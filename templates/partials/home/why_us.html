@@ -8,6 +8,9 @@
             {% for item in machine_screed_advantages %}
             <li class="home-why__card">
                 <h3 class="home-why__title">{{ item.title }}</h3>
+                {% if item.text %}
+                <p class="home-why__text">{{ item.text }}</p>
+                {% endif %}
             </li>
             {% endfor %}
         </ul>

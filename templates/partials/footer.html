@@ -19,8 +19,8 @@
         <div>
             <p class="site-footer__heading">Kontakt</p>
             <ul class="site-footer__links">
-                {% if contact_phone %}<li><a href="tel:{{ contact_phone|phone_uri }}">{{ contact_phone_display }}</a></li>{% endif %}
-                {% if contact_phone_2 %}<li><a href="tel:{{ contact_phone_2|phone_uri }}">{{ contact_phone_2_display }}</a></li>{% endif %}
+                {% if contact_phone %}<li><a href="tel:{{ contact_phone|phone_uri }}" class="tel-link">{{ contact_phone_display }}</a></li>{% endif %}
+                {% if contact_phone_2 %}<li><a href="tel:{{ contact_phone_2|phone_uri }}" class="tel-link">{{ contact_phone_2_display }}</a></li>{% endif %}
                 {% if contact_address %}<li>{{ contact_address }}</li>{% endif %}
             </ul>
         </div>

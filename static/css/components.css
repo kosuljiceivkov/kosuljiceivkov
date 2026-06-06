@@ -108,6 +108,20 @@
     cursor: not-allowed;
 }
 
+/* tel: linkovi — klikabilni samo ispod desktop breakpointa (1024px) */
+@media (min-width: 64rem) {
+    a.tel-link,
+    a[href^="tel:"] {
+        pointer-events: none;
+        cursor: default;
+    }
+
+    .site-footer a.tel-link:hover,
+    .site-footer a[href^="tel:"]:hover {
+        color: rgba(255, 255, 255, 0.92);
+    }
+}
+
 /* -------------------------------------------------------------------------- */
 /* Bedževi                                                                   */
 /* -------------------------------------------------------------------------- */

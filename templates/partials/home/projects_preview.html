@@ -1,16 +1,42 @@
+{% load static %}
 <section class="section home-projects u-content-auto" id="projekti-preview" aria-labelledby="home-projects-title">
     <div class="container">
         <header class="section__header" data-animate="fade-up">
             <p class="eyebrow">Reference</p>
             <h2 id="home-projects-title" class="section__title">Realizovani projekti</h2>
             <p class="section__subtitle">
-                Pregled mašinski ugrađenih cementnih košuljica na stambenim, poslovnim i investitorskim objektima.
+                Pregled mašinski ugrađenih cementnih košuljica na stambenim, poslovnim i investitorskim objektima širom Srbije.
             </p>
         </header>
-        <div class="home-projects__placeholder" data-animate="fade-in">
-            <p class="home-projects__placeholder-text">
-                Reference projekata biće uskoro objavljene.
-            </p>
+
+        <div class="home-projects__grid" data-animate-stagger data-stagger="fade-up">
+            {% for project in project_highlights %}
+            <article class="home-project-card">
+                <a href="{% url 'frontend:projekti' %}" class="home-project-card__link">
+                    <div class="home-project-card__media">
+                        <img
+                            class="home-project-card__image"
+                            src="{% static project.image.path %}"
+                            alt="{{ project.image.alt }}"
+                            width="{{ project.image.width }}"
+                            height="{{ project.image.height }}"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    </div>
+                    <div class="home-project-card__body">
+                        <h3 class="home-project-card__title">{{ project.title }}</h3>
+                        {% if project.caption %}
+                        <p class="home-project-card__caption">{{ project.caption }}</p>
+                        {% endif %}
+                    </div>
+                </a>
+            </article>
+            {% endfor %}
         </div>
+
+        <p class="section__footer-link">
+            <a href="{% url 'frontend:projekti' %}" class="btn btn--outline-dark">Pogledaj sve projekte</a>
+        </p>
     </div>
 </section>

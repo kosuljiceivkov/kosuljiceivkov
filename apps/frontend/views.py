@@ -3,7 +3,14 @@ from django.views.decorators.cache import cache_page
 
 from apps.blog.selectors import get_latest_published_posts
 
-from .home_data import MACHINE_SCREED_ADVANTAGES, PROCESS_STEPS
+from .home_data import (
+    HOME_FAQ_ITEMS,
+    HOME_PROJECT_HIGHLIGHTS,
+    HOME_SEO_DESCRIPTION,
+    HOME_SEO_TITLE,
+    MACHINE_SCREED_ADVANTAGES,
+    PROCESS_STEPS,
+)
 from .services_data import AUDIENCE, QUALITY_SECTION, SERVICES
 from .static_media_data import SERVICES_GALLERY_IMAGES, WORK_CAROUSEL_SLIDES
 
@@ -21,12 +28,11 @@ def home(request):
             "machine_screed_advantages": MACHINE_SCREED_ADVANTAGES,
             "process_steps": PROCESS_STEPS,
             "work_carousel_slides": WORK_CAROUSEL_SLIDES,
+            "project_highlights": HOME_PROJECT_HIGHLIGHTS,
+            "home_faq_items": HOME_FAQ_ITEMS,
             "seo_overrides": {
-                "title": "Početna",
-                "description": (
-                    "Mašinska izrada cementnih košuljica za stambene, poslovne "
-                    "i industrijske objekte — priprema podloge i ugradnja."
-                ),
+                "title": HOME_SEO_TITLE,
+                "description": HOME_SEO_DESCRIPTION,
             },
         },
     )

@@ -1,0 +1,7 @@
+{% load contact_tags %}
+{% if contact_phone %}
+{% include "partials/contact/phone_number_button.html" with phone=contact_phone display=contact_phone_display extra_class=primary_class btn_class=btn_class %}
+{% endif %}
+{% if contact_phone_2 %}
+{% include "partials/contact/phone_number_button.html" with phone=contact_phone_2 display=contact_phone_2_display extra_class=secondary_class|default:primary_class btn_class=btn_class %}
+{% endif %}

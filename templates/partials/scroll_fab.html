@@ -6,7 +6,7 @@
         {% if contact_phone %}
         <a
             href="tel:{{ contact_phone|phone_uri }}"
-            class="scroll-fab__call scroll-fab__call--primary"
+            class="scroll-fab__call scroll-fab__call--primary tel-link"
             aria-label="Pozovite {{ contact_phone }}"
         >
             {% include "partials/contact/phone_icon.html" %}
@@ -16,7 +16,7 @@
         {% if contact_phone_2 %}
         <a
             href="tel:{{ contact_phone_2|phone_uri }}"
-            class="scroll-fab__call scroll-fab__call--alt"
+            class="scroll-fab__call scroll-fab__call--alt tel-link"
             aria-label="Pozovite {{ contact_phone_2 }}"
         >
             {% include "partials/contact/phone_icon.html" %}

@@ -1,0 +1,18 @@
+<section class="section home-faq u-content-auto" id="faq" aria-labelledby="home-faq-title">
+    <div class="container">
+        <div data-animate="fade-up">
+            {% include "partials/section_head.html" with eyebrow="FAQ" title="Česta pitanja" title_id="home-faq-title" subtitle="Odgovori na najčešća pitanja o mašinskoj izradi cementnih košuljica, pripremi podloge i ponudi." %}
+        </div>
+
+        <div class="home-faq__list" data-animate-stagger data-stagger="fade-up">
+            {% for item in home_faq_items %}
+            <details class="home-faq__item">
+                <summary class="home-faq__question">{{ item.question }}</summary>
+                <div class="home-faq__answer">
+                    <p>{{ item.answer }}</p>
+                </div>
+            </details>
+            {% endfor %}
+        </div>
+    </div>
+</section>

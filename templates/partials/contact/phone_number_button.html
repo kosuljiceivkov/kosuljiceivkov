@@ -1,10 +1,10 @@
 {% load contact_tags %}
-{% if contact_phone %}
+{% if phone %}
 <a
-    href="tel:{{ contact_phone|phone_uri }}"
+    href="tel:{{ phone|phone_uri }}"
     class="{% if btn_class %}{{ btn_class }}{% else %}btn btn--primary btn--lg{% endif %} tel-link{% if extra_class %} {{ extra_class }}{% endif %}"
-    aria-label="Pozovite {{ contact_phone }}"
+    aria-label="Pozovite {{ display|default:phone }}"
 >
-    {{ contact_phone_display|default:contact_phone }}
+    {{ display|default:phone }}
 </a>
 {% endif %}

@@ -13,7 +13,7 @@
             {% if contact_phone %}
             <a
                 href="tel:{{ contact_phone|phone_uri }}"
-                class="contact-sticky__btn contact-sticky__btn--phone contact-sticky__btn--primary"
+                class="contact-sticky__btn contact-sticky__btn--phone contact-sticky__btn--primary tel-link"
                 aria-label="Pozovite {{ contact_phone }}"
             >
                 <span class="contact-sticky__number">{{ contact_phone_display }}</span>
@@ -22,7 +22,7 @@
             {% if contact_phone_2 %}
             <a
                 href="tel:{{ contact_phone_2|phone_uri }}"
-                class="contact-sticky__btn contact-sticky__btn--phone contact-sticky__btn--alt"
+                class="contact-sticky__btn contact-sticky__btn--phone contact-sticky__btn--alt tel-link"
                 aria-label="Pozovite {{ contact_phone_2 }}"
             >
                 <span class="contact-sticky__number">{{ contact_phone_2_display }}</span>

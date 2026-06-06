@@ -10,7 +10,7 @@
     {% block lcp_preload %}{% endblock %}
     {% include "partials/perf/fonts.html" %}
     {% include "partials/perf/critical_css.html" %}
-    <link rel="stylesheet" href="{% static 'css/bundles/site-core.css' %}?v=13">
+    <link rel="stylesheet" href="{% static 'css/bundles/site-core.css' %}?v=14">
     {% include "partials/perf/async_stylesheet.html" with href="css/bundles/site-defer.css" cache_bust=1 %}
     {% block extra_css %}{% endblock %}
     {% block perf_css %}{% endblock %}

@@ -10,6 +10,7 @@ from apps.seo.constants import SeoSchemaType
 from apps.seo.schema.base import serialize_json_ld
 from apps.seo.schema.builders import (
     build_breadcrumb_schema,
+    build_homepage_schema_graph,
     build_organization_schema,
     build_primary_schema,
     resolve_effective_schema_type,
@@ -80,6 +81,15 @@ def serialize_schema_graph(schemas: list[dict[str, Any]]) -> list[str]:
     return serialize_json_ld(schemas)
 
 
+def _is_home_request(request) -> bool:
+    match = getattr(request, "resolver_match", None)
+    return bool(
+        match
+        and match.app_name == "frontend"
+        and match.url_name == "home"
+    )
+
+
 def collect_json_ld_schemas(
     request,
     *,
@@ -100,6 +110,9 @@ def collect_json_ld_schemas(
     )
 
     if seo_object is None:
+        if _is_home_request(request):
+            return serialize_schema_graph(build_homepage_schema_graph(request))
+
         schemas = build_schema_graph(request, None, breadcrumb_trail=trail)
         organization = build_organization_schema(request)
         if organization and not any(s.get("@type") == "Organization" for s in schemas):

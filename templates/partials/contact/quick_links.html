@@ -2,7 +2,7 @@
 <ul class="contact-quick{% if extra_class %} {{ extra_class }}{% endif %}" role="list">
     {% if contact_phone %}
     <li class="contact-quick__item">
-        <a href="tel:{{ contact_phone|phone_uri }}" class="contact-quick__link">
+        <a href="tel:{{ contact_phone|phone_uri }}" class="contact-quick__link tel-link">
             <span class="contact-quick__label">Telefon</span>
             <span class="contact-quick__value">{{ contact_phone_display }}</span>
             <span class="contact-quick__hint">Dodirnite za poziv</span>
@@ -11,7 +11,7 @@
     {% endif %}
     {% if contact_phone_2 %}
     <li class="contact-quick__item">
-        <a href="tel:{{ contact_phone_2|phone_uri }}" class="contact-quick__link">
+        <a href="tel:{{ contact_phone_2|phone_uri }}" class="contact-quick__link tel-link">
             <span class="contact-quick__label">Telefon</span>
             <span class="contact-quick__value">{{ contact_phone_2_display }}</span>
             <span class="contact-quick__hint">Dodirnite za poziv</span>

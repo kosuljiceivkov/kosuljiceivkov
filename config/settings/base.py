@@ -188,7 +188,10 @@ SEO_DEFAULT_KEYWORDS = env(
     "SEO_DEFAULT_KEYWORDS",
     default="cementne košuljice, betonske košuljice, terase, stepeništa",
 )
-SEO_DEFAULT_OG_IMAGE_URL = env("SEO_DEFAULT_OG_IMAGE_URL", default="")
+SEO_DEFAULT_OG_IMAGE_URL = env(
+    "SEO_DEFAULT_OG_IMAGE_URL",
+    default="/static/img/cementne-kosuljice6.webp",
+)
 SEO_DISALLOW_ALL = env.bool("SEO_DISALLOW_ALL", default=False)
 SEO_BLOG_AUTHOR_NAME = env(
     "SEO_BLOG_AUTHOR_NAME",

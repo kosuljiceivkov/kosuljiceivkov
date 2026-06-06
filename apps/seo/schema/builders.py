@@ -6,6 +6,7 @@ from datetime import datetime, time
 from typing import Any
 
 from django.conf import settings
+from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
 
@@ -58,20 +59,21 @@ def build_organization_schema(request) -> dict[str, Any] | None:
         }
 
     phone = getattr(settings, "CONTACT_PHONE", "")
-    if phone:
-        schema["telephone"] = phone
+    phone_2 = getattr(settings, "CONTACT_PHONE_2", "")
+    phones = [value.strip() for value in (phone, phone_2) if value and value.strip()]
+    if len(phones) == 1:
+        schema["telephone"] = phones[0]
+    elif phones:
+        schema["telephone"] = phones
 
     email = getattr(settings, "SEO_ORGANIZATION_EMAIL", "")
     if email:
         schema["email"] = email
 
-    address = getattr(settings, "CONTACT_ADDRESS", "")
-    if address:
-        schema["address"] = {
-            "@type": "PostalAddress",
-            "addressCountry": getattr(settings, "SEO_ORGANIZATION_COUNTRY", "RS"),
-            "streetAddress": address,
-        }
+    schema["areaServed"] = {
+        "@type": "Country",
+        "name": "Serbia",
+    }
 
     return clean_schema(schema)
 
@@ -248,7 +250,22 @@ def build_faqpage_schema(
     url = content_object.get_canonical_url(request) if hasattr(content_object, "get_canonical_url") else None
     name = content_object.get_seo_title() if hasattr(content_object, "get_seo_title") else ""
     faq_items = extract_faq_items(content_object, visible_only=visible_only)
+    return build_faqpage_schema_from_items(
+        request,
+        faq_items=faq_items,
+        page_url=url,
+        name=name,
+    )
 
+
+def build_faqpage_schema_from_items(
+    request,
+    *,
+    faq_items: list,
+    page_url: str | None = None,
+    name: str | None = None,
+) -> dict[str, Any] | None:
+    url = page_url or absolute_url(request, reverse("frontend:home"))
     if not url or not faq_items:
         return None
 
@@ -361,3 +378,143 @@ def build_primary_schema(
         )
 
     return None
+
+
+def build_homepage_webpage_schema(
+    request,
+    *,
+    title: str,
+    description: str,
+    page_url: str | None = None,
+    image_url: str | None = None,
+) -> dict[str, Any] | None:
+    """WebPage schema za statičku početnu stranicu."""
+    site_name = getattr(settings, "SEO_SITE_NAME", "Cementne košuljice Ivkov")
+    site_url = organization_site_url(request)
+    url = page_url or absolute_url(request, reverse("frontend:home"))
+    if not title or not url:
+        return None
+
+    schema: dict[str, Any] = {
+        "@context": JSON_LD_CONTEXT,
+        "@type": "WebPage",
+        "@id": f"{url}#webpage",
+        "name": title,
+        "description": description,
+        "url": url,
+        "inLanguage": "sr-Latn",
+        "isPartOf": {
+            "@type": "WebSite",
+            "@id": f"{site_url}#website" if site_url else None,
+            "name": site_name,
+            "url": site_url,
+        },
+    }
+
+    if image_url:
+        schema["primaryImageOfPage"] = image_url
+
+    publisher = build_organization_schema(request)
+    if publisher:
+        schema["publisher"] = {
+            "@type": "Organization",
+            "@id": publisher.get("@id"),
+            "name": publisher.get("name"),
+            "logo": publisher.get("logo"),
+        }
+
+    return clean_schema(schema)
+
+
+def build_homepage_local_business_schema(
+    request,
+    *,
+    description: str,
+    page_url: str | None = None,
+    image_url: str | None = None,
+) -> dict[str, Any] | None:
+    """LocalBusiness schema za statičku početnu stranicu."""
+    name = getattr(settings, "SEO_SITE_NAME", "Cementne košuljice Ivkov")
+    url = page_url or absolute_url(request, reverse("frontend:home"))
+    if not name or not url:
+        return None
+
+    schema: dict[str, Any] = {
+        "@context": JSON_LD_CONTEXT,
+        "@type": "HomeAndConstructionBusiness",
+        "@id": f"{url}#localbusiness",
+        "name": name,
+        "url": url,
+        "description": description,
+        "areaServed": {
+            "@type": "Country",
+            "name": "Serbia",
+        },
+    }
+
+    phone = getattr(settings, "CONTACT_PHONE", "")
+    phone_2 = getattr(settings, "CONTACT_PHONE_2", "")
+    phones = [value.strip() for value in (phone, phone_2) if value and value.strip()]
+    if len(phones) == 1:
+        schema["telephone"] = phones[0]
+    elif phones:
+        schema["telephone"] = phones
+
+    logo = organization_logo_url(request)
+    if image_url:
+        schema["image"] = image_url
+    elif logo:
+        schema["image"] = logo
+
+    return clean_schema(schema)
+
+
+def build_homepage_schema_graph(request) -> list[dict[str, Any]]:
+    """JSON-LD graf za statičku početnu stranicu."""
+    from apps.frontend.home_data import (
+        HOME_FAQ_ITEMS,
+        HOME_OG_IMAGE_STATIC,
+        HOME_SEO_DESCRIPTION,
+        HOME_SEO_TITLE,
+    )
+    from apps.seo.schema.faq import FaqItem
+
+    image_url = absolute_url(request, static(HOME_OG_IMAGE_STATIC))
+    page_url = absolute_url(request, reverse("frontend:home"))
+    schemas: list[dict[str, Any]] = []
+
+    organization = build_organization_schema(request)
+    if organization:
+        schemas.append(organization)
+
+    webpage = build_homepage_webpage_schema(
+        request,
+        title=HOME_SEO_TITLE,
+        description=HOME_SEO_DESCRIPTION,
+        image_url=image_url,
+    )
+    if webpage:
+        schemas.append(webpage)
+
+    local_business = build_homepage_local_business_schema(
+        request,
+        description=HOME_SEO_DESCRIPTION,
+        image_url=image_url,
+    )
+    if local_business:
+        schemas.append(local_business)
+
+    faq_items = [
+        FaqItem(question=item["question"], answer=item["answer"])
+        for item in HOME_FAQ_ITEMS
+    ]
+    faq_schema = build_faqpage_schema_from_items(
+        request,
+        faq_items=faq_items,
+        page_url=page_url,
+        name="Česta pitanja — Cementne košuljice Ivkov",
+    )
+    if faq_schema:
+        schemas.append(faq_schema)
+
+    return [schema for schema in schemas if schema]
