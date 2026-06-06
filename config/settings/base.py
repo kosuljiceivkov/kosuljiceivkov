@@ -114,8 +114,8 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 
 # Site branding (public site + Django admin)
 SITE_ADMIN_BRAND_NAME = "Administracija sajta"
-SITE_ADMIN_BRAND_LOGO = "img/logo-za-wagtail.webp"
-SITE_FAVICON_WEBP = "img/logo-za-wagtail.webp"
+SITE_ADMIN_BRAND_LOGO = "img/logo.webp"
+SITE_FAVICON_WEBP = "img/logo.webp"
 SITE_FAVICON_PNG = "img/favicon.png"
 SITE_FAVICON_APPLE = "img/apple-touch-icon.png"
 SITE_BASE_URL = env("SITE_BASE_URL", default="http://localhost:8000")
@@ -194,7 +194,7 @@ SEO_BLOG_AUTHOR_NAME = env(
 SEO_ORGANIZATION_EMAIL = env("SEO_ORGANIZATION_EMAIL", default="")
 SEO_ORGANIZATION_LOGO = env(
     "SEO_ORGANIZATION_LOGO",
-    default="img/logo-za-wagtail.webp",
+    default="img/logo.webp",
 )
 SEO_ORGANIZATION_COUNTRY = env("SEO_ORGANIZATION_COUNTRY", default="RS")
 

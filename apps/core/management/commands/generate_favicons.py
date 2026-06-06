@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand
 class Command(BaseCommand):
     help = (
         "Generiše favicon.png i apple-touch-icon.png iz WebP logotipa "
-        "(podrazumevano static/img/logo-za-wagtail.webp)."
+        "(podrazumevano static/img/logo.webp)."
     )
 
     def handle(self, *args, **options):
@@ -21,11 +21,11 @@ class Command(BaseCommand):
         logo_path = base_dir / "static" / logo_rel.replace("img/", "img/")
 
         if not logo_path.is_file():
-            logo_path = static_dir / "logo-za-wagtail.webp"
+            logo_path = static_dir / "logo.webp"
         if not logo_path.is_file():
             self.stderr.write(
                 self.style.ERROR(
-                    "Postavite static/img/logo-za-wagtail.webp pa pokrenite ponovo."
+                    "Postavite static/img/logo.webp pa pokrenite ponovo."
                 )
             )
             return

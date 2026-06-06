@@ -3,7 +3,7 @@ from django.conf import settings
 
 def site_branding(request):
     """Logo, favicon and site name for templates and Django admin."""
-    logo = getattr(settings, "SITE_ADMIN_BRAND_LOGO", "img/logo-za-wagtail.webp")
+    logo = getattr(settings, "SITE_ADMIN_BRAND_LOGO", "img/logo.webp")
     return {
         "site_admin_brand_name": getattr(
             settings, "SITE_ADMIN_BRAND_NAME", "Administracija sajta"

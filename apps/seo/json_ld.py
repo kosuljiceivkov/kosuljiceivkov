@@ -93,7 +93,7 @@ def _organization_logo_url(request) -> str | None:
     logo_path = getattr(
         settings,
         "SEO_ORGANIZATION_LOGO",
-        getattr(settings, "SITE_ADMIN_BRAND_LOGO", "img/logo-za-wagtail.webp"),
+        getattr(settings, "SITE_ADMIN_BRAND_LOGO", "img/logo.webp"),
     )
     static_path = static(logo_path)
     return _absolute(request, static_path)
