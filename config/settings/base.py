@@ -113,7 +113,7 @@ LANGUAGES = [
 LOCALE_PATHS = [BASE_DIR / "locale"]
 
 # Site branding (public site + Django admin)
-SITE_ADMIN_BRAND_NAME = "Administracija sajta"
+SITE_ADMIN_BRAND_NAME = "Cementne košuljice Ivkov (admin)"
 SITE_ADMIN_BRAND_LOGO = "img/logo.webp"
 SITE_FAVICON_WEBP = "img/logo.webp"
 SITE_FAVICON_PNG = "img/favicon.png"
