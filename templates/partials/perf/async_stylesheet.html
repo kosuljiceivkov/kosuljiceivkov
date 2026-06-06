@@ -1,3 +1,3 @@
 {% load static %}
-<link rel="preload" href="{% static href %}{% if cache_bust %}?v={{ cache_bust }}{% endif %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="{% static href %}{% if cache_bust %}?v={{ cache_bust }}{% endif %}" as="style" data-async-css>
 <noscript><link rel="stylesheet" href="{% static href %}{% if cache_bust %}?v={{ cache_bust }}{% endif %}"></noscript>

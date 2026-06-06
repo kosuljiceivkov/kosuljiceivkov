@@ -1,8 +1,16 @@
 /**
  * Uslovno učitavanje JS — karuseli i galerija lazy; animacije odmah.
+ * Aktivira async CSS (CSP-safe — bez inline onload handlera u produkciji).
  */
 (function () {
     "use strict";
+
+    document.documentElement.classList.remove("no-js");
+
+    document.querySelectorAll("link[data-async-css]").forEach(function (link) {
+        link.rel = "stylesheet";
+        link.removeAttribute("data-async-css");
+    });
 
     var script = document.currentScript;
     var base = (script && script.getAttribute("data-static-base")) || "/static/js/";
