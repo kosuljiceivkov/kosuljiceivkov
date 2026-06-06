@@ -1,0 +1,5 @@
+{% if json_ld_payloads %}
+    {% for payload in json_ld_payloads %}
+<script type="application/ld+json">{{ payload }}</script>
+    {% endfor %}
+{% endif %}

@@ -1,0 +1,280 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Cementne košuljice Ivkov\n"
+"Report-Msgid-Bugs-To: \n"
+"Language: sr_Latn\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "(%(number)s new items in this menu)"
+msgstr "(%(number)s novih stavki u ovom meniju)"
+
+msgid "(1 new item in this menu)"
+msgstr "(1 nova stavka u ovom meniju)"
+
+msgid "(New)"
+msgstr "(Novo)"
+
+msgid "%(num)s error"
+msgid_plural "%(num)s errors"
+msgstr[0] "%(num)s greška"
+msgstr[1] "%(num)s greške"
+msgstr[2] "%(num)s grešaka"
+
+msgid "%(num)s min"
+msgid_plural "%(num)s mins"
+msgstr[0] "%(num)s min"
+msgstr[1] "%(num)s min"
+msgstr[2] "%(num)s min"
+
+msgid "%(num)s pixel"
+msgid_plural "%(num)s pixels"
+msgstr[0] "%(num)s piksel"
+msgstr[1] "%(num)s piksela"
+msgstr[2] "%(num)s piksela"
+
+#. Translators: An item in the time zone selection dropdown, e.g. "America/New_York: EDT (Eastern Daylight Time)". Some languages may require a space before the colon.
+msgid "%(time_zone_option)s: %(localized_time_zone_label)s"
+msgstr "%(time_zone_option)s: %(localized_time_zone_label)s"
+
+msgid "A network error occurred."
+msgstr "Došlo je do mrežne greške."
+
+msgid "A server error occurred."
+msgstr "Došlo je do greške na serveru."
+
+msgid "Actions"
+msgstr "Akcije"
+
+msgid "Add"
+msgstr "Dodaj"
+
+msgid "Add a comment"
+msgstr "Dodaj komentar"
+
+msgid "Alt text"
+msgstr "Alt tekst"
+
+msgid "Are you sure?"
+msgstr "Da li ste sigurni?"
+
+msgid "Autosave in progress…"
+msgstr "Automatsko čuvanje u toku…"
+
+msgid "Blocks"
+msgstr "Blokovi"
+
+msgid "Broken link"
+msgstr "Neispravna veza"
+
+msgid "Cancel"
+msgstr "Otkaži"
+
+msgid "Changes have been autosaved."
+msgstr "Promene su automatski sačuvane."
+
+msgid "Character count:"
+msgstr "Broj znakova:"
+
+msgid "Close"
+msgstr "Zatvori"
+
+msgid "Collapse all"
+msgstr "Skupi sve"
+
+msgid "Comment"
+msgstr "Komentar"
+
+#. Translators: denotes the readability of a difficult text.
+msgid "Complex"
+msgstr "Složeno"
+
+msgid "Dashboard"
+msgstr "Kontrolna tabla"
+
+msgid "Decorative image"
+msgstr "Dekorativna slika"
+
+msgid "Delete"
+msgstr "Obriši"
+
+msgid "Delete error"
+msgstr "Greška pri brisanju"
+
+msgid "Deleting"
+msgstr "Brisanje"
+
+msgid "Drag"
+msgstr "Povucite"
+
+msgid "Duplicate"
+msgstr "Dupliraj"
+
+msgid "Edit"
+msgstr "Uredi"
+
+msgid "Edit '%(title)s'"
+msgstr "Uredi '%(title)s'"
+
+msgid "Enter your comments..."
+msgstr "Unesite komentare..."
+
+msgid "Enter your reply..."
+msgstr "Unesite odgovor..."
+
+msgid "Error while sending preview data."
+msgstr "Greška pri slanju podataka za pregled."
+
+msgid "Expand all"
+msgstr "Proširi sve"
+
+#. Translators: denotes the readability of an average text.
+msgid "Fair"
+msgstr "Prihvatljivo"
+
+msgid "Focus comment"
+msgstr "Fokusiraj komentar"
+
+msgid "Good"
+msgstr "Dobro"
+
+msgid "Horizontal line"
+msgstr "Vodoravna linija"
+
+msgid "Insert a block"
+msgstr "Ubaci blok"
+
+msgid "Line break"
+msgstr "Novi red"
+
+msgid "Loading…"
+msgstr "Učitavanje..."
+
+msgid "Main menu"
+msgstr "Glavni meni"
+
+msgid "Missing document"
+msgstr "Nedostaje dokument"
+
+msgid "More actions"
+msgstr "Više akcija"
+
+msgid "Move down"
+msgstr "Pomeri dole"
+
+msgid "Move up"
+msgstr "Pomeri gore"
+
+msgid "No"
+msgstr "Ne"
+
+msgid "No results"
+msgstr "Nema rezultata"
+
+msgid "Page"
+msgstr "Stranica"
+
+msgid "Page explorer"
+msgstr "Pregledač stranica"
+
+msgid "Pages"
+msgstr "Stranice"
+
+msgid "Pin toolbar"
+msgstr "Prikači alatnu traku"
+
+msgid "Preview"
+msgstr "Pregled"
+
+msgid "Reload saved content"
+msgstr "Ponovo učitaj sačuvani sadržaj"
+
+msgid "Reload the page"
+msgstr "Ponovo učitaj stranicu"
+
+msgid "Reply"
+msgstr "Odgovori"
+
+msgid ""
+"Report this error to your website administrator with the following "
+"information:"
+msgstr ""
+"Prijavite ovu grešku administratoru sajta sa sledećim informacijama:"
+
+msgid "Resolve"
+msgstr "Reši"
+
+msgid "Retry"
+msgstr "Pokušaj ponovo"
+
+msgid "Save"
+msgstr "Sačuvaj"
+
+msgid "Save error"
+msgstr "Greška pri čuvanju"
+
+msgid "Saving..."
+msgstr "Čuvanje..."
+
+msgid "Search"
+msgstr "Pretraga"
+
+msgid "Search options…"
+msgstr "Pretraži opcije…"
+
+msgid "See all"
+msgstr "Vidi sve"
+
+msgid "Server Error"
+msgstr "Greška na serveru"
+
+msgid "Settings"
+msgstr "Podešavanja"
+
+msgid "Show error"
+msgstr "Prikaži grešku"
+
+msgid "Show latest content"
+msgstr "Prikaži najnoviji sadržaj"
+
+msgid "Split block"
+msgstr "Podeli blok"
+
+msgid ""
+"The editor just crashed. Content has been reset to the last saved version."
+msgstr ""
+"Uređivač se upravo srušio. Sadržaj je vraćen na poslednju sačuvanu verziju."
+
+msgid "The maximum number of items is %(max_num)d"
+msgstr "Maksimalni broj stavki iznosi %(max_num)d"
+
+msgid "The minimum number of items is %(min_num)d"
+msgstr "Minimalni broj stavki iznosi %(min_num)d"
+
+msgid "This field is required."
+msgstr "Ovo polje je obavezno."
+
+msgid "Toggle section"
+msgstr "Prebaci sekciju"
+
+msgid "Toggle side panel"
+msgstr "Prebaci bočni panel"
+
+msgid "Toggle sidebar"
+msgstr "Prebaci bočnu traku"
+
+msgid "Unfocus comment"
+msgstr "Skini fokus sa komentara"
+
+msgid "Unpin toolbar"
+msgstr "Otkvači alatnu traku"
+
+msgid "View child pages of '%(title)s'"
+msgstr "Pogledaj decu stranice '%(title)s'"
+
+msgid "Write something or type ‘/’ to insert a block"
+msgstr "Upišite nešto ili ukucajte '/' za ubacivanje bloka"
+
+msgid "Yes"
+msgstr "Da"

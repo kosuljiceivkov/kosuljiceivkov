@@ -1,0 +1,10 @@
+/* Sakrij filter sidebar u celom adminu */
+
+#changelist-filter {
+  display: none !important;
+}
+
+#changelist .changelist-form-container {
+  flex: 1 1 100%;
+  max-width: 100%;
+}

@@ -1,0 +1,10 @@
+{# Reusable section header — srpski (latinica) #}
+<header class="section-head{% if align == 'left' %} section-head--left{% endif %}">
+    {% if eyebrow %}
+    <p class="section-head__eyebrow eyebrow">{{ eyebrow }}</p>
+    {% endif %}
+    <h2 class="section-head__title"{% if title_id %} id="{{ title_id }}"{% endif %}>{{ title }}</h2>
+    {% if subtitle %}
+    <p class="section-head__subtitle">{{ subtitle }}</p>
+    {% endif %}
+</header>

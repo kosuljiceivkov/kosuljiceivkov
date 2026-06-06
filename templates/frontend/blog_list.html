@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-hero page-hero--compact">
+    <div class="container" data-animate="fade-up">
+        <h1 class="page-hero__title">Blog</h1>
+        <p class="page-hero__lead">
+            Stručni saveti i vesti o pripremi podloge, ugradnji i održavanju cementnih košuljica.
+        </p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        {% if posts %}
+        <div class="blog-grid" role="list">
+            {% for post in posts %}
+            <div role="listitem">
+                {% include "partials/blog_card.html" with post=post %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-state">Blog objave će uskoro biti dostupne.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

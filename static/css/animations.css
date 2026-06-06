@@ -1,0 +1,109 @@
+/**
+ * Animacije — Intersection Observer (bez biblioteka)
+ * Profesionalno, jednom, prefers-reduced-motion
+ */
+
+:root {
+    --animate-duration-fast: 300ms;
+    --animate-duration: 500ms;
+    --animate-duration-slow: 700ms;
+    --animate-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --animate-distance: 1.25rem;
+    --animate-slide: 1.5rem;
+    --animate-stagger-step: 75ms;
+    --animate-stagger-max: 8;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Smanjeno kretanje — odmah vidljivo, bez tranzicija                          */
+/* -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    [data-animate],
+    [data-animate-child],
+    [data-animate-stagger] > * {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Početno stanje (samo kada korisnik dozvoljava animacije)                    */
+/* -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+    html.js-animate [data-animate]:not(.is-animated),
+    html.js-animate [data-animate-child]:not(.is-animated) {
+        opacity: 0;
+        transition-property: opacity, transform;
+        transition-duration: var(--animate-duration);
+        transition-timing-function: var(--animate-ease);
+    }
+
+    html.js-animate [data-animate="fade-in"]:not(.is-animated) {
+        transform: none;
+    }
+
+    html.js-animate [data-animate="fade-up"]:not(.is-animated),
+    html.js-animate [data-animate-child="fade-up"]:not(.is-animated) {
+        transform: translateY(var(--animate-distance));
+    }
+
+    html.js-animate [data-animate="slide-in"]:not(.is-animated),
+    html.js-animate [data-animate-child="slide-in"]:not(.is-animated) {
+        transform: translateX(calc(-1 * var(--animate-slide)));
+    }
+
+    html.js-animate [data-animate="slide-in-right"]:not(.is-animated),
+    html.js-animate [data-animate-child="slide-in-right"]:not(.is-animated) {
+        transform: translateX(var(--animate-slide));
+    }
+
+    /* Trajanje */
+    html.js-animate [data-animate-duration="fast"],
+    html.js-animate [data-animate-child][data-animate-duration="fast"] {
+        transition-duration: var(--animate-duration-fast);
+    }
+
+    html.js-animate [data-animate-duration="slow"],
+    html.js-animate [data-animate-child][data-animate-duration="slow"] {
+        transition-duration: var(--animate-duration-slow);
+    }
+
+    /* Završno stanje */
+    html.js-animate [data-animate].is-animated,
+    html.js-animate [data-animate-child].is-animated {
+        opacity: 1;
+        transform: none;
+    }
+
+    /* Stagger — deca unutar kontejnera */
+    html.js-animate [data-animate-stagger]:not(.is-animated) > * {
+        opacity: 0;
+        transform: translateY(var(--animate-distance));
+        transition-property: opacity, transform;
+        transition-duration: var(--animate-duration);
+        transition-timing-function: var(--animate-ease);
+        transition-delay: calc(var(--stagger-index, 0) * var(--animate-stagger-step));
+    }
+
+    html.js-animate [data-animate-stagger].is-animated > * {
+        opacity: 1;
+        transform: none;
+    }
+
+    html.js-animate [data-animate-stagger][data-stagger="fade-in"]:not(.is-animated) > * {
+        transform: none;
+    }
+
+    html.js-animate [data-animate-stagger][data-stagger="slide-in"]:not(.is-animated) > * {
+        transform: translateX(calc(-1 * var(--animate-slide)));
+    }
+}
+
+/* JS isključen — sigurnosni fallback */
+html.no-js [data-animate],
+html.no-js [data-animate-child],
+html.no-js [data-animate-stagger] > * {
+    opacity: 1;
+    transform: none;
+}

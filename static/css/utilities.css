@@ -1,0 +1,228 @@
+/**
+ * Responsive utilities — mobile-first
+ * Koristi tokene iz variables.css
+ */
+
+/* Off-screen sekcije — brži paint na mobilnom */
+.u-content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 28rem;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Sekcije i kontejner                                                        */
+/* -------------------------------------------------------------------------- */
+.u-section-y {
+    padding-block: var(--section-padding-y);
+}
+
+.u-section-y-sm {
+    padding-block: var(--section-padding-y-sm);
+}
+
+.u-container-x {
+    padding-inline: var(--container-padding-x);
+}
+
+.u-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-block);
+}
+
+.u-stack--tight {
+    gap: var(--gap-inline);
+}
+
+.u-cluster {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--gap-inline);
+}
+
+.u-center {
+    text-align: center;
+    margin-inline: auto;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Grid — 1 kolona mobil, proširenje na tablet/desktop                        */
+/* -------------------------------------------------------------------------- */
+.u-grid {
+    display: grid;
+    gap: var(--gap-grid);
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 48rem) {
+    .u-grid--2-md {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .u-grid--auto-md {
+        grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    }
+}
+
+@media (min-width: 64rem) {
+    .u-grid--2-lg {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .u-grid--3-lg {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .u-grid--4-lg {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .u-grid--auto-lg {
+        grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Razmaci (margin / padding)                                                 */
+/* -------------------------------------------------------------------------- */
+.u-mt-0 { margin-top: 0; }
+.u-mb-0 { margin-bottom: 0; }
+.u-my-section { margin-block: var(--section-padding-y); }
+.u-gap-grid { gap: var(--gap-grid); }
+
+.u-p-inline { padding-inline: var(--container-padding-x); }
+.u-p-block-sm { padding-block: var(--space-6); }
+.u-p-block-md { padding-block: var(--space-12); }
+.u-p-block-lg { padding-block: var(--space-16); }
+
+@media (min-width: 48rem) {
+    .u-p-block-md {
+        padding-block: var(--space-16);
+    }
+
+    .u-p-block-lg {
+        padding-block: var(--space-20);
+    }
+}
+
+@media (min-width: 64rem) {
+    .u-p-block-lg {
+        padding-block: var(--space-24);
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Tipografija (utility)                                                      */
+/* -------------------------------------------------------------------------- */
+.u-type-display {
+    font-family: var(--font-heading);
+    font-size: var(--type-display);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+}
+
+.u-type-h1 {
+    font-family: var(--font-heading);
+    font-size: var(--type-h1);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+}
+
+.u-type-h2 {
+    font-family: var(--font-heading);
+    font-size: var(--type-h2);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+}
+
+.u-type-lead {
+    font-size: var(--type-lead);
+    line-height: var(--line-height-relaxed);
+}
+
+.u-text-balance {
+    text-wrap: balance;
+}
+
+.u-text-pretty {
+    text-wrap: pretty;
+}
+
+.u-break-words {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Vidljivost po breakpointu                                                  */
+/* -------------------------------------------------------------------------- */
+.u-hide-md-up {
+    display: block;
+}
+
+.u-hide-mobile {
+    display: none;
+}
+
+@media (min-width: 48rem) {
+    .u-hide-md-up {
+        display: none;
+    }
+
+    .u-hide-mobile {
+        display: block;
+    }
+
+    .u-hide-tablet {
+        display: none;
+    }
+}
+
+@media (min-width: 64rem) {
+    .u-hide-desktop {
+        display: none;
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Akcije — puna širina na mobilu                                             */
+/* -------------------------------------------------------------------------- */
+.u-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--gap-inline);
+}
+
+.u-actions .btn {
+    width: 100%;
+    text-align: center;
+}
+
+@media (min-width: 48rem) {
+    .u-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .u-actions .btn {
+        width: auto;
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Širina sadržaja                                                            */
+/* -------------------------------------------------------------------------- */
+.u-max-prose {
+    max-width: 65ch;
+}
+
+.u-max-read {
+    max-width: 42rem;
+}
+
+.u-max-narrow {
+    max-width: 47.5rem;
+}

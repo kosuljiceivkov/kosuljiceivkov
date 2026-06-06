@@ -1,0 +1,409 @@
+/**
+ * Kontakt — mobile-first, veliki inputi, 44px touch, sticky ponuda
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Brze akcije                                                                */
+/* -------------------------------------------------------------------------- */
+.contact-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+}
+
+.contact-actions__btn {
+    width: 100%;
+    min-height: var(--touch-min);
+    text-align: center;
+    justify-content: center;
+}
+
+.contact-actions--cta {
+    margin-top: var(--space-8);
+}
+
+
+.contact-actions--centered {
+    justify-content: center;
+}
+
+@media (min-width: 48rem) {
+    .contact-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .contact-actions__btn {
+        width: auto;
+        flex: 0 1 auto;
+    }
+
+    .contact-actions--centered {
+        justify-content: center;
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Klikabilni telefon / email                                                 */
+/* -------------------------------------------------------------------------- */
+.contact-quick {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.contact-quick__link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-height: var(--touch-min);
+    padding: var(--space-5);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: inherit;
+    border-left: 4px solid var(--color-primary);
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
+    -webkit-tap-highlight-color: transparent;
+}
+
+a.contact-quick__link:hover {
+    border-left-color: var(--color-dark);
+    box-shadow: var(--shadow-md);
+}
+
+.contact-quick__link--static {
+    cursor: default;
+}
+
+.contact-quick__label {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-muted);
+}
+
+.contact-quick__value {
+    font-family: var(--font-heading);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-heading);
+    line-height: var(--line-height-snug);
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.contact-quick__hint {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-accent);
+    font-weight: var(--font-weight-medium);
+}
+
+.contact-quick__link--static .contact-quick__hint {
+    display: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Stranica kontakt                                                           */
+/* -------------------------------------------------------------------------- */
+.contact-hero .page-hero__lead {
+    margin-bottom: 0;
+}
+
+.contact-page__content {
+    max-width: 28rem;
+}
+
+.contact-page__heading {
+    margin: 0 0 var(--space-5);
+    font-family: var(--font-heading);
+    font-size: var(--font-size-xl);
+    color: var(--color-heading);
+}
+
+.contact-page__hours {
+    margin: var(--space-6) 0 0;
+    font-size: var(--font-size-md);
+    color: var(--color-text-muted);
+    line-height: var(--line-height-relaxed);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Forma (neaktivna — zadržano za legacy stilove ako zatreba)                 */
+/* -------------------------------------------------------------------------- */
+.contact-form {
+    scroll-margin-top: calc(var(--header-height) + var(--space-4));
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+}
+
+.contact-form__title {
+    margin: 0 0 var(--space-3);
+    font-family: var(--font-heading);
+    font-size: var(--font-size-xl);
+    color: var(--color-heading);
+}
+
+.contact-form__lead {
+    margin: 0 0 var(--space-6);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-relaxed);
+    color: var(--color-text-muted);
+}
+
+.contact-form__messages {
+    list-style: none;
+    margin: 0 0 var(--space-5);
+    padding: 0;
+}
+
+.contact-form__message {
+    padding: var(--space-4);
+    border-radius: var(--radius);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+}
+
+.contact-form__message--success {
+    background: var(--color-primary-muted);
+    color: var(--color-dark);
+    border: 1px solid var(--color-primary);
+}
+
+.contact-form__message--error {
+    background: #fde8e8;
+    color: #8b1a1a;
+    border: 1px solid #e8a0a0;
+}
+
+.form-group {
+    margin-bottom: var(--space-5);
+}
+
+.form-group--error .form-control {
+    border-color: #c53030;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-md);
+    color: var(--color-heading);
+}
+
+.form-control--touch,
+.contact-form .form-control {
+    display: block;
+    width: 100%;
+    min-height: var(--touch-min);
+    padding: var(--space-4);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: var(--line-height-base);
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.contact-form textarea.form-control {
+    min-height: 8rem;
+    resize: vertical;
+}
+
+.form-control--touch:focus,
+.contact-form .form-control:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-color: var(--color-primary);
+}
+
+.form-error {
+    display: block;
+    margin-top: var(--space-2);
+    font-size: var(--font-size-sm);
+    color: #c53030;
+    font-weight: var(--font-weight-medium);
+}
+
+.contact-form__submit {
+    width: 100%;
+    min-height: var(--touch-min);
+    margin-top: var(--space-2);
+}
+
+@media (min-width: 48rem) {
+    .contact-form {
+        padding: var(--space-8);
+    }
+
+    .contact-form__submit {
+        width: auto;
+        min-width: 12rem;
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Sticky — Zatražite ponuda (mobil)                                          */
+/* -------------------------------------------------------------------------- */
+.contact-sticky[hidden] {
+    display: block !important;
+}
+
+.contact-sticky {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 90;
+    padding: var(--space-3) var(--space-4);
+    padding-bottom: max(var(--space-3), env(safe-area-inset-bottom, 0px));
+    background: rgba(34, 34, 34, 0.96);
+    border-top: 3px solid var(--color-primary);
+    box-shadow: 0 -8px 24px rgba(34, 34, 34, 0.2);
+    transform: translate3d(0, 100%, 0);
+    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+}
+
+.contact-sticky.is-visible {
+    transform: translate3d(0, 0, 0);
+    pointer-events: auto;
+}
+
+.contact-sticky__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-width: 36rem;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.contact-sticky__heading {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-wide);
+    text-align: center;
+    color: var(--color-accent);
+}
+
+.contact-sticky__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    width: 100%;
+}
+
+.contact-sticky__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: var(--touch-min);
+    padding: 0 var(--space-4);
+    font-family: var(--font-heading);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    text-decoration: none;
+    border-radius: var(--radius);
+    border: 2px solid transparent;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.contact-sticky__btn--phone {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: var(--touch-min);
+    padding: var(--space-3) var(--space-4);
+    text-align: center;
+}
+
+.contact-sticky__btn--primary {
+    background: var(--color-btn);
+    color: var(--color-dark);
+    border-color: var(--color-btn);
+}
+
+.contact-sticky__btn--alt {
+    background: var(--color-primary);
+    color: var(--color-accent);
+    border-color: var(--color-primary);
+}
+
+.contact-sticky__number {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-snug);
+    letter-spacing: 0.01em;
+}
+
+.phone-call-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
+    width: 100%;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.phone-call-label__action {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+}
+
+.phone-call-label__number {
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+@media (min-width: 26.875rem) {
+    .phone-call-label__number {
+        font-size: var(--font-size-xs);
+    }
+}
+
+.contact-sticky__btn--phone .phone-call-label__number {
+    color: inherit;
+    opacity: 0.9;
+}
+
+@media (min-width: 48rem) {
+    .contact-sticky {
+        display: none !important;
+    }
+}
+
+body.has-contact-sticky {
+    padding-bottom: calc((var(--touch-min) * 2) + var(--space-10) + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 48rem) {
+    body.has-contact-sticky {
+        padding-bottom: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .contact-sticky {
+        transition: none;
+    }
+}

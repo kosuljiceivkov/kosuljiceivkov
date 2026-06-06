@@ -1,0 +1,13 @@
+{% load contact_tags %}
+<section class="cta-banner home-cta u-content-auto" aria-labelledby="home-cta-title">
+    <div class="container cta-banner__inner" data-animate="fade-in" data-animate-duration="slow">
+        <h2 id="home-cta-title" class="cta-banner__title">Pozovite za ponudu vašeg projekta</h2>
+        <p class="cta-banner__text">
+            Javite nam osnovne informacije o objektu, kvadraturi i lokaciji telefonom —
+            pripremamo procenu i ponudu u najkraćem roku.
+        </p>
+        <div class="contact-actions contact-actions--cta contact-actions--centered">
+            {% include "partials/contact/phone_call_button.html" with extra_class="contact-actions__btn contact-actions__btn--offer-cta" %}
+        </div>
+    </div>
+</section>

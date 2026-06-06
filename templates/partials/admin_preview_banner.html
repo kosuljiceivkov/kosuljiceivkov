@@ -1,0 +1,10 @@
+<div class="admin-preview-banner" role="status">
+    <div class="container admin-preview-banner__inner">
+        <strong>Admin pregled</strong>
+        {% if is_draft_preview %}
+        <span>Ovo je nacrt — sadržaj nije javan posetiocima. Samo urednici mogu videti ovu stranicu.</span>
+        {% else %}
+        <span>Ovo je pregled za urednike. Sadržaj je javan na sajtu.</span>
+        {% endif %}
+    </div>
+</div>

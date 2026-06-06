@@ -1,0 +1,173 @@
+Author: Python Software Foundation
+Commands:
+- py
+- python
+- pythonw
+- pyw
+Copyright: "Copyright \xA9 2001-2026 Python Software Foundation. All Rights Reserved.\nCopyright
+  \xA9 2000 BeOpen.com. All Rights Reserved.\nCopyright \xA9 1995-2001 Corporation
+  for National Research Initiatives. All Rights Reserved.\nCopyright \xA9 1991-1995
+  Stichting Mathematisch Centrum, Amsterdam. All Rights Reserved."
+CopyrightUrl: https://www.python.org/about/legal/
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.python.org/doc/
+FileExtensions:
+- py
+- pyc
+- pyd
+- pyo
+- pyw
+- pyz
+- pyzw
+Icons:
+- IconFileType: ico
+  IconResolution: custom
+  IconSha256: ebbc52305cda5a9fb7c108a2cc9466e7e72a33841d2c7935f6a48b1653fc1373
+  IconTheme: default
+  IconUrl: https://cdn.winget.microsoft.com/icons/ebbc52305cda5a9fb7c108a2cc9466e7e72a33841d2c7935f6a48b1653fc1373.ico
+InstallerType: burn
+Installers:
+- AppsAndFeaturesEntries:
+  - DisplayName: Python 3.13.13 (32-bit)
+    DisplayVersion: 3.13.13150.0
+    ProductCode: '{aabbf6fd-e8e8-4a32-b888-3f90ef5e84dc}'
+    UpgradeCode: '{D931076A-D223-5314-A7DC-5C755C936363}'
+  Architecture: x86
+  InstallerSha256: 78D4C435A410662E87D33C20FDBC9421F3AC019B2049C798B2B86DB21C1A08DB
+  InstallerSwitches:
+    Custom: InstallAllUsers=0 PrependPath=1
+    InstallLocation: DefaultJustForMeTargetDir=<INSTALLPATH>
+  InstallerUrl: https://www.python.org/ftp/python/3.13.13/python-3.13.13.exe
+  ProductCode: '{aabbf6fd-e8e8-4a32-b888-3f90ef5e84dc}'
+  Scope: user
+- AppsAndFeaturesEntries:
+  - DisplayName: Python 3.13.13 (32-bit)
+    DisplayVersion: 3.13.13150.0
+    ProductCode: '{aabbf6fd-e8e8-4a32-b888-3f90ef5e84dc}'
+    UpgradeCode: '{D931076A-D223-5314-A7DC-5C755C936363}'
+  Architecture: x86
+  ElevationRequirement: elevatesSelf
+  InstallerSha256: 78D4C435A410662E87D33C20FDBC9421F3AC019B2049C798B2B86DB21C1A08DB
+  InstallerSwitches:
+    Custom: InstallAllUsers=1 PrependPath=1
+    InstallLocation: DefaultAllUsersTargetDir=<INSTALLPATH>
+  InstallerUrl: https://www.python.org/ftp/python/3.13.13/python-3.13.13.exe
+  ProductCode: '{aabbf6fd-e8e8-4a32-b888-3f90ef5e84dc}'
+  Scope: machine
+- AppsAndFeaturesEntries:
+  - DisplayName: Python 3.13.13 (64-bit)
+    DisplayVersion: 3.13.13150.0
+    ProductCode: '{dd518466-824c-47af-82c7-2de3c7b13062}'
+    UpgradeCode: '{F96F59BD-3E48-5E4E-B1A4-6CAFADEFEAE8}'
+  Architecture: x64
+  InstallerSha256: 3C9C81D80F91C002CED86D645422D81432C68C7D9B6B0E974768CA2E449A4D00
+  InstallerSwitches:
+    Custom: InstallAllUsers=0 PrependPath=1
+    InstallLocation: DefaultJustForMeTargetDir=<INSTALLPATH>
+  InstallerUrl: https://www.python.org/ftp/python/3.13.13/python-3.13.13-amd64.exe
+  ProductCode: '{dd518466-824c-47af-82c7-2de3c7b13062}'
+  Scope: user
+- AppsAndFeaturesEntries:
+  - DisplayName: Python 3.13.13 (64-bit)
+    DisplayVersion: 3.13.13150.0
+    ProductCode: '{dd518466-824c-47af-82c7-2de3c7b13062}'
+    UpgradeCode: '{F96F59BD-3E48-5E4E-B1A4-6CAFADEFEAE8}'
+  Architecture: x64
+  ElevationRequirement: elevatesSelf
+  InstallerSha256: 3C9C81D80F91C002CED86D645422D81432C68C7D9B6B0E974768CA2E449A4D00
+  InstallerSwitches:
+    Custom: InstallAllUsers=1 PrependPath=1
+    InstallLocation: DefaultAllUsersTargetDir=<INSTALLPATH>
+  InstallerUrl: https://www.python.org/ftp/python/3.13.13/python-3.13.13-amd64.exe
+  ProductCode: '{dd518466-824c-47af-82c7-2de3c7b13062}'
+  Scope: machine
+- AppsAndFeaturesEntries:
+  - DisplayName: Python 3.13.13 (ARM64)
+    DisplayVersion: 3.13.13150.0
+    ProductCode: '{31d6e489-8290-4499-bad4-a717818ad73a}'
+    UpgradeCode: '{303A4F18-F0C9-5E9F-8F29-42EA62697711}'
+  Architecture: arm64
+  InstallerSha256: 7925FC1D40DC75379AE70EDE7A6217FAF5549BB93CA89A3EA519185D8BC657BF
+  InstallerSwitches:
+    Custom: InstallAllUsers=0 PrependPath=1
+    InstallLocation: DefaultJustForMeTargetDir=<INSTALLPATH>
+  InstallerUrl: https://www.python.org/ftp/python/3.13.13/python-3.13.13-arm64.exe
+  ProductCode: '{31d6e489-8290-4499-bad4-a717818ad73a}'
+  Scope: user
+- AppsAndFeaturesEntries:
+  - DisplayName: Python 3.13.13 (ARM64)
+    DisplayVersion: 3.13.13150.0
+    ProductCode: '{31d6e489-8290-4499-bad4-a717818ad73a}'
+    UpgradeCode: '{303A4F18-F0C9-5E9F-8F29-42EA62697711}'
+  Architecture: arm64
+  ElevationRequirement: elevatesSelf
+  InstallerSha256: 7925FC1D40DC75379AE70EDE7A6217FAF5549BB93CA89A3EA519185D8BC657BF
+  InstallerSwitches:
+    Custom: InstallAllUsers=1 PrependPath=1
+    InstallLocation: DefaultAllUsersTargetDir=<INSTALLPATH>
+  InstallerUrl: https://www.python.org/ftp/python/3.13.13/python-3.13.13-arm64.exe
+  ProductCode: '{31d6e489-8290-4499-bad4-a717818ad73a}'
+  Scope: machine
+License: PSF-2.0
+LicenseUrl: https://docs.python.org/3/license.html
+Localization:
+- Author: Python Software Foundation
+  Copyright: 'Copyright (c) 2001-2026 Python Software Foundation. All Rights Reserved.
+
+    Copyright (c) 2000 BeOpen.com. All Rights Reserved.
+
+    Copyright (c) 1995-2001 Corporation for National Research Initiatives. All Rights
+    Reserved.
+
+    Copyright (c) 1991-1995 Stichting Mathematisch Centrum, Amsterdam. All Rights
+    Reserved.'
+  CopyrightUrl: https://www.python.org/about/legal/
+  Documentations:
+  - DocumentLabel: "\u6587\u6863"
+    DocumentUrl: https://www.python.org/doc/
+  License: PSF-2.0
+  LicenseUrl: https://docs.python.org/3/license.html
+  PackageLocale: zh-CN
+  PackageName: Python 3.13
+  PackageUrl: https://www.python.org/
+  PrivacyUrl: https://www.python.org/privacy/
+  Publisher: Python Software Foundation
+  PublisherSupportUrl: https://www.python.org/about/help/
+  PublisherUrl: https://www.python.org/
+  ShortDescription: "Python \u662F\u4E00\u79CD\u7F16\u7A0B\u8BED\u8A00\uFF0C\u53EF\u4EE5\u8BA9\u60A8\u66F4\u5FEB\u5730\u5DE5\u4F5C\uFF0C\u66F4\u6709\u6548\u5730\u6574\u5408\u60A8\u7684\u7CFB\u7EDF\u3002"
+  Tags:
+  - python
+  - python3
+  - "\u7F16\u7A0B"
+  - "\u7F16\u7A0B\u8BED\u8A00"
+  - "\u811A\u672C"
+  - "\u8BED\u8A00"
+ManifestType: merged
+ManifestVersion: 1.12.0
+Moniker: python3.13
+PackageIdentifier: Python.Python.3.13
+PackageLocale: en-US
+PackageName: Python 3.13
+PackageUrl: https://www.python.org/
+PackageVersion: 3.13.13
+PrivacyUrl: https://www.python.org/privacy/
+Publisher: Python Software Foundation
+PublisherSupportUrl: https://www.python.org/about/help/
+PublisherUrl: https://www.python.org/
+ReleaseDate: 2026-04-07
+ReleaseNotesUrl: https://docs.python.org/release/3.13.13/whatsnew/changelog.html
+ShortDescription: Python is a programming language that lets you work more quickly
+  and integrate your systems more effectively.
+Tags:
+- 9pnrbtzxmb4z
+- idna
+- language
+- pip3
+- programming
+- programming-language
+- python
+- python3
+- requirescmd
+- script
+UpgradeBehavior: install

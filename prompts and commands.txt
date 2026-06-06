@@ -1,0 +1,22 @@
+python manage.py runserver
+
+.\.venv\Scripts\Activate.ps1
+
+deactivate
+
+python manage.py makemigrations
+python manage.py migrate
+
+Prevodjenje:
+
+django-admin makemessages
+django-admin compilemessages
+
+
+Git commit and push commands:
+
+git add .
+git commit -m "update"
+git push
+
+git push --force - nakon backup kopiranja

@@ -1,0 +1,11 @@
+<section
+    class="builder-section builder-section--pad-top-{{ section.padding_top }} builder-section--pad-bottom-{{ section.padding_bottom }} builder-section--width-{{ section.container_width }}"
+    {% if section.background_color %}style="--builder-section-bg: {{ section.background_color }};"{% endif %}
+    data-section-id="{{ section.pk }}"
+>
+    <div class="builder-section__inner">
+        {% for row in section.rows.all %}
+            {% include "builder/row.html" with row=row %}
+        {% endfor %}
+    </div>
+</section>

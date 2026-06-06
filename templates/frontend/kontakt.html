@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block body_class %}page-kontakt{% endblock %}
+
+{% block content %}
+<section class="page-hero page-hero--compact contact-hero">
+    <div class="container">
+        <h1 class="page-hero__title">Kontakt</h1>
+        <p class="page-hero__lead">
+            Za procenu, ponudu i dogovor oko radova pozovite nas direktno — odgovaramo telefonom.
+        </p>
+        {% include "partials/contact/actions.html" with extra_class="contact-hero__actions" %}
+    </div>
+</section>
+
+<section class="section contact-page">
+    <div class="container contact-page__content">
+        <h2 class="contact-page__heading">Kontakt informacije</h2>
+        {% include "partials/contact/quick_links.html" %}
+        <p class="contact-page__hours">
+            <strong>Radno vreme:</strong> pon–pet, 08:00–17:00
+        </p>
+    </div>
+</section>
+{% endblock %}

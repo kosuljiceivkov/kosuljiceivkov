@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_class %}page-home{% endblock %}
+
+{% block lcp_preload %}
+<link
+    rel="preload"
+    as="image"
+    type="image/webp"
+    href="{% static 'img/cementne-kosuljice6-800.webp' %}"
+    imagesrcset="{% static 'img/cementne-kosuljice6-800.webp' %} 800w, {% static 'img/cementne-kosuljice6.webp' %} 1600w"
+    imagesizes="(max-width: 48rem) 100vw, (max-width: 64rem) 50vw, 560px"
+    fetchpriority="high"
+>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/home.css' %}?v=3">
+{% endblock %}
+
+{% block perf_css %}
+{% include "partials/perf/async_stylesheet.html" with href="css/bundles/site-carousel.css" cache_bust=3 %}
+{% include "partials/perf/async_stylesheet.html" with href="css/animations.css" cache_bust=3 %}
+{% endblock %}
+
+{% block content %}
+{% include "partials/home/hero.html" %}
+{% include "partials/home/why_us.html" %}
+{% include "partials/home/services_preview.html" %}
+{% include "partials/home/process.html" %}
+{% include "partials/home/work_carousel.html" %}
+{% include "partials/home/projects_preview.html" %}
+{% include "partials/home/blog_preview.html" %}
+{% include "partials/home/cta_offer.html" %}
+{% endblock %}

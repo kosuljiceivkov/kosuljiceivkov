@@ -1,0 +1,66 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Jedna codebase: lokalno SQLite (config.settings.local), produkcija PostgreSQL (config.settings.production)
+
+databases:
+  - name: cementnekosuljiceivkov-db
+    databaseName: cementnekosuljiceivkov
+    user: cementnekosuljiceivkov
+    plan: free
+
+services:
+  - type: web
+    name: cementnekosuljiceivkov
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: gunicorn config.wsgi:application -c config/gunicorn.conf.py
+    healthCheckPath: /health/
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.5"
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cementnekosuljiceivkov-db
+          property: connectionString
+      - key: SITE_BASE_URL
+        sync: false
+      - key: SECURE_SSL_REDIRECT
+        value: "True"
+      - key: USE_X_FORWARDED_HOST
+        value: "True"
+      - key: DB_SSLMODE
+        value: require
+      - key: REQUIRE_R2_CONFIG
+        value: "True"
+      - key: USE_R2_STORAGE
+        value: "True"
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: R2_ENDPOINT_URL
+        sync: false
+      - key: R2_REGION_NAME
+        value: auto
+      - key: R2_CUSTOM_DOMAIN
+        sync: false
+      - key: R2_MEDIA_URL
+        sync: false
+      - key: CSP_EXTRA_MEDIA_ORIGINS
+        sync: false
+      - key: USE_CLOUDFLARE_PROXY
+        value: "False"
+      - key: CONTACT_PHONE
+        value: "+381 62 810 7037"
+      - key: CONTACT_PHONE_2
+        value: "+381 61 146 3318"

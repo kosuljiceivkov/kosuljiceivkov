@@ -1,0 +1,33 @@
+{% load contact_tags %}
+{# Desktop: dva poziva (levo) + na vrh (desno) #}
+{% if contact_phone or contact_phone_2 %}
+<div class="scroll-fab" data-scroll-fab hidden>
+    <div class="scroll-fab__calls">
+        {% if contact_phone %}
+        <a
+            href="tel:{{ contact_phone|phone_uri }}"
+            class="scroll-fab__call scroll-fab__call--primary"
+            aria-label="Pozovite {{ contact_phone }}"
+        >
+            {% include "partials/contact/phone_icon.html" %}
+            <span class="scroll-fab__number">{{ contact_phone_display }}</span>
+        </a>
+        {% endif %}
+        {% if contact_phone_2 %}
+        <a
+            href="tel:{{ contact_phone_2|phone_uri }}"
+            class="scroll-fab__call scroll-fab__call--alt"
+            aria-label="Pozovite {{ contact_phone_2 }}"
+        >
+            {% include "partials/contact/phone_icon.html" %}
+            <span class="scroll-fab__number">{{ contact_phone_2_display }}</span>
+        </a>
+        {% endif %}
+    </div>
+    <button type="button" class="scroll-fab__btn scroll-fab__btn--top" data-scroll-top aria-label="Na vrh stranice">
+        <svg class="scroll-fab__icon" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M7.41 15.41 12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
+        </svg>
+    </button>
+</div>
+{% endif %}

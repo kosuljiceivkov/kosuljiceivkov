@@ -1,0 +1,315 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Cementne košuljice Ivkov\n"
+"Report-Msgid-Bugs-To: \n"
+"Language: sr_Latn\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Medijske reference"
+msgstr "Medijske reference"
+
+msgid "Media reference"
+msgstr "Medijske reference"
+
+msgid "Media references"
+msgstr "Medijske reference"
+
+msgid "Layout"
+msgstr "Raspored"
+
+msgid "Layout builder"
+msgstr "Graditelj rasporeda"
+
+msgid "Graditelj rasporeda"
+msgstr "Graditelj rasporeda"
+
+msgid "Raspored"
+msgstr "Raspored"
+
+msgid "Explorer"
+msgstr "Pregledač"
+
+msgid "Snippets"
+msgstr "Isječci"
+
+msgid "Welcome to the Wagtail CMS"
+msgstr "Dobrodošli u administraciju sajta"
+
+msgid "Page created successfully."
+msgstr "Stranica je uspešno kreirana."
+
+msgid "Showing %(start)s to %(end)s of %(total)s results"
+msgstr "Prikaz %(start)s–%(end)s od %(total)s rezultata"
+
+msgid "Robots: indeksiranje"
+msgstr "Robots: indeksiranje"
+
+msgid "Robots: praćenje linkova"
+msgstr "Robots: praćenje linkova"
+
+msgid "Wagtail admin"
+msgstr "Administracija sajta"
+
+msgid "Sign in to Wagtail"
+msgstr "Prijava — administracija sajta"
+
+msgid "Go to Wagtail admin"
+msgstr "Idi na administraciju"
+
+msgid "Idi na administraciju"
+msgstr "Idi na administraciju"
+
+msgid "View Wagtail quick actions"
+msgstr "Brze akcije administracije"
+
+msgid "Wagtail upgrade available"
+msgstr "Dostupna je nova verzija CMS-a"
+
+msgid "JavaScript is required to use Wagtail, but it is currently disabled."
+msgstr "JavaScript je neophodan za administraciju sajta, ali trenutno je isključen."
+
+msgid "Prijava — administracija sajta"
+msgstr "Prijava — administracija sajta"
+
+msgid "Dostupna je nova verzija CMS-a"
+msgstr "Dostupna je nova verzija CMS-a"
+
+msgid "Pročitajte beleške o izdanju."
+msgstr "Pročitajte beleške o izdanju."
+
+msgid "Vodič za uređivanje sadržaja"
+msgstr "Vodič za uređivanje sadržaja"
+
+msgid "Help"
+msgstr "Pomoć"
+
+msgid "Root"
+msgstr "Koren sajta"
+
+msgid "Page explorer"
+msgstr "Pregledač stranica"
+
+msgid "Rich text"
+msgstr "Obogaćeni tekst"
+
+msgid "title"
+msgstr "naslov"
+
+msgid "file"
+msgstr "fajl"
+
+msgid "created at"
+msgstr "kreirano"
+
+msgid "collection"
+msgstr "kolekcija"
+
+msgid "tags"
+msgstr "oznake"
+
+msgid "uploaded by user"
+msgstr "otpremio korisnik"
+
+msgid "description"
+msgstr "opis"
+
+msgid "width"
+msgstr "širina"
+
+msgid "height"
+msgstr "visina"
+
+msgid "Read the release notes."
+msgstr "Pročitajte beleške o izdanju."
+
+msgid "Your version:"
+msgstr "Vaša verzija:"
+
+msgid "New version:"
+msgstr "Nova verzija:"
+
+msgid "Forgotten password?"
+msgstr "Zaboravili ste lozinku?"
+
+msgid "Remember me"
+msgstr "Zapamti me"
+
+msgid "Sign in"
+msgstr "Prijava"
+
+msgid "Account"
+msgstr "Nalog"
+
+msgid "Dashboard"
+msgstr "Kontrolna tabla"
+
+msgid "No, don't delete"
+msgstr "Ne, ne briši"
+
+msgid "Yes, delete"
+msgstr "Da, obriši"
+
+msgid "Go to the first error"
+msgstr "Idi na prvu grešku"
+
+msgid "Skip to main content"
+msgstr "Preskoči na glavni sadržaj"
+
+msgid "Privacy"
+msgstr "Privatnost"
+
+msgid "Public"
+msgstr "Javno"
+
+msgid "Private"
+msgstr "Privatno"
+
+msgid "Bulk actions"
+msgstr "Grupne akcije"
+
+msgid "Actions"
+msgstr "Akcije"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Locked"
+msgstr "Zaključano"
+
+msgid "Submit for moderation"
+msgstr "Pošalji na moderaciju"
+
+msgid "Compare with live version"
+msgstr "Uporedi sa objavljenom verzijom"
+
+msgid "Save draft"
+msgstr "Sačuvaj nacrt"
+
+msgid "Save Draft"
+msgstr "Sačuvaj nacrt"
+
+msgid "Unpublish"
+msgstr "Povuci objavu"
+
+msgid "View live"
+msgstr "Pogledaj objavljeno"
+
+msgid "Add child page"
+msgstr "Dodaj podstranicu"
+
+msgid "Workflow"
+msgstr "Tok rada"
+
+msgid "Promote"
+msgstr "Promocija"
+
+msgid "For search engines"
+msgstr "Za pretraživače"
+
+msgid "Search description"
+msgstr "Opis za pretragu"
+
+msgid "Choose an image"
+msgstr "Izaberite sliku"
+
+msgid "Choose a document"
+msgstr "Izaberite dokument"
+
+msgid "Insert image"
+msgstr "Ubaci sliku"
+
+msgid "Filter"
+msgstr "Filter"
+
+msgid "Sort"
+msgstr "Sortiraj"
+
+msgid "Select all"
+msgstr "Izaberi sve"
+
+msgid "Previous"
+msgstr "Prethodna"
+
+msgid "Next"
+msgstr "Sledeća"
+
+msgid "Upload"
+msgstr "Otpremi"
+
+msgid "Alt text"
+msgstr "Alt tekst"
+
+msgid "Decorative image"
+msgstr "Dekorativna slika"
+
+msgid "All collections"
+msgstr "Sve kolekcije"
+
+msgid "Sorry, no pages match"
+msgstr "Nažalost, nema stranica koje odgovaraju"
+
+msgid "Sorry, no images match"
+msgstr "Nažalost, nema slika koje odgovaraju"
+
+msgid "Sorry, no documents match"
+msgstr "Nažalost, nema dokumenata koji odgovaraju"
+
+msgid "No results"
+msgstr "Nema rezultata"
+
+msgid "Are you sure you want to delete this page?"
+msgstr "Da li ste sigurni da želite da obrišete ovu stranicu?"
+
+msgid "Please add some alt text for your image or mark it as decorative"
+msgstr "Dodajte alt tekst za sliku ili je označite kao dekorativnu"
+
+msgid "Praćenje referenci medijskih fajlova (baza = izvor istine, bez R2 skeniranja)."
+msgstr "Praćenje referenci medijskih fajlova (baza = izvor istine, bez R2 skeniranja)."
+
+msgid "Ukupno"
+msgstr "Ukupno"
+
+msgid "Referencirano"
+msgstr "Referencirano"
+
+msgid "Neiskorišćeno"
+msgstr "Neiskorišćeno"
+
+msgid "Zakazano brisanje"
+msgstr "Zakazano brisanje"
+
+msgid "Tip"
+msgstr "Tip"
+
+msgid "Wagtail ID"
+msgstr "Wagtail ID"
+
+msgid "Fajl"
+msgstr "Fajl"
+
+msgid "Datum otpremanja"
+msgstr "Datum otpremanja"
+
+msgid "Broj referenci"
+msgstr "Broj referenci"
+
+msgid "Brisanje zakazano"
+msgstr "Brisanje zakazano"
+
+msgid "Nema zapisa."
+msgstr "Nema zapisa."
+
+msgid "Embed URL"
+msgstr "URL ugradnje"
+
+msgid "Are you sure?"
+msgstr "Da li ste sigurni?"
+
+msgid "Loading…"
+msgstr "Učitavanje…"
+
+msgid "Write something or type ‘/’ to insert a block"
+msgstr "Upišite nešto ili ukucajte '/' za ubacivanje bloka"
+

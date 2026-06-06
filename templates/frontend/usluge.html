@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static contact_tags %}
+
+{% block extra_css %}
+{% include "partials/perf/async_stylesheet.html" with href="css/pages/usluge-gallery.css" cache_bust=2 %}
+{% endblock %}
+
+{% block perf_css %}
+{% include "partials/perf/async_stylesheet.html" with href="css/animations.css" cache_bust=3 %}
+{% endblock %}
+
+{% block content %}
+<section class="page-hero page-hero--compact">
+    <div class="container" data-animate="fade-up">
+        <h1 class="page-hero__title">Naše usluge</h1>
+        <p class="page-hero__lead">
+            Pružamo kompletna rešenja za izradu cementnih košuljica i pripremu podova za završne
+            obloge. Svaki projekat realizujemo uz pažljivo planiranje, kvalitetne materijale
+            i preciznu izvedbu.
+        </p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container container--narrow services-detail">
+        {% for service in services %}
+        <article class="service-detail" id="{{ service.slug }}" data-animate="fade-up">
+            <h2 class="service-detail__title">{{ service.title }}</h2>
+            <p class="service-detail__text service-detail__summary">{{ service.summary }}</p>
+            {% for paragraph in service.paragraphs %}
+            <p class="service-detail__text">{{ paragraph }}</p>
+            {% endfor %}
+        </article>
+        {% if not forloop.last %}
+        <hr class="service-detail__divider" aria-hidden="true">
+        {% endif %}
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section section--muted" aria-labelledby="usluge-audience-title">
+    <div class="container">
+        <div data-animate="fade-up">
+            {% include "partials/section_head.html" with title="Za koga radimo?" title_id="usluge-audience-title" subtitle="Sarađujemo sa investitorima, izvođačima i vlasnicima objekata — od porodičnih kuća do industrijskih hala." %}
+        </div>
+        <ul class="services-audience" role="list" data-animate-stagger data-stagger="fade-up">
+            {% for item in audience %}
+            <li class="services-audience__item">{{ item }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+
+<section class="section" aria-labelledby="usluge-quality-title">
+    <div class="container container--narrow">
+        <div data-animate="fade-up">
+            <h2 id="usluge-quality-title" class="section__title">{{ quality_section.title }}</h2>
+            {% for paragraph in quality_section.paragraphs %}
+            <p class="services-quality__text">{{ paragraph }}</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% include "partials/usluge/gallery.html" %}
+
+<section class="cta-banner cta-banner--inline" aria-labelledby="usluge-cta-title">
+    <div class="container cta-banner__inner" data-animate="fade-in">
+        <h2 id="usluge-cta-title" class="cta-banner__title">Zatražite ponudu</h2>
+        <div class="contact-actions contact-actions--cta contact-actions--centered">
+            {% if contact_phone %}
+            <a href="tel:{{ contact_phone|phone_uri }}" class="btn btn--outline btn--lg contact-actions__btn">
+                Pozovite nas
+            </a>
+            {% endif %}
+            <a href="{% url 'frontend:kontakt' %}#upit" class="btn btn--light btn--lg contact-actions__btn">
+                Pošaljite upit
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,213 @@
+/**
+ * Deljeno — adaptivni karuseli (CLS, contain, touch, slike)
+ */
+
+[data-ops-carousel],
+[data-showcase-carousel],
+[data-lb-carousel] {
+    --carousel-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --carousel-min-h: 10rem;
+    --carousel-max-ratio: 0.7;
+    contain: layout style;
+}
+
+/* Viewport — rezervisana visina, glatka promena */
+.ops-carousel__viewport,
+.showcase-carousel__viewport,
+.lb-carousel__viewport {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    touch-action: pan-y pinch-zoom;
+    -webkit-overflow-scrolling: touch;
+    background: var(--color-dark-soft);
+    min-height: var(--carousel-min-h);
+}
+
+.ops-carousel__viewport.is-dragging,
+.showcase-carousel__viewport.is-dragging,
+.lb-carousel__viewport.is-dragging {
+    transition: none !important;
+}
+
+/* Slajdovi — fade stack */
+.ops-carousel__slide,
+.showcase-carousel__slide,
+.lb-carousel__slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 1;
+    transition: opacity 320ms var(--carousel-ease), visibility 320ms;
+}
+
+@media (max-width: 47.99rem) {
+    .ops-carousel__slide,
+    .showcase-carousel__slide,
+    .lb-carousel__slide {
+        transition-duration: 240ms;
+    }
+}
+
+.ops-carousel__slide.is-active,
+.showcase-carousel__slide.is-active,
+.lb-carousel__slide.is-active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    z-index: 2;
+}
+
+/* Scena slike — contain, bez istezanja */
+.ops-carousel__figure,
+.showcase-carousel__stage,
+.lb-carousel__stage,
+[data-carousel-stage] {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    height: var(--carousel-stage-h, auto);
+    max-height: var(--carousel-stage-h, none);
+    margin: 0;
+    padding: var(--space-3);
+    background: linear-gradient(180deg, var(--color-dark-soft) 0%, var(--color-dark) 100%);
+    overflow: hidden;
+}
+
+.showcase-carousel__picture {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+/* Slike — učitavanje bez flash-a */
+.ops-carousel__image,
+.showcase-carousel__image,
+[data-carousel-img] {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    object-position: center center;
+    opacity: 0;
+    transform: scale(0.98);
+    transition: opacity 280ms ease, transform 560ms var(--carousel-ease);
+}
+
+.ops-carousel__image.is-loaded,
+.showcase-carousel__image.is-loaded,
+[data-carousel-img].is-loaded {
+    opacity: 1;
+}
+
+.ops-carousel__slide.is-active .ops-carousel__image.is-loaded,
+.showcase-carousel__slide.is-active .showcase-carousel__image.is-loaded {
+    transform: scale(1);
+}
+
+/* Drag feedback */
+.ops-carousel__viewport.is-dragging .ops-carousel__slide.is-active .ops-carousel__image.is-loaded,
+.showcase-carousel__viewport.is-dragging
+    .showcase-carousel__slide.is-active
+    .showcase-carousel__image.is-loaded {
+    transition: transform 80ms linear, opacity 280ms ease;
+}
+
+.ops-carousel.is-drag-offset .ops-carousel__slide.is-active .ops-carousel__image,
+.showcase-carousel.is-drag-offset .showcase-carousel__slide.is-active .showcase-carousel__image {
+    transform: scale(1) translate3d(var(--carousel-drag-x, 0), 0, 0);
+}
+
+/* Meta / caption */
+.ops-carousel__meta,
+.showcase-carousel__caption-wrap,
+.lb-carousel__caption-wrap {
+    flex-shrink: 0;
+}
+
+/* Touch-friendly tačke */
+.ops-carousel__dot,
+.showcase-carousel__dot,
+.lb-carousel__dot {
+    position: relative;
+    min-width: var(--touch-min);
+    min-height: var(--touch-min);
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.ops-carousel__dot::after,
+.showcase-carousel__dot::after,
+.lb-carousel__dot::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.28);
+    transform: translate(-50%, -50%);
+    transition: background 200ms ease, transform 200ms ease;
+}
+
+.ops-carousel__dot.is-active::after,
+.showcase-carousel__dot.is-active::after,
+.lb-carousel__dot.is-active::after {
+    background: var(--color-primary);
+    transform: translate(-50%, -50%) scale(1.25);
+}
+
+@media (min-width: 48rem) {
+    [data-ops-carousel],
+    [data-showcase-carousel],
+    [data-lb-carousel] {
+        --carousel-min-h: 12rem;
+    }
+
+    .ops-carousel__figure,
+    .showcase-carousel__stage,
+    .lb-carousel__stage,
+    [data-carousel-stage] {
+        padding: var(--space-4);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ops-carousel__viewport,
+    .showcase-carousel__viewport,
+    .lb-carousel__viewport {
+        transition: none !important;
+    }
+
+    .ops-carousel__slide,
+    .showcase-carousel__slide,
+    .lb-carousel__slide,
+    .ops-carousel__image,
+    .showcase-carousel__image,
+    [data-carousel-img] {
+        transition: none !important;
+        transform: none !important;
+        opacity: 1;
+    }
+
+    .ops-carousel__slide:not(.is-active),
+    .showcase-carousel__slide:not(.is-active),
+    .lb-carousel__slide:not(.is-active) {
+        display: none;
+    }
+}

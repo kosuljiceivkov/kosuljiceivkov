@@ -1,0 +1,57 @@
+{% load static image_tags %}
+<section class="section services-gallery" id="galerija-radova" aria-labelledby="services-gallery-title" data-services-gallery>
+    <div class="container">
+        <div data-animate="fade-up">
+            {% include "partials/section_head.html" with eyebrow="Galerija" title="Fotografije sa gradilišta" title_id="services-gallery-title" subtitle="Pogledajte opremu, proces ugradnje i završnu obradu cementnih košuljica." %}
+        </div>
+
+        <div class="services-gallery__grid" role="list" data-animate-stagger data-stagger="fade-up">
+            {% for image in gallery_images %}
+            <figure class="services-gallery__item" role="listitem">
+                <button
+                    type="button"
+                    class="services-gallery__trigger"
+                    data-gallery-trigger
+                    data-gallery-src="{% static image.path %}"
+                    data-gallery-alt="{{ image.alt }}"
+                    data-gallery-caption="{{ image.caption }}"
+                    data-gallery-width="{{ image.width }}"
+                    data-gallery-height="{{ image.height }}"
+                    aria-label="Uvećaj: {{ image.alt }}"
+                >
+                    {% carousel_static_image image.path css_class="services-gallery__image" alt=image.alt width=image.width height=image.height sizes="(max-width: 48rem) 100vw, (max-width: 64rem) 50vw, 33vw" %}
+                </button>
+                {% if image.caption %}
+                <figcaption class="services-gallery__caption">{{ image.caption }}</figcaption>
+                {% endif %}
+            </figure>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="gallery-lightbox" data-gallery-lightbox hidden aria-hidden="true">
+        <div class="gallery-lightbox__backdrop" data-gallery-close tabindex="-1"></div>
+        <div
+            class="gallery-lightbox__dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Pregled fotografije"
+            data-gallery-dialog
+        >
+            <button type="button" class="gallery-lightbox__close" data-gallery-close aria-label="Zatvori">
+                <span aria-hidden="true">×</span>
+            </button>
+            <button type="button" class="gallery-lightbox__nav gallery-lightbox__nav--prev" data-gallery-prev aria-label="Prethodna fotografija">
+                <span aria-hidden="true">‹</span>
+            </button>
+            <button type="button" class="gallery-lightbox__nav gallery-lightbox__nav--next" data-gallery-next aria-label="Sledeća fotografija">
+                <span aria-hidden="true">›</span>
+            </button>
+            <div class="gallery-lightbox__stage" data-gallery-stage>
+                <img class="gallery-lightbox__image" data-gallery-image alt="" decoding="async">
+            </div>
+            <p class="gallery-lightbox__caption" data-gallery-caption hidden></p>
+            <p class="gallery-lightbox__counter" data-gallery-counter aria-live="polite"></p>
+        </div>
+    </div>
+</section>

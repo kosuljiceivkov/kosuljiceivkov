@@ -1,0 +1,9 @@
+{% load contact_tags %}
+{% if contact_phone %}
+<a
+    href="tel:{{ contact_phone|phone_uri }}"
+    class="{% if btn_class %}{{ btn_class }}{% else %}btn btn--primary btn--lg{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}"
+>
+    {% include "partials/contact/phone_call_label.html" %}
+</a>
+{% endif %}

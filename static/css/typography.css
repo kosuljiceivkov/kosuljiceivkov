@@ -1,0 +1,132 @@
+/**
+ * Tipografija — mobile-first, srpski (latinica)
+ */
+
+body {
+    font-family: var(--font-sans);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-base);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    color: var(--color-heading);
+    letter-spacing: var(--letter-spacing-tight);
+    margin-top: 0;
+    text-wrap: balance;
+}
+
+h1,
+.h1 {
+    font-size: var(--type-h1);
+}
+
+h2,
+.h2 {
+    font-size: var(--type-h2);
+}
+
+h3,
+.h3 {
+    font-size: var(--type-h3);
+}
+
+h4,
+.h4 {
+    font-size: var(--font-size-lg);
+}
+
+h5,
+.h5 {
+    font-size: var(--font-size-md);
+}
+
+h6,
+.h6 {
+    font-size: var(--font-size-base);
+}
+
+p {
+    margin: 0 0 var(--space-4);
+    text-wrap: pretty;
+}
+
+p:last-child {
+    margin-bottom: 0;
+}
+
+.lead {
+    font-size: var(--type-lead);
+    line-height: var(--line-height-relaxed);
+    color: var(--color-text-muted);
+}
+
+.text-muted {
+    color: var(--color-text-muted);
+}
+
+.text-small {
+    font-size: var(--font-size-sm);
+}
+
+.text-uppercase {
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+}
+
+.eyebrow {
+    font-family: var(--font-heading);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wider);
+    color: var(--color-text-accent-accessible);
+}
+
+@media (min-width: 48rem) {
+    .eyebrow {
+        font-size: var(--font-size-sm);
+    }
+}
+
+.eyebrow--inverse {
+    color: var(--color-text-accent);
+}
+
+.prose {
+    max-width: 65ch;
+}
+
+.prose p + p {
+    margin-top: var(--space-4);
+}
+
+.prose a {
+    color: var(--color-link);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.prose a:hover {
+    color: var(--color-link-hover);
+}

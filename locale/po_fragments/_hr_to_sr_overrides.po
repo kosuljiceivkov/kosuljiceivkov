@@ -1,0 +1,145 @@
+# Croatian → Serbian Latin overrides (correct msgids only)
+
+msgid "Workflows"
+msgstr "Tokovi rada"
+
+msgid "Workflow"
+msgstr "Tok rada"
+
+msgid "Apply filters"
+msgstr "Primeni filtere"
+
+msgid "Snippets"
+msgstr "Isječci"
+
+msgid "Form data"
+msgstr "Podaci formulara"
+
+msgid "Redirects"
+msgstr "Preusmeravanja"
+
+msgid "Redirect"
+msgstr "Preusmeravanje"
+
+msgid "In progress"
+msgstr "U toku"
+
+msgid "workflow page"
+msgstr "stranica toka rada"
+
+msgid "workflow pages"
+msgstr "stranice toka rada"
+
+msgid "workflow state"
+msgstr "stanje toka rada"
+
+msgid "workflow states"
+msgstr "stanja toka rada"
+
+msgid "workflows"
+msgstr "tokovi rada"
+
+msgid "workflow tasks"
+msgstr "zadaci toka rada"
+
+msgid "workflow task order"
+msgstr "redosled zadatka toka rada"
+
+msgid "workflow task orders"
+msgstr "redosledi zadataka toka rada"
+
+msgid "Deleted"
+msgstr "Obrisano"
+
+msgid "Deleted comments"
+msgstr "Obrisani komentari"
+
+msgid "Deleted comments:"
+msgstr "Obrisani komentari:"
+
+msgid "Delete pages with children"
+msgstr "Brisanje stranica sa decom"
+
+msgid "in moderation"
+msgstr "u moderaciji"
+
+msgid "live + in moderation"
+msgstr "objavljeno + u moderaciji"
+
+msgid "approved live at"
+msgstr "odobreno objavljivanje u"
+
+msgid "Receive notification when a page is submitted for moderation"
+msgstr "Primite obaveštenje kada se stranica pošalje na moderaciju"
+
+msgid "approved notifications"
+msgstr "obaveštenja o odobrenju"
+
+msgid "Receive notification when your page edit is approved"
+msgstr "Primite obaveštenje kada je vaša izmena na stranici odobrena"
+
+msgid "Receive notification when your page edit is rejected"
+msgstr "Primite obaveštenje kada je vaša izmena na stranici odbijena"
+
+msgid "user %(id)s (deleted)"
+msgstr "korisnik %(id)s (obrisan)"
+
+msgid "Select all snippets in listing"
+msgstr "Izaberi sve isječke u listi"
+
+msgid "Delete selected snippets"
+msgstr "Obriši izabrane isječke"
+
+msgid "Wagtail snippets"
+msgstr "Wagtail isječci"
+
+msgid "Signing in…"
+msgstr "Prijava u toku…"
+
+msgid "Publishing…"
+msgstr "Objava u toku…"
+
+msgid "Workflow: approve task"
+msgstr "Tok rada: odobri zadatak"
+
+msgid "Workflow: resume task"
+msgstr "Tok rada: nastavi zadatak"
+
+msgid "The page \"%(title)s\" has been rejected during \"%(task)s\"."
+msgstr "Stranica \"%(title)s\" je odbijena tokom \"%(task)s\"."
+
+msgid "The page \"%(title)s\" has been approved in workflow \"%(workflow)s\"."
+msgstr "Stranica \"%(title)s\" je odobrena u toku rada \"%(workflow)s\"."
+
+msgid "The page \"%(title)s\" has been rejected during \"%(workflow)s\"."
+msgstr "Stranica \"%(title)s\" je odbijena tokom \"%(workflow)s\"."
+
+msgid "This workflow is disabled so it cannot be assigned to any page."
+msgstr "Ovaj tok rada je onemogućen, pa ga nije moguće dodeliti nijednoj stranici."
+
+msgid "Page '%(page_title)s' created and submitted for moderation."
+msgstr "Stranica '%(page_title)s' je kreirana i poslata na moderaciju."
+
+msgid "Page '%(page_title)s' has been submitted for moderation."
+msgstr "Stranica '%(page_title)s' je poslata na moderaciju."
+
+msgid "This page already has workflow '%(workflow_name)s' assigned."
+msgstr "Ovoj stranici je već dodeljen tok rada '%(workflow_name)s'."
+
+msgid "A redirect with this path already exists."
+msgstr "Preusmeravanje na ovu putanju već postoji."
+
+msgid "Redirect '%(redirect_title)s' updated."
+msgstr "Preusmeravanje '%(redirect_title)s' je ažurirano."
+
+msgid "Redirect '%(redirect_title)s' deleted."
+msgstr "Preusmeravanje '%(redirect_title)s' je obrisano."
+
+msgid "Redirect '%(redirect_title)s' added."
+msgstr "Preusmeravanje '%(redirect_title)s' je dodato."
+
+msgid "Editor's picks deleted."
+msgstr "Izbori urednika su obrisani."
+
+msgid "Publishing this page will cancel the current workflow."
+msgstr "Objavljivanje stranice će otkazati trenutni tok rada."

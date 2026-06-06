@@ -1,0 +1,33 @@
+{% load media_tags %}
+<article
+    class="builder-carousel__slide{% if forloop.first %} is-active{% endif %}"
+    data-slide
+    data-slide-index="{{ forloop.counter0 }}"
+    aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}"
+>
+    <div class="builder-carousel__media">
+        {% responsive_image item.image alt=item.alt_text|default:item.title css_class="builder-carousel__img" sizes="100vw" loading=forloop.first|yesno:"eager,lazy" fetchpriority=forloop.first|yesno:"high,low" %}
+    </div>
+
+    {% if item.has_overlay_content %}
+    <div class="builder-carousel__overlay">
+        {% if item.title %}
+        <h3 class="builder-carousel__title">{{ item.title }}</h3>
+        {% endif %}
+        {% if item.description %}
+        <p class="builder-carousel__text">{{ item.description|linebreaksbr }}</p>
+        {% endif %}
+        {% if item.has_button %}
+        <div class="builder-carousel__actions">
+            <a
+                href="{{ item.button_url }}"
+                class="btn btn--primary builder-carousel__btn"
+                {% if item.button_open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
+            >
+                {{ item.button_text }}
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</article>

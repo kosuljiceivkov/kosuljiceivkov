@@ -1,0 +1,22 @@
+<section class="section section--muted home-blog u-content-auto" id="blog-preview" aria-labelledby="home-blog-title">
+    <div class="container">
+        <div data-animate="fade-up">
+            {% include "partials/section_head.html" with eyebrow="Blog" title="Stručni saveti i vesti" subtitle="Praktične informacije o pripremi podloge, ugradnji i održavanju cementnih košuljica." %}
+        </div>
+
+        {% if latest_posts %}
+        <div class="blog-grid blog-grid--home" role="list">
+            {% for post in latest_posts %}
+            <div role="listitem">
+                {% include "partials/blog_card.html" with post=post %}
+            </div>
+            {% endfor %}
+        </div>
+        <p class="home-blog__more">
+            <a href="{% url 'frontend:blog' %}" class="btn btn--outline">Pogledaj sve objave</a>
+        </p>
+        {% else %}
+        <p class="empty-state">Blog objave će uskoro biti dostupne.</p>
+        {% endif %}
+    </div>
+</section>

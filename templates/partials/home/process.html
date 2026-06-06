@@ -1,0 +1,19 @@
+<section class="section section--muted home-process u-content-auto" id="proces" aria-labelledby="home-process-title">
+    <div class="container">
+        <div data-animate="fade-up">
+            {% include "partials/section_head.html" with eyebrow="Proces rada" title="Kako izgleda proces rada?" subtitle="Od pregleda objekta do završne obrade podloge — jasno definisane faze u skladu sa gradilištem." %}
+        </div>
+
+        <ol class="home-process__steps" data-animate-stagger data-stagger="slide-in">
+            {% for step in process_steps %}
+            <li class="home-process__step">
+                <span class="home-process__number" aria-hidden="true">{{ forloop.counter }}</span>
+                <div class="home-process__content">
+                    <h3 class="home-process__title">{{ step.title }}</h3>
+                    <p class="home-process__text">{{ step.text }}</p>
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+</section>

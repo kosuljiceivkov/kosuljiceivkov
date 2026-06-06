@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load builder_tags %}
+
+{% block content %}
+<article class="blog-article">
+    {% if is_admin_preview %}
+        {% render_page_builder post visible_only=False %}
+    {% else %}
+        {% render_page_builder post %}
+    {% endif %}
+
+    <div class="container container--narrow">
+        <p class="blog-article__back">
+            <a href="{% url 'frontend:blog' %}">&larr; Nazad na blog</a>
+        </p>
+    </div>
+</article>
+{% endblock %}

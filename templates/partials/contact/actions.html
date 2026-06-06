@@ -1,0 +1,5 @@
+{% load contact_tags %}
+{# Jedina akcija — direktan poziv #}
+<div class="contact-actions{% if extra_class %} {{ extra_class }}{% endif %}">
+    {% include "partials/contact/phone_call_button.html" with extra_class="contact-actions__btn contact-actions__btn--call" %}
+</div>

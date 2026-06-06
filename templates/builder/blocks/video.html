@@ -1,0 +1,25 @@
+{% if block.video_source == "embed" and block.video_embed_url %}
+<div class="builder-video builder-video--embed">
+    <iframe
+        src="{{ block.video_embed_url }}"
+        title="Video"
+        class="builder-video__iframe"
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+    ></iframe>
+</div>
+{% elif block.video_source == "file" and block.video_file %}
+<div class="builder-video builder-video--file">
+    <video
+        class="builder-video__player"
+        controls
+        playsinline
+        preload="metadata"
+        {% if block.video_poster %}poster="{{ block.video_poster.url }}"{% endif %}
+    >
+        <source src="{{ block.video_file.url }}">
+        Vaš pregledač ne podržava reprodukciju videa.
+    </video>
+</div>
+{% endif %}

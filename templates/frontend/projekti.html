@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load builder_tags %}
+
+{% block content %}
+{% if is_admin_preview %}
+    {% render_page_builder page visible_only=False %}
+{% else %}
+    {% render_page_builder page %}
+{% endif %}
+{% endblock %}

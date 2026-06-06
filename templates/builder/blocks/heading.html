@@ -1,0 +1,5 @@
+{% if block.heading_text %}
+<{{ block.heading_level }} class="builder-heading builder-heading--align-{{ block.heading_align }}">
+    {{ block.heading_text }}
+</{{ block.heading_level }}>
+{% endif %}

@@ -1,0 +1,39 @@
+{% load static seo_tags %}
+<!DOCTYPE html>
+<html lang="sr-Latn" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% include "partials/favicon.html" %}
+    {% render_seo_meta seo_object %}
+    {% render_json_ld seo_object %}
+    {% block lcp_preload %}{% endblock %}
+    {% include "partials/perf/fonts.html" %}
+    {% include "partials/perf/critical_css.html" %}
+    <link rel="stylesheet" href="{% static 'css/bundles/site-core.css' %}?v=13">
+    {% include "partials/perf/async_stylesheet.html" with href="css/bundles/site-defer.css" cache_bust=1 %}
+    {% block extra_css %}{% endblock %}
+    {% block perf_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    {% include "partials/header.html" %}
+    {% if is_admin_preview %}
+        {% include "partials/admin_preview_banner.html" %}
+    {% endif %}
+    <div class="scroll-sentinel" data-scroll-sentinel aria-hidden="true"></div>
+
+    <main class="site-main" id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include "partials/footer.html" %}
+    {% include "partials/nav_access_fab.html" %}
+    {% include "partials/contact/sticky_cta.html" %}
+    {% include "partials/scroll_fab.html" %}
+
+    <script>document.documentElement.classList.remove("no-js");</script>
+    <script src="{% static 'js/site-shell.js' %}?v=1" defer></script>
+    <script src="{% static 'js/site-init.js' %}?v=4" defer data-static-base="{% static 'js/' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

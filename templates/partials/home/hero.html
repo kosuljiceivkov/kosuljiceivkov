@@ -1,0 +1,39 @@
+{% load static contact_tags %}
+<section class="home-hero" aria-labelledby="home-hero-title">
+    <div class="container home-hero__inner">
+        <div class="home-hero__copy">
+            <h1 id="home-hero-title" class="home-hero__title">
+                Mašinska izrada cementnih košuljica za sve vrste objekata
+            </h1>
+
+            <p class="home-hero__lead home-hero__lead--top">
+                Izvodimo profesionalnu mašinsku izradu cementnih košuljica za stambene,
+                poslovne i industrijske objekte. Koristimo savremenu opremu i proverene metode
+                rada kako bismo obezbedili ravnu, čvrstu i dugotrajnu podlogu spremnu za
+                postavljanje završnih podnih obloga.
+            </p>
+
+            <div class="home-hero__actions u-actions">
+                {% include "partials/contact/phone_call_button.html" with extra_class="home-hero__cta-primary" %}
+                <a href="{% url 'frontend:kontakt' %}" class="btn btn--outline btn--lg home-hero__cta-secondary">
+                    Kontakt
+                </a>
+            </div>
+        </div>
+
+        <figure class="home-hero__visual">
+            <img
+                class="home-hero__image"
+                src="{% static 'img/cementne-kosuljice6-800.webp' %}"
+                srcset="{% static 'img/cementne-kosuljice6-800.webp' %} 800w, {% static 'img/cementne-kosuljice6.webp' %} 1600w"
+                alt="Mašinska izrada cementne košuljice na gradilištu"
+                width="1600"
+                height="1112"
+                sizes="(max-width: 48rem) 100vw, (max-width: 64rem) 50vw, 560px"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+            >
+        </figure>
+    </div>
+</section>

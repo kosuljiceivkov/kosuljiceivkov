@@ -1,0 +1,14 @@
+{% if image %}
+<img
+    src="{{ image.src }}"
+    {% if image.srcset %}srcset="{{ image.srcset }}"{% endif %}
+    {% if image.sizes %}sizes="{{ image.sizes }}"{% endif %}
+    alt="{{ image.alt }}"
+    {% if image.css_class %}class="{{ image.css_class }}"{% endif %}
+    {% if image.width %}width="{{ image.width }}"{% endif %}
+    {% if image.height %}height="{{ image.height }}"{% endif %}
+    loading="{{ image.loading }}"
+    decoding="async"
+    {% if image.fetchpriority %}fetchpriority="{{ image.fetchpriority }}"{% endif %}
+>
+{% endif %}

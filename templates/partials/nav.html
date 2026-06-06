@@ -1,0 +1,56 @@
+{% load contact_tags %}
+<nav
+    id="site-nav"
+    class="site-nav"
+    data-nav-panel
+    aria-label="Glavna navigacija"
+>
+    <div class="site-nav__header">
+        <span class="site-nav__title" id="site-nav-title">Meni</span>
+        <button
+            type="button"
+            class="site-nav__close"
+            data-nav-close
+            aria-label="Zatvori meni"
+        >
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <ul class="site-nav__list" role="list">
+        <li class="site-nav__item">
+            <a
+                href="{% url 'frontend:home' %}"
+                class="site-nav__link{% if request.resolver_match.url_name == 'home' %} is-active{% endif %}"
+                {% if request.resolver_match.url_name == 'home' %}aria-current="page"{% endif %}
+            >Početna</a>
+        </li>
+        <li class="site-nav__item">
+            <a
+                href="{% url 'frontend:usluge' %}"
+                class="site-nav__link{% if request.resolver_match.url_name == 'usluge' %} is-active{% endif %}"
+                {% if request.resolver_match.url_name == 'usluge' %}aria-current="page"{% endif %}
+            >Usluge</a>
+        </li>
+        <li class="site-nav__item">
+            <a
+                href="{% url 'frontend:projekti' %}"
+                class="site-nav__link{% if request.resolver_match.url_name == 'projekti' %} is-active{% endif %}"
+                {% if request.resolver_match.url_name == 'projekti' %}aria-current="page"{% endif %}
+            >Projekti</a>
+        </li>
+        <li class="site-nav__item">
+            <a
+                href="{% url 'frontend:blog' %}"
+                class="site-nav__link{% if request.resolver_match.url_name == 'blog' or request.resolver_match.url_name == 'blog_detail' %} is-active{% endif %}"
+                {% if request.resolver_match.url_name == 'blog' or request.resolver_match.url_name == 'blog_detail' %}aria-current="page"{% endif %}
+            >Blog</a>
+        </li>
+        <li class="site-nav__item site-nav__item--cta">
+            <a
+                href="{% url 'frontend:kontakt' %}"
+                class="site-nav__link site-nav__link--cta{% if request.resolver_match.url_name == 'kontakt' %} is-active{% endif %}"
+                {% if request.resolver_match.url_name == 'kontakt' %}aria-current="page"{% endif %}
+            >Kontakt</a>
+        </li>
+    </ul>
+</nav>

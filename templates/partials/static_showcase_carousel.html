@@ -1,0 +1,61 @@
+{% load image_tags %}
+{# Adaptivni fade karusel — statičke WebP slike (različiti aspect ratio) #}
+{% if slides and slides|length > 0 %}
+<div
+    class="showcase-carousel{% if extra_class %} {{ extra_class }}{% endif %}"
+    data-showcase-carousel
+    data-autoplay="{{ autoplay|default:'false' }}"
+    data-interval="{{ interval|default:8000 }}"
+    aria-label="{{ aria_label|default:'Pregled izvedenih radova' }}"
+>
+    <span class="showcase-carousel__counter" data-showcase-counter aria-live="polite">1 / {{ slides|length }}</span>
+
+    <div class="showcase-carousel__viewport" data-showcase-viewport tabindex="0">
+        {% for slide in slides %}
+        <article
+            class="showcase-carousel__slide{% if forloop.first %} is-active{% endif %}"
+            data-showcase-slide
+            data-aspect="{{ slide.width }}/{{ slide.height }}"
+            aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}"
+            {% if forloop.first %}aria-current="true"{% endif %}
+        >
+            <div class="showcase-carousel__stage" data-carousel-stage>
+                <figure class="showcase-carousel__picture">
+                    {% carousel_static_image slide.path css_class="showcase-carousel__image" alt=slide.alt width=slide.width height=slide.height priority=forloop.first sizes=sizes|default:"(max-width: 48rem) 100vw, min(56rem, 90vw)" %}
+                </figure>
+            </div>
+            {% if slide.caption %}
+            <div class="showcase-carousel__caption-wrap">
+                <p class="showcase-carousel__caption">{{ slide.caption }}</p>
+            </div>
+            {% endif %}
+        </article>
+        {% endfor %}
+
+        {% if slides|length > 1 %}
+        <button type="button" class="showcase-carousel__btn showcase-carousel__btn--prev" data-showcase-prev aria-label="Prethodna fotografija">
+            <span aria-hidden="true">‹</span>
+        </button>
+        <button type="button" class="showcase-carousel__btn showcase-carousel__btn--next" data-showcase-next aria-label="Sledeća fotografija">
+            <span aria-hidden="true">›</span>
+        </button>
+        {% endif %}
+    </div>
+
+    {% if slides|length > 1 %}
+    <div class="showcase-carousel__dots" role="tablist" aria-label="Izbor fotografije">
+        {% for slide in slides %}
+        <button
+            type="button"
+            class="showcase-carousel__dot{% if forloop.first %} is-active{% endif %}"
+            data-showcase-dot
+            role="tab"
+            aria-label="Fotografija {{ forloop.counter }}"
+            aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
+        ></button>
+        {% endfor %}
+    </div>
+    <span class="showcase-carousel__progress" data-showcase-progress aria-hidden="true"></span>
+    {% endif %}
+</div>
+{% endif %}

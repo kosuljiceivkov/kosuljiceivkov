@@ -1,0 +1,18 @@
+{% load static %}
+<img
+    class="{{ css_class }}"
+    src="{% static image_path %}"
+    alt="{{ alt|default:'' }}"
+    {% if width and height %}width="{{ width }}" height="{{ height }}"{% endif %}
+    {% if sizes %}sizes="{{ sizes }}"{% endif %}
+    data-carousel-img
+    {% if width and height %}data-aspect-nw="{{ width }}" data-aspect-nh="{{ height }}"{% endif %}
+    {% if priority %}
+    loading="eager"
+    fetchpriority="high"
+    decoding="async"
+    {% else %}
+    loading="lazy"
+    decoding="async"
+    {% endif %}
+>

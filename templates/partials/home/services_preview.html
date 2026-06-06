@@ -1,0 +1,23 @@
+<section class="section section--muted home-services u-content-auto" id="usluge-preview" aria-labelledby="home-services-title">
+    <div class="container">
+        <div data-animate="fade-up">
+            {% include "partials/section_head.html" with eyebrow="Usluge" title="Naše usluge" subtitle="Mašinska izrada košuljice, laserska nivelacija i izolacioni slojevi — u skladu sa zahtevima vašeg projekta." %}
+        </div>
+
+        <div class="home-services__grid" data-animate-stagger data-stagger="fade-up">
+            {% for service in services_preview %}
+            <article class="service-card home-services__card">
+                <span class="service-card__icon" aria-hidden="true">{{ forloop.counter|stringformat:"02d" }}</span>
+                <h3 class="service-card__title">
+                    <a href="{% url 'frontend:usluge' %}#{{ service.slug }}">{{ service.title }}</a>
+                </h3>
+                <p class="service-card__text">{{ service.summary }}</p>
+            </article>
+            {% endfor %}
+        </div>
+
+        <p class="section__footer-link">
+            <a href="{% url 'frontend:usluge' %}" class="btn btn--outline-dark">Sve usluge</a>
+        </p>
+    </div>
+</section>

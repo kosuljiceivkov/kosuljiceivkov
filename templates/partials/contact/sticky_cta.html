@@ -1,0 +1,34 @@
+{% load contact_tags %}
+{# Mobil: POZVATI + dva broja #}
+{% if contact_phone or contact_phone_2 %}
+<aside
+    class="contact-sticky"
+    aria-label="Pozovite nas"
+    data-contact-sticky
+    hidden
+>
+    <div class="contact-sticky__inner">
+        <p class="contact-sticky__heading">POZVATI</p>
+        <div class="contact-sticky__actions">
+            {% if contact_phone %}
+            <a
+                href="tel:{{ contact_phone|phone_uri }}"
+                class="contact-sticky__btn contact-sticky__btn--phone contact-sticky__btn--primary"
+                aria-label="Pozovite {{ contact_phone }}"
+            >
+                <span class="contact-sticky__number">{{ contact_phone_display }}</span>
+            </a>
+            {% endif %}
+            {% if contact_phone_2 %}
+            <a
+                href="tel:{{ contact_phone_2|phone_uri }}"
+                class="contact-sticky__btn contact-sticky__btn--phone contact-sticky__btn--alt"
+                aria-label="Pozovite {{ contact_phone_2 }}"
+            >
+                <span class="contact-sticky__number">{{ contact_phone_2_display }}</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</aside>
+{% endif %}

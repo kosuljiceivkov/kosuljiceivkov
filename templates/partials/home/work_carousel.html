@@ -1,0 +1,11 @@
+<section class="section section--muted home-work u-content-auto" id="izvedeni-radovi" aria-labelledby="home-work-title">
+    <div class="container">
+        <div data-animate="fade-up">
+            {% include "partials/section_head.html" with eyebrow="Reference" title="Izvedeni radovi" title_id="home-work-title" subtitle="Primeri realizovanih projekata i kvaliteta završne obrade cementnih košuljica." %}
+        </div>
+
+        <div class="home-work__carousel" data-animate="fade-up">
+            {% include "partials/static_showcase_carousel.html" with slides=work_carousel_slides aria_label="Izvedeni radovi — fotografije" autoplay="false" interval=8000 sizes="(max-width: 48rem) 100vw, min(56rem, 92vw)" extra_class="showcase-carousel--work" %}
+        </div>
+    </div>
+</section>

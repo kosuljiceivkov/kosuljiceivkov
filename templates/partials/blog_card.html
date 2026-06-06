@@ -1,0 +1,20 @@
+{% load media_tags %}
+<article class="blog-card">
+    <a href="{{ post.get_absolute_url }}" class="blog-card__link">
+        <div class="blog-card__media{% if not post.featured_image %} blog-card__media--placeholder{% endif %}">
+            {% if post.featured_image %}
+            {% responsive_image post.featured_image alt=post.title css_class="blog-card__image" sizes="(max-width: 767px) 100vw, (max-width: 1024px) 50vw, 400px" %}
+            {% endif %}
+        </div>
+        <div class="blog-card__body">
+            <time class="blog-card__date" datetime="{{ post.publish_date|date:'Y-m-d' }}">
+                {{ post.publish_date|date:"d.m.Y." }}
+            </time>
+            <h2 class="blog-card__title">{{ post.title }}</h2>
+            {% if post.excerpt %}
+            <p class="blog-card__excerpt">{{ post.excerpt }}</p>
+            {% endif %}
+            <span class="btn btn--outline btn--sm blog-card__cta">Pročitaj više</span>
+        </div>
+    </a>
+</article>
