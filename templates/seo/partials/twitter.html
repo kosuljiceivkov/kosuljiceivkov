@@ -1,0 +1,6 @@
+{% if seo.twitter_card or seo.twitter_title or seo.twitter_description or seo.twitter_image %}
+{% if seo.twitter_card %}<meta name="twitter:card" content="{{ seo.twitter_card }}">{% endif %}
+{% if seo.twitter_title %}<meta name="twitter:title" content="{{ seo.twitter_title }}">{% endif %}
+{% if seo.twitter_description %}<meta name="twitter:description" content="{{ seo.twitter_description }}">{% endif %}
+{% if seo.twitter_image %}<meta name="twitter:image" content="{{ seo.twitter_image }}">{% endif %}
+{% endif %}

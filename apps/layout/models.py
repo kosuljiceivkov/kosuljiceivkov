@@ -2,10 +2,10 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from apps.core.mixins import CMSMetaMixin, TimestampMixin
+from apps.core.mixins import SeoContentMixin, TimestampMixin
 
 
-class CMSPage(CMSMetaMixin, TimestampMixin):
+class CMSPage(SeoContentMixin, TimestampMixin):
     """
     CMS stranica — osnova za budući page builder.
     Specijalni tipovi (npr. projekti) imaju fiksne javne rute.
@@ -39,6 +39,12 @@ class CMSPage(CMSMetaMixin, TimestampMixin):
     )
     builder_sections = GenericRelation(
         "layout.Section",
+        related_query_name="cms_page",
+        content_type_field="content_type",
+        object_id_field="object_id",
+    )
+    seo_metadata = GenericRelation(
+        "seo.SeoMetadata",
         related_query_name="cms_page",
         content_type_field="content_type",
         object_id_field="object_id",
@@ -98,17 +104,10 @@ class CMSPage(CMSMetaMixin, TimestampMixin):
 
         return get_sections_for_object(self, visible_only=visible_only)
 
-    def get_seo_fallback_image_url(self):
-        from apps.seo.media import get_page_seo_image
-
-        url, _, _ = get_page_seo_image(self, request=None)
-        return url
-
     def get_seo_context(self, request=None, *, og_type="website"):
-        from apps.seo.media import apply_seo_image_to_context
+        from apps.seo.services import build_seo_context
 
-        context = super().get_seo_context(request, og_type=og_type)
-        return apply_seo_image_to_context(self, context, request)
+        return build_seo_context(self, request, og_type=og_type)
 
 
 class ProjektiPage(CMSPage):

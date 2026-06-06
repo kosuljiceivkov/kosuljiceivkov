@@ -2,7 +2,7 @@
 
 from django.shortcuts import get_object_or_404
 
-from apps.blog.models import BlogPost
+from apps.blog.models import BlogCategory, BlogPost
 
 PUBLISHED_POST_FIELDS = (
     "id",
@@ -11,18 +11,24 @@ PUBLISHED_POST_FIELDS = (
     "excerpt",
     "publish_date",
     "featured_image",
-    "meta_title",
-    "meta_description",
     "updated_at",
+    "category_id",
 )
 
 
-def get_published_posts_queryset():
-    return (
+def get_published_posts_queryset(*, category=None):
+    queryset = (
         BlogPost.objects.publicly_visible()
+        .select_related("category", "category__parent")
+        .prefetch_related("seo_metadata")
         .only(*PUBLISHED_POST_FIELDS)
         .order_by("-publish_date", "-created_at")
     )
+    if category is None:
+        return queryset
+
+    category_ids = [category.pk, *category.get_descendant_ids()]
+    return queryset.filter(category_id__in=category_ids)
 
 
 def get_latest_published_posts(limit=3):
@@ -31,6 +37,26 @@ def get_latest_published_posts(limit=3):
 
 def get_published_post(slug):
     return get_object_or_404(
-        BlogPost.objects.publicly_visible().only(*PUBLISHED_POST_FIELDS),
+        BlogPost.objects.publicly_visible()
+        .select_related("category", "category__parent")
+        .prefetch_related("seo_metadata")
+        .only(*PUBLISHED_POST_FIELDS),
         slug=slug,
     )
+
+
+def get_active_category_by_path(category_path: str) -> BlogCategory:
+    slugs = [part for part in category_path.strip("/").split("/") if part]
+    if not slugs:
+        raise BlogCategory.DoesNotExist
+
+    parent = None
+    category = None
+    for slug in slugs:
+        category = get_object_or_404(
+            BlogCategory.objects.active().select_related("parent"),
+            slug=slug,
+            parent=parent,
+        )
+        parent = category
+    return category

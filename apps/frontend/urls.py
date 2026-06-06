@@ -10,6 +10,11 @@ urlpatterns = [
     path("kontakt/", views.kontakt, name="kontakt"),
     path("projekti/", cms_views.projekti, name="projekti"),
     path("blog/", cms_views.blog_list, name="blog"),
+    path(
+        "blog/kategorija/<path:category_path>/",
+        cms_views.blog_category,
+        name="blog_category",
+    ),
     path("blog/<slug:slug>/", cms_views.blog_detail, name="blog_detail"),
     path(
         "pregled/cms/<int:pk>/",

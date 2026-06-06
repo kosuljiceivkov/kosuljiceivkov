@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static contact_tags %}
+{% load static contact_tags seo_tags %}
 
 {% block extra_css %}
 {% include "partials/perf/async_stylesheet.html" with href="css/pages/usluge-gallery.css" cache_bust=2 %}
@@ -12,6 +12,7 @@
 {% block content %}
 <section class="page-hero page-hero--compact">
     <div class="container" data-animate="fade-up">
+        {% render_breadcrumbs %}
         <h1 class="page-hero__title">Naše usluge</h1>
         <p class="page-hero__lead">
             Pružamo kompletna rešenja za izradu cementnih košuljica i pripremu podova za završne

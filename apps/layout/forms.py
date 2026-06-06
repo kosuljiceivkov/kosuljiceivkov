@@ -8,7 +8,7 @@ class ProjektiPageAdminForm(forms.ModelForm):
 
     class Meta:
         model = CMSPage
-        fields = ("title", "is_active", "meta_title", "meta_description", "canonical_url")
+        fields = ("title", "is_active")
 
     def save(self, commit=True):
         instance = super().save(commit=False)

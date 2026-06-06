@@ -3,17 +3,12 @@
 from django.contrib.admin.options import ShowFacets
 
 from apps.layout.admin_preview_links import get_admin_preview_url
-from apps.layout.builder_admin import BuilderAdminMixin
+from apps.layout.builder_admin import BuilderAdminMixin, SectionInline
+from apps.seo.admin import SeoMetadataInline
 
-BUILDER_SEO_FIELDSET = (
-    "SEO",
-    {
-        "fields": ("meta_title", "meta_description", "canonical_url"),
-        "description": (
-            "Meta podaci za Google. Kanonski URL ostavite prazan "
-            "za automatsko generisanje."
-        ),
-    },
+BUILDER_SEO_HINT = (
+    "SEO podešavanja su u sekciji ispod. Sva polja su opciona — "
+    "prazna vrednost koristi naslov, uvod ili sadržaj iz buildera."
 )
 
 BUILDER_HISTORY_FIELDSET = (
@@ -28,8 +23,9 @@ BUILDER_SECTIONS_HINT = (
 
 
 class BuilderHostAdminMixin(BuilderAdminMixin):
-    """Isti page builder i pregled na sajtu za Projekti i Blog."""
+    """Isti page builder, SEO panel i pregled na sajtu za Projekti i Blog."""
 
+    inlines = [SeoMetadataInline, SectionInline]
     view_on_site = True
     list_filter = ()
     date_hierarchy = None

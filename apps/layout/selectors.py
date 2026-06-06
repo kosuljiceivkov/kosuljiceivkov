@@ -8,8 +8,6 @@ PROJEKTI_PAGE_FIELDS = (
     "slug",
     "page_type",
     "is_active",
-    "meta_title",
-    "meta_description",
     "updated_at",
 )
 
@@ -20,6 +18,7 @@ def get_projekti_page():
             page_type=CMSPage.PageType.PROJEKTI,
             is_active=True,
         )
+        .prefetch_related("seo_metadata")
         .only(*PROJEKTI_PAGE_FIELDS)
         .first()
     )

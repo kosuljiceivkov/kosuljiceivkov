@@ -2,6 +2,15 @@ from django.db import models
 from django.utils import timezone
 
 
+class BlogCategoryQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(is_active=True)
+
+
+class BlogCategoryManager(models.Manager.from_queryset(BlogCategoryQuerySet)):
+    pass
+
+
 class BlogPostQuerySet(models.QuerySet):
     """Upiti za blog objave."""
 

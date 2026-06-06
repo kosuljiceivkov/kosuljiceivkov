@@ -1,8 +1,10 @@
 {% extends "base.html" %}
+{% load seo_tags %}
 
 {% block content %}
 <section class="page-hero page-hero--compact">
     <div class="container" data-animate="fade-up">
+        {% render_breadcrumbs %}
         <h1 class="page-hero__title">Blog</h1>
         <p class="page-hero__lead">
             Stručni saveti i vesti o pripremi podloge, ugradnji i održavanju cementnih košuljica.

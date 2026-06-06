@@ -7,7 +7,7 @@ import nested_admin
 from apps.layout.builder_page_admin import (
     BUILDER_HISTORY_FIELDSET,
     BUILDER_SECTIONS_HINT,
-    BUILDER_SEO_FIELDSET,
+    BUILDER_SEO_HINT,
     BuilderHostAdminMixin,
 )
 from apps.layout.forms import ProjektiPageAdminForm
@@ -33,10 +33,11 @@ class ProjektiPageAdmin(BuilderHostAdminMixin, nested_admin.NestedModelAdmin, ad
                 "description": (
                     "Stranica projekata na sajtu. Javna adresa je uvek /projekti/. "
                     + BUILDER_SECTIONS_HINT
+                    + " "
+                    + BUILDER_SEO_HINT
                 ),
             },
         ),
-        BUILDER_SEO_FIELDSET,
         BUILDER_HISTORY_FIELDSET,
     )
 

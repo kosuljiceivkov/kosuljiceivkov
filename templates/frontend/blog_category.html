@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load seo_tags %}
+
+{% block content %}
+<section class="page-hero page-hero--compact">
+    <div class="container" data-animate="fade-up">
+        {% render_breadcrumbs category %}
+        <h1 class="page-hero__title">{{ category.get_breadcrumb_title }}</h1>
+        {% if category.description %}
+        <p class="page-hero__lead">{{ category.description }}</p>
+        {% endif %}
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        {% if posts %}
+        <div class="blog-grid" role="list">
+            {% for post in posts %}
+            <div role="listitem">
+                {% include "partials/blog_card.html" with post=post %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-state">Nema objava u ovoj kategoriji.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

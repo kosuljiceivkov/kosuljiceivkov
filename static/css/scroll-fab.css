@@ -36,7 +36,7 @@
         transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.scroll-fab.is-visible .scroll-fab__calls {
+.scroll-fab.is-calls-visible .scroll-fab__calls {
     opacity: 1;
     transform: translate3d(0, 0, 0);
     pointer-events: auto;
@@ -123,7 +123,7 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-.scroll-fab.is-visible .scroll-fab__btn--top {
+.scroll-fab.is-top-visible .scroll-fab__btn--top {
     opacity: 1;
     transform: translate3d(0, 0, 0);
     pointer-events: auto;

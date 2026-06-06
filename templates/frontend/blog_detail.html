@@ -1,8 +1,15 @@
 {% extends "base.html" %}
-{% load builder_tags %}
+{% load builder_tags seo_tags %}
+
+{# SEO tagovi se renderuju u base.html: {% render_seo_meta seo_object %} #}
+{# Vidi templates/seo/usage_examples.html za sve načine korišćenja. #}
 
 {% block content %}
 <article class="blog-article">
+    <div class="container container--narrow">
+        {% render_breadcrumbs post %}
+    </div>
+
     {% if is_admin_preview %}
         {% render_page_builder post visible_only=False %}
     {% else %}

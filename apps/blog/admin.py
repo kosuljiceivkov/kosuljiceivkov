@@ -5,11 +5,34 @@ import nested_admin
 from apps.layout.builder_page_admin import (
     BUILDER_HISTORY_FIELDSET,
     BUILDER_SECTIONS_HINT,
-    BUILDER_SEO_FIELDSET,
+    BUILDER_SEO_HINT,
     BuilderHostAdminMixin,
 )
 
-from .models import BlogPost
+from .models import BlogCategory, BlogPost
+
+
+@admin.register(BlogCategory)
+class BlogCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug", "parent", "is_active", "updated_at")
+    list_filter = ("is_active", "parent")
+    search_fields = ("name", "slug", "breadcrumb_title")
+    prepopulated_fields = {"slug": ("name",)}
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "name",
+                    "slug",
+                    "parent",
+                    "breadcrumb_title",
+                    "description",
+                    "is_active",
+                ),
+            },
+        ),
+    )
 
 
 @admin.action(description="Objavi izabrane objave")
@@ -34,8 +57,8 @@ def unpublish_posts(modeladmin, request, queryset):
 
 @admin.register(BlogPost)
 class BlogPostAdmin(BuilderHostAdminMixin, nested_admin.NestedModelAdmin, admin.ModelAdmin):
-    list_display = ("title", "slug", "publish_date", "publish_status", "updated_at")
-    search_fields = ("title", "slug", "excerpt", "meta_title")
+    list_display = ("title", "slug", "category", "publish_date", "publish_status", "updated_at")
+    search_fields = ("title", "slug", "excerpt", "seo_metadata__focus_keyword")
     prepopulated_fields = {"slug": ("title",)}
     readonly_fields = (
         "public_url_display",
@@ -51,11 +74,15 @@ class BlogPostAdmin(BuilderHostAdminMixin, nested_admin.NestedModelAdmin, admin.
                     "title",
                     "slug",
                     "public_url_display",
+                    "category",
                     "excerpt",
                     "featured_image",
                 ),
                 "description": (
-                    "Osnovne informacije za listu bloga. " + BUILDER_SECTIONS_HINT
+                    "Osnovne informacije za listu bloga. "
+                    + BUILDER_SECTIONS_HINT
+                    + " "
+                    + BUILDER_SEO_HINT
                 ),
             },
         ),
@@ -68,7 +95,6 @@ class BlogPostAdmin(BuilderHostAdminMixin, nested_admin.NestedModelAdmin, admin.
                 ),
             },
         ),
-        BUILDER_SEO_FIELDSET,
         BUILDER_HISTORY_FIELDSET,
     )
 

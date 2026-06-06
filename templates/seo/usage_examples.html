@@ -1,0 +1,53 @@
+{#
+  SEO template tag usage examples
+  =================================
+
+  1) Global setup in base.html (recommended — single render, no duplicates):
+
+     {% load seo_tags %}
+     {% render_seo_meta seo_object %}
+     {% render_json_ld seo_object %}
+
+  2) Blog article — pass seo_object and og_type in the view:
+
+     # views.py
+     return render(request, "frontend/blog_detail.html", {
+         "post": post,
+         "seo_object": post,
+         "seo_og_type": "article",
+     })
+
+     # blog_detail.html — nothing extra needed; base.html renders all tags.
+     {% extends "base.html" %}
+
+  3) Static page — override defaults via seo_overrides:
+
+     # views.py
+     return render(request, "frontend/kontakt.html", {
+         "seo_overrides": {
+             "title": "Kontakt",
+             "description": "Pozovite nas za ponudu.",
+         },
+     })
+
+  4) Explicit article object in template:
+
+     {% render_seo_meta post "article" %}
+
+  5) Read SEO values without HTML (debug/custom partials):
+
+     {% resolve_seo post "article" as seo %}
+     <p class="sr-only">{{ seo.title }}</p>
+
+  Fallback order for articles:
+  - SeoMetadata fields (admin SEO panel)
+  - title / excerpt from BlogPost
+  - builder text for description when excerpt is empty
+
+  Canonical URLs:
+  - Every article gets <link rel="canonical"> automatically from /blog/<slug>/
+  - Editors override in admin SEO panel → Kanonski URL
+  - Paginated lists (?page=2) canonicalize to the first page (/blog/)
+  - UTM/fbclid/gclid query params are stripped from canonical URLs
+  - Future i18n: set SEO_CANONICAL_LANGUAGE_PREFIX=True and SEO_HREFLANG_ENABLED=True
+#}

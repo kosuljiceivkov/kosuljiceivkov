@@ -1,19 +1,9 @@
 """SEO slike — istaknuta slika ili prva slika iz buildera."""
 
-from apps.core.mixins import CMSMetaMixin
+from apps.seo.builder_images import get_first_builder_image_field
+from apps.seo.helpers import get_image_dimensions, resolve_absolute_url
 
-from .builder_images import get_first_builder_image_field
-
-
-def get_image_dimensions(image_field):
-    if not image_field or not getattr(image_field, "name", ""):
-        return None, None
-
-    width = getattr(image_field, "width", None)
-    height = getattr(image_field, "height", None)
-    if width and height:
-        return int(width), int(height)
-    return None, None
+__all__ = ("get_image_dimensions", "get_page_seo_image", "apply_seo_image_to_context")
 
 
 def get_page_seo_image(page_object, request=None, *, visible_only=True):
@@ -23,13 +13,13 @@ def get_page_seo_image(page_object, request=None, *, visible_only=True):
     """
     featured = getattr(page_object, "featured_image", None)
     if featured and getattr(featured, "name", ""):
-        url = CMSMetaMixin.resolve_absolute_url(request, featured.url)
+        url = resolve_absolute_url(request, featured.url)
         width, height = get_image_dimensions(featured)
         return url, width, height
 
     builder_image = get_first_builder_image_field(page_object, visible_only=visible_only)
     if builder_image and getattr(builder_image, "name", ""):
-        url = CMSMetaMixin.resolve_absolute_url(request, builder_image.url)
+        url = resolve_absolute_url(request, builder_image.url)
         width, height = get_image_dimensions(builder_image)
         return url, width, height
 

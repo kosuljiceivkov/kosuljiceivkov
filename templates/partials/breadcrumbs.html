@@ -1,0 +1,15 @@
+{% if has_breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+    <ol class="breadcrumbs__list">
+        {% for item in breadcrumb_items %}
+        <li class="breadcrumbs__item{% if item.is_current %} breadcrumbs__item--current{% endif %}">
+            {% if item.url and not item.is_current %}
+            <a class="breadcrumbs__link" href="{{ item.url }}">{{ item.title }}</a>
+            {% else %}
+            <span class="breadcrumbs__current"{% if item.is_current %} aria-current="page"{% endif %}>{{ item.title }}</span>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ol>
+</nav>
+{% endif %}

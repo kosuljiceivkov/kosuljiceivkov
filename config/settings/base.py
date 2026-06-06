@@ -169,7 +169,10 @@ CONTACT_PHONE = env("CONTACT_PHONE", default="+381 62 810 7037")
 CONTACT_PHONE_DISPLAY = env("CONTACT_PHONE_DISPLAY", default="+381 62 810 7037")
 CONTACT_PHONE_2 = env("CONTACT_PHONE_2", default="+381 61 146 3318")
 CONTACT_PHONE_2_DISPLAY = env("CONTACT_PHONE_2_DISPLAY", default="+381 61 146 3318")
-CONTACT_ADDRESS = env("CONTACT_ADDRESS", default="Srbija")
+CONTACT_ADDRESS = env(
+    "CONTACT_ADDRESS",
+    default="Naše usluge pružamo na teritoriji cele Srbije.",
+)
 
 # SEO defaults (when page has no seo_object)
 SEO_SITE_NAME = "Cementne košuljice Ivkov"
@@ -191,12 +194,29 @@ SEO_BLOG_AUTHOR_NAME = env(
     "SEO_BLOG_AUTHOR_NAME",
     default="Cementne košuljice Ivkov",
 )
+SEO_BLOG_AUTHOR_TYPE = env("SEO_BLOG_AUTHOR_TYPE", default="Organization")
+SEO_PERSON_NAME = env("SEO_PERSON_NAME", default="")
+SEO_PERSON_URL = env("SEO_PERSON_URL", default="")
+SEO_PERSON_IMAGE = env("SEO_PERSON_IMAGE", default="")
+SEO_PERSON_JOB_TITLE = env("SEO_PERSON_JOB_TITLE", default="")
 SEO_ORGANIZATION_EMAIL = env("SEO_ORGANIZATION_EMAIL", default="")
 SEO_ORGANIZATION_LOGO = env(
     "SEO_ORGANIZATION_LOGO",
     default="img/logo.webp",
 )
 SEO_ORGANIZATION_COUNTRY = env("SEO_ORGANIZATION_COUNTRY", default="RS")
+
+BREADCRUMB_HOME_TITLE = env("BREADCRUMB_HOME_TITLE", default="Početna")
+BREADCRUMB_BLOG_TITLE = env("BREADCRUMB_BLOG_TITLE", default="Blog")
+
+# Canonical URL management
+SEO_CANONICAL_DEFAULT_LANGUAGE = env(
+    "SEO_CANONICAL_DEFAULT_LANGUAGE",
+    default=LANGUAGE_CODE,
+)
+SEO_CANONICAL_PAGINATION_PARAM = env("SEO_CANONICAL_PAGINATION_PARAM", default="page")
+SEO_CANONICAL_LANGUAGE_PREFIX = env.bool("SEO_CANONICAL_LANGUAGE_PREFIX", default=False)
+SEO_HREFLANG_ENABLED = env.bool("SEO_HREFLANG_ENABLED", default=False)
 
 # Keš — page builder fragmenti i verzije
 CACHES = {

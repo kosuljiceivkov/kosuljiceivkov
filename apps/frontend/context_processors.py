@@ -12,5 +12,9 @@ def contact_info(request):
         "contact_phone_2_display": getattr(
             settings, "CONTACT_PHONE_2_DISPLAY", "+381 61 146 3318"
         ),
-        "contact_address": getattr(settings, "CONTACT_ADDRESS", "Srbija"),
+        "contact_address": getattr(
+            settings,
+            "CONTACT_ADDRESS",
+            "Naše usluge pružamo na teritoriji cele Srbije.",
+        ),
     }

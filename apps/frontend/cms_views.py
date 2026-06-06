@@ -1,7 +1,11 @@
 from django.http import Http404
 from django.shortcuts import render
 
-from apps.blog.selectors import get_published_post, get_published_posts_queryset
+from apps.blog.selectors import (
+    get_active_category_by_path,
+    get_published_post,
+    get_published_posts_queryset,
+)
 from apps.layout.selectors import get_projekti_page
 from apps.seo.page_seo import build_static_page_seo
 
@@ -40,6 +44,31 @@ def blog_list(request):
                 request,
                 url_name="frontend:blog",
                 **BLOG_INDEX_SEO,
+            ),
+        },
+    )
+
+
+def blog_category(request, category_path):
+    category = get_active_category_by_path(category_path)
+    posts = get_published_posts_queryset(category=category)
+    description = category.description.strip() or (
+        f"Blog objave u kategoriji {category.get_breadcrumb_title()}."
+    )
+    return render(
+        request,
+        "frontend/blog_category.html",
+        {
+            "category": category,
+            "posts": posts,
+            "seo_object": category,
+            "seo_overrides": build_static_page_seo(
+                request,
+                title=category.get_breadcrumb_title(),
+                description=description,
+                url_name="frontend:blog_category",
+                url_kwargs={"category_path": category.get_slug_path()},
+                og_type="website",
             ),
         },
     )

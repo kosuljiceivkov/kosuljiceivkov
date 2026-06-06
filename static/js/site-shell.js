@@ -168,8 +168,11 @@
     /* --- Scroll FAB --- */
     var MQ_MOBILE = "(max-width: 47.99rem)";
     var SCROLL_OFFSET = 80;
+    var FOOTER_HIDE_LEAD = 24;
     var header = document.querySelector(".site-header");
     var sentinel = document.querySelector("[data-scroll-sentinel]");
+    var footer = document.querySelector(".site-footer");
+    var stickyTrigger = document.querySelector("[data-contact-sticky-trigger]");
     var mobileSticky = document.querySelector("[data-contact-sticky]");
     var navFab = document.querySelector("[data-scroll-nav-fab]");
     var desktopFab = document.querySelector("[data-scroll-fab]");
@@ -179,6 +182,59 @@
         var mqMobile = window.matchMedia(MQ_MOBILE);
         var skipMobileSticky = document.body.classList.contains("page-kontakt");
         var pastHeader = false;
+        var pastStickyTrigger = false;
+        var nearFooter = false;
+
+        function footerHideLeadPx() {
+            var measureEl = mqMobile.matches ? mobileSticky : null;
+            if (!measureEl && desktopFab) {
+                measureEl = desktopFab.querySelector(".scroll-fab__calls");
+            }
+            if (measureEl && measureEl.offsetHeight) {
+                return measureEl.offsetHeight + FOOTER_HIDE_LEAD;
+            }
+            return 160;
+        }
+
+        function readNearFooterFromScroll() {
+            if (!footer) {
+                nearFooter = false;
+                return;
+            }
+            var lead = footerHideLeadPx();
+            nearFooter = footer.getBoundingClientRect().top <= window.innerHeight + lead;
+        }
+
+        function isStickyTriggerVisible() {
+            if (!stickyTrigger) {
+                return false;
+            }
+            var rect = stickyTrigger.getBoundingClientRect();
+            return rect.bottom > 0 && rect.top < window.innerHeight;
+        }
+
+        function readPastStickyTriggerFromScroll() {
+            if (!stickyTrigger) {
+                pastStickyTrigger = document.body.classList.contains("page-home")
+                    ? false
+                    : pastHeader;
+                return;
+            }
+            pastStickyTrigger = !isStickyTriggerVisible();
+        }
+
+        function shouldShowCallButtons() {
+            if (skipMobileSticky && mqMobile.matches) {
+                return false;
+            }
+            if (document.body.classList.contains("page-home")) {
+                if (!stickyTrigger) {
+                    return false;
+                }
+                return pastStickyTrigger && !nearFooter;
+            }
+            return pastHeader && !nearFooter;
+        }
 
         function setMobileSticky(show) {
             if (!mobileSticky || skipMobileSticky || !mqMobile.matches) {
@@ -217,30 +273,34 @@
             }
         }
 
-        function setDesktopFab(show) {
+        function setDesktopFab(showCalls, showTop) {
             if (!desktopFab || mqMobile.matches) {
                 if (desktopFab) {
-                    desktopFab.classList.remove("is-visible");
+                    desktopFab.classList.remove("is-calls-visible", "is-top-visible");
                     desktopFab.setAttribute("hidden", "");
                     desktopFab.setAttribute("aria-hidden", "true");
                 }
                 return;
             }
-            if (show) {
-                desktopFab.removeAttribute("hidden");
-                desktopFab.setAttribute("aria-hidden", "false");
-                desktopFab.classList.add("is-visible");
-            } else {
-                desktopFab.classList.remove("is-visible");
+            if (!showCalls && !showTop) {
+                desktopFab.classList.remove("is-calls-visible", "is-top-visible");
                 desktopFab.setAttribute("hidden", "");
                 desktopFab.setAttribute("aria-hidden", "true");
+                return;
             }
+            desktopFab.removeAttribute("hidden");
+            desktopFab.setAttribute("aria-hidden", "false");
+            desktopFab.classList.toggle("is-calls-visible", showCalls);
+            desktopFab.classList.toggle("is-top-visible", showTop);
         }
 
         function updateFabVisibility() {
+            readPastStickyTriggerFromScroll();
+            readNearFooterFromScroll();
+            var showCalls = shouldShowCallButtons();
             setNavFab(pastHeader);
-            setMobileSticky(pastHeader);
-            setDesktopFab(pastHeader);
+            setMobileSticky(showCalls);
+            setDesktopFab(showCalls, pastHeader);
         }
 
         function readPastHeaderFromScroll() {
@@ -249,21 +309,40 @@
             updateFabVisibility();
         }
 
-        if (sentinel && typeof IntersectionObserver !== "undefined") {
-            var observer = new IntersectionObserver(
-                function (entries) {
-                    pastHeader = !entries[0].isIntersecting;
-                    updateFabVisibility();
-                },
-                { root: null, threshold: 0 }
-            );
-            observer.observe(sentinel);
+        if (typeof IntersectionObserver !== "undefined") {
+            if (sentinel) {
+                var observer = new IntersectionObserver(
+                    function (entries) {
+                        pastHeader = !entries[0].isIntersecting;
+                        updateFabVisibility();
+                    },
+                    { root: null, threshold: 0 }
+                );
+                observer.observe(sentinel);
+            }
+
+            if (footer) {
+                var footerObserver = new IntersectionObserver(
+                    function (entries) {
+                        nearFooter = entries[0].isIntersecting;
+                        updateFabVisibility();
+                    },
+                    {
+                        root: null,
+                        threshold: 0,
+                        rootMargin: "0px 0px " + footerHideLeadPx() + "px 0px",
+                    }
+                );
+                footerObserver.observe(footer);
+            }
+
             window.addEventListener("scroll", readPastHeaderFromScroll, { passive: true });
         } else {
             window.addEventListener("scroll", readPastHeaderFromScroll, { passive: true });
         }
 
         mqMobile.addEventListener("change", updateFabVisibility);
+        window.addEventListener("resize", updateFabVisibility, { passive: true });
 
         if (scrollTopBtn) {
             scrollTopBtn.addEventListener("click", function () {

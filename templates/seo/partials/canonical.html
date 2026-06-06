@@ -1,0 +1,4 @@
+{% if seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}
+{% for alternate in seo.hreflang_alternates %}
+<link rel="alternate" hreflang="{{ alternate.hreflang }}" href="{{ alternate.url }}">
+{% endfor %}

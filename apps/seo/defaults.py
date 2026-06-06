@@ -1,5 +1,7 @@
 from django.conf import settings
 
+from apps.seo.canonical import resolve_request_canonical
+
 
 def get_site_seo_defaults(request=None):
     """Podrazumevani SEO kada stranica nema seo_object."""
@@ -14,18 +16,19 @@ def get_site_seo_defaults(request=None):
         "SEO_DEFAULT_DESCRIPTION",
         "Izrada i ugradnja cementnih i betonskih košuljica.",
     )
-    canonical = None
-    if request:
-        canonical = request.build_absolute_uri(request.path)
+    canonical = resolve_request_canonical(request) if request else None
 
     og_image = getattr(settings, "SEO_DEFAULT_OG_IMAGE_URL", None)
     if og_image and request and og_image.startswith("/"):
-        og_image = request.build_absolute_uri(og_image)
+        from apps.seo.canonical import build_absolute_canonical
+
+        og_image = build_absolute_canonical(og_image, request)
 
     return {
         "title": title,
         "description": description,
         "canonical": canonical,
+        "og_url": canonical,
         "robots": "index, follow",
         "keywords": getattr(settings, "SEO_DEFAULT_KEYWORDS", ""),
         "focus_keyword": "",

@@ -1,0 +1,191 @@
+(function () {
+  "use strict";
+
+  function scoreClass(score) {
+    if (score >= 70) return "seo-analyzer__score--good";
+    if (score >= 40) return "seo-analyzer__score--ok";
+    return "seo-analyzer__score--bad";
+  }
+
+  function getCsrfToken(form) {
+    var tokenInput = form.querySelector('[name="csrfmiddlewaretoken"]');
+    return tokenInput ? tokenInput.value : "";
+  }
+
+  function getConfig(root) {
+    if (root.nextElementSibling && root.nextElementSibling.classList.contains("seo-analyzer-config")) {
+      return root.nextElementSibling;
+    }
+    return null;
+  }
+
+  function renderChecks(container, checks) {
+    container.innerHTML = checks
+      .map(function (check) {
+        return (
+          '<li class="seo-analyzer__check seo-analyzer__check--' +
+          check.status +
+          '">' +
+          '<span class="seo-analyzer__dot" aria-hidden="true"></span>' +
+          '<span class="seo-analyzer__check-body">' +
+          "<strong>" +
+          check.label +
+          "</strong>" +
+          '<span class="seo-analyzer__message">' +
+          check.message +
+          "</span></span></li>"
+        );
+      })
+      .join("");
+  }
+
+  function renderList(container, items, className) {
+    container.innerHTML = items
+      .map(function (item) {
+        return '<li class="' + className + '">' + item + "</li>";
+      })
+      .join("");
+  }
+
+  function renderImages(container, images) {
+    if (!images || !images.length) {
+      container.innerHTML =
+        '<tr><td colspan="5" class="seo-image-seo__empty">Nema slika u sadržaju.</td></tr>';
+      return;
+    }
+
+    container.innerHTML = images
+      .map(function (row) {
+        var dimensions =
+          row.width && row.height ? row.width + "×" + row.height + " px" : "—";
+        var size = row.file_size_kb != null ? row.file_size_kb + " KB" : "—";
+        return (
+          "<tr class=\"seo-image-seo__row\">" +
+          "<td>" +
+          row.label +
+          "</td>" +
+          "<td><code>" +
+          row.filename +
+          "</code></td>" +
+          "<td>" +
+          row.alt_text +
+          "</td>" +
+          "<td>" +
+          dimensions +
+          "</td>" +
+          "<td>" +
+          size +
+          "</td></tr>"
+        );
+      })
+      .join("");
+  }
+
+  function renderIssues(container, issues) {
+    if (!issues || !issues.length) {
+      container.innerHTML =
+        '<li class="seo-image-seo__issue seo-image-seo__issue--good">Nema problema sa slikama.</li>';
+      return;
+    }
+
+    container.innerHTML = issues
+      .slice(0, 10)
+      .map(function (issue) {
+        return (
+          '<li class="seo-image-seo__issue seo-image-seo__issue--' +
+          issue.severity +
+          '">' +
+          "<strong>" +
+          issue.label +
+          "</strong> · " +
+          issue.filename +
+          " — " +
+          issue.issue +
+          "</li>"
+        );
+      })
+      .join("");
+  }
+
+  function initImageSeoAnalyzer(root) {
+    var form = root.closest("form");
+    if (!form) return;
+
+    var config = getConfig(root);
+    var apiUrl = config ? config.dataset.seoAnalyzerApi : null;
+    if (!apiUrl || !config.dataset.objectId) return;
+
+    var inflight = null;
+
+    function runAnalysis() {
+      if (inflight) inflight.abort();
+      inflight = new AbortController();
+      root.classList.add("is-loading");
+
+      fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCsrfToken(form),
+        },
+        body: JSON.stringify({
+          content_type_id: config.dataset.contentTypeId,
+          object_id: config.dataset.objectId,
+        }),
+        signal: inflight.signal,
+      })
+        .then(function (response) {
+          if (!response.ok) throw new Error("Image SEO analysis failed");
+          return response.json();
+        })
+        .then(function (data) {
+          if (data.message && !data.checks) return;
+
+          var scoreValue = root.querySelector("[data-seo-score-value]");
+          var scoreRing = root.querySelector("[data-seo-score-ring]");
+          var imageCount = root.querySelector("[data-seo-image-count]");
+          var checksList = root.querySelector("[data-seo-checks-list]");
+          var imageList = root.querySelector("[data-seo-image-list]");
+          var issuesList = root.querySelector("[data-seo-image-issues]");
+          var recommendationsList = root.querySelector("[data-seo-recommendations-list]");
+
+          if (scoreValue) scoreValue.textContent = String(data.score);
+          if (scoreRing) {
+            scoreRing.classList.remove(
+              "seo-analyzer__score--good",
+              "seo-analyzer__score--ok",
+              "seo-analyzer__score--bad"
+            );
+            scoreRing.classList.add(scoreClass(data.score));
+          }
+          if (imageCount) imageCount.textContent = String(data.image_count || 0);
+          if (checksList && data.checks) renderChecks(checksList, data.checks);
+          if (imageList) renderImages(imageList, data.images);
+          if (issuesList) renderIssues(issuesList, data.issues);
+          if (recommendationsList && data.recommendations) {
+            renderList(recommendationsList, data.recommendations, "seo-analyzer__recommendation");
+          }
+        })
+        .catch(function (error) {
+          if (error.name !== "AbortError") {
+            console.warn("SEO image analysis error:", error);
+          }
+        })
+        .finally(function () {
+          root.classList.remove("is-loading");
+        });
+    }
+
+    runAnalysis();
+  }
+
+  function boot() {
+    document.querySelectorAll("[data-seo-image-seo-analyzer]").forEach(initImageSeoAnalyzer);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+})();
