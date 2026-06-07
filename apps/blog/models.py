@@ -2,6 +2,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.core.mixins import SeoContentMixin
+from apps.core.storage_aliases import blog_images_storage
 from django.urls import reverse
 from django.utils import timezone
 
@@ -118,7 +119,7 @@ class BlogPost(SeoContentMixin, TimestampMixin):
     featured_image = models.ImageField(
         "Istaknuta slika",
         upload_to="blog/featured/%Y/%m/",
-        storage="blog_images",
+        storage=blog_images_storage,
         blank=True,
         help_text="Prikazuje se na kartici u listi bloga. Sadržaj članka gradi se u builderu ispod.",
     )

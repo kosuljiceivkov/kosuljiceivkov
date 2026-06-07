@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from apps.core.storage_aliases import blog_images_storage
 from apps.seo.constants import (
     BREADCRUMB_TITLE_MAX_LENGTH,
     KEYWORD_MAX_LENGTH,
@@ -113,7 +114,7 @@ class SeoMetadata(models.Model):
     og_image = models.ImageField(
         "Open Graph slika",
         upload_to="seo/og/%Y/%m/",
-        storage="blog_images",
+        storage=blog_images_storage,
         blank=True,
         help_text=_(
             "Preporučeno: 1200×630 px, JPEG/PNG/WebP, max 8 MB. "
@@ -149,7 +150,7 @@ class SeoMetadata(models.Model):
     twitter_image = models.ImageField(
         "Twitter slika",
         upload_to="seo/twitter/%Y/%m/",
-        storage="blog_images",
+        storage=blog_images_storage,
         blank=True,
         help_text=_(
             "Preporučeno: 1200×630 px za summary_large_image. "

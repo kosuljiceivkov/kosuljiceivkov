@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from apps.core.storage_aliases import blog_images_storage, project_videos_storage
 from apps.layout.validators import validate_css_color
 
 
@@ -296,7 +297,7 @@ class Block(OrderedModel):
     image = models.ImageField(
         "Slika",
         upload_to="builder/images/%Y/%m/",
-        storage="blog_images",
+        storage=blog_images_storage,
         blank=True,
     )
     image_alt = models.CharField("Alt tekst slike", max_length=255, blank=True)
@@ -329,13 +330,13 @@ class Block(OrderedModel):
     video_file = models.FileField(
         "Video fajl",
         upload_to="builder/videos/%Y/%m/",
-        storage="project_videos",
+        storage=project_videos_storage,
         blank=True,
     )
     video_poster = models.ImageField(
         "Poster slike",
         upload_to="builder/posters/%Y/%m/",
-        storage="blog_images",
+        storage=blog_images_storage,
         blank=True,
     )
 
@@ -417,7 +418,7 @@ class BlockGalleryImage(OrderedModel):
     image = models.ImageField(
         "Slika",
         upload_to="builder/gallery/%Y/%m/",
-        storage="blog_images",
+        storage=blog_images_storage,
     )
     alt_text = models.CharField("Alt tekst", max_length=255, blank=True)
     caption = models.CharField("Opis", max_length=255, blank=True)
@@ -479,7 +480,7 @@ class CarouselItem(OrderedModel):
     image = models.ImageField(
         "Slika",
         upload_to="builder/carousel/%Y/%m/",
-        storage="blog_images",
+        storage=blog_images_storage,
     )
     alt_text = models.CharField("Alt tekst", max_length=255, blank=True)
     title = models.CharField("Naslov", max_length=255, blank=True)
