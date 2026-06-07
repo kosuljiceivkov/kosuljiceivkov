@@ -103,9 +103,16 @@ def get_section_host_ids(section) -> tuple[int, int] | None:
 
 
 def get_row_host_ids(row) -> tuple[int, int] | None:
-    if row is None:
+    if row is None or not row.section_id:
         return None
-    return get_section_host_ids(row.section)
+    section_data = (
+        Section.objects.filter(pk=row.section_id)
+        .values("content_type_id", "object_id")
+        .first()
+    )
+    if section_data:
+        return section_data["content_type_id"], section_data["object_id"]
+    return None
 
 
 def get_column_host_ids(column) -> tuple[int, int] | None:

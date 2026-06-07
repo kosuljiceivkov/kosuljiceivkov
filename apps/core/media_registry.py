@@ -80,6 +80,10 @@ def iter_instance_media_files(instance: models.Model) -> list[InstanceMediaFile]
         if not normalized:
             continue
         storage = field_file.storage if field_file else ref.field.storage
+        if isinstance(storage, str):
+            from django.core.files.storage import storages
+
+            storage = storages[storage]
         files.append(
             InstanceMediaFile(
                 name=normalized,

@@ -112,7 +112,7 @@ R2_MEDIA_URL=https://media.yourdomain.com/
 
 Local development uses `MEDIA_ROOT` (`media/` folder) — no R2 credentials required.
 
-There is **no automatic media deletion** — files in R2 persist until removed manually or by future upload logic.
+There is **automatic media deletion** when database records are removed or media fields are replaced — see `apps/core/media_signals.py`. Orphaned files can be cleaned with `python manage.py cleanup_orphaned_media` or `python manage.py audit_orphaned_data --fix`.
 
 ---
 

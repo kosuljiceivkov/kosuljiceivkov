@@ -11,9 +11,13 @@ class CoreConfig(AppConfig):
         from django.contrib import admin as django_admin
 
         from . import admin  # noqa: F401
+        from .storage_aliases import resolve_filefield_storage_aliases
         from .media_signals import connect_media_cleanup_signals
+        from .generic_cleanup_signals import connect_generic_cleanup_signals
 
+        resolve_filefield_storage_aliases()
         connect_media_cleanup_signals()
+        connect_generic_cleanup_signals()
 
         brand_name = getattr(
             settings,
