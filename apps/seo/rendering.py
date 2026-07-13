@@ -13,8 +13,6 @@ RENDERED_SEO_FIELDS = (
     "description",
     "canonical",
     "robots",
-    "keywords",
-    "focus_keyword",
     "og_type",
     "og_title",
     "og_description",

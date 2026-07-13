@@ -26,6 +26,7 @@ class PageImageEntry:
     height: int | None
     file_size: int
     format_name: str
+    loading: str = ""
 
     @property
     def has_alt(self) -> bool:
@@ -145,6 +146,100 @@ def get_first_page_image_src(page_object) -> str:
     return ""
 
 
+def _normalize_loading(value: str) -> str:
+    normalized = (value or "").strip().lower()
+    if normalized in {"eager", "lazy", "auto"}:
+        return normalized
+    return ""
+
+
+def _assign_loading_defaults(images: list[PageImageEntry]) -> list[PageImageEntry]:
+    if not images:
+        return images
+
+    result: list[PageImageEntry] = []
+    page_image_seen = False
+    for entry in images:
+        explicit = _normalize_loading(entry.loading)
+        if explicit:
+            loading = explicit
+        elif entry.source == "featured":
+            loading = "eager"
+        elif entry.source == "page_image":
+            loading = "eager" if not page_image_seen else "lazy"
+            page_image_seen = True
+        else:
+            loading = "lazy"
+        result.append(
+            PageImageEntry(
+                source=entry.source,
+                label=entry.label,
+                alt_text=entry.alt_text,
+                filename=entry.filename,
+                basename=entry.basename,
+                width=entry.width,
+                height=entry.height,
+                file_size=entry.file_size,
+                format_name=entry.format_name,
+                loading=loading,
+            )
+        )
+    return result
+
+
+def collect_page_images_from_body_page(
+    page_object,
+    body_page: dict,
+    *,
+    visible_only: bool = False,
+) -> list[PageImageEntry]:
+    """Prikuplja slike iz prosleđenog body_page JSON-a (live editor stanje)."""
+    _ = visible_only
+    images: list[PageImageEntry] = []
+
+    featured = getattr(page_object, "featured_image", None)
+    featured_entry = _entry_from_field(
+        image_field=featured,
+        source="featured",
+        label="Istaknuta slika",
+        alt_text=getattr(page_object, "title", "") or "",
+    )
+    if featured_entry is not None:
+        images.append(featured_entry)
+
+    index = 0
+    for section in body_page.get("sections") or []:
+        for row in section.get("rows") or []:
+            for column in row.get("columns") or []:
+                for block in column.get("blocks") or []:
+                    if not isinstance(block, dict) or block.get("type") != PageBlockType.IMAGE:
+                        continue
+                    attrs = block.get("attrs") or {}
+                    src = str(attrs.get("src") or attrs.get("path") or "").strip()
+                    if not src:
+                        continue
+                    index += 1
+                    path = src
+                    if "://" in path:
+                        path = urlparse(path).path or path
+                    basename = os.path.basename(path.split("?")[0].split("#")[0])
+                    images.append(
+                        PageImageEntry(
+                            source="page_image",
+                            label=f"Slika (visual builder) #{index}",
+                            alt_text=str(attrs.get("alt") or "").strip(),
+                            filename=src,
+                            basename=basename,
+                            width=None,
+                            height=None,
+                            file_size=0,
+                            format_name="",
+                            loading=_normalize_loading(str(attrs.get("loading") or "")),
+                        )
+                    )
+    return _assign_loading_defaults(images)
+
+
 def collect_page_images(page_object, *, visible_only: bool = False) -> list[PageImageEntry]:
     _ = visible_only
     if page_object is None or not getattr(page_object, "pk", None):
@@ -192,9 +287,10 @@ def collect_page_images(page_object, *, visible_only: bool = False) -> list[Page
                                 height=None,
                                 file_size=0,
                                 format_name="",
+                                loading=_normalize_loading(str(attrs.get("loading") or "")),
                             )
                         )
-        return images
+        return _assign_loading_defaults(images)
 
     featured = getattr(page_object, "featured_image", None)
     featured_entry = _entry_from_field(
@@ -206,4 +302,4 @@ def collect_page_images(page_object, *, visible_only: bool = False) -> list[Page
     if featured_entry is not None:
         images.append(featured_entry)
 
-    return images
+    return _assign_loading_defaults(images)

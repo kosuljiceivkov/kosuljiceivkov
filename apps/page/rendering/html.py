@@ -25,6 +25,7 @@ class HtmlPageRenderer:
             return ""
 
         render_context = context or RenderContext()
+        render_context.extra.setdefault("page_image_index", 0)
         normalized = normalize_page(page)
         sections = []
         for section in normalized.get("sections") or []:

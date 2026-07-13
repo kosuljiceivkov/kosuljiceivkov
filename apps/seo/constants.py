@@ -60,6 +60,29 @@ SERP_DESCRIPTION_IDEAL_MAX = 160
 SERP_DESCRIPTION_DESKTOP_DISPLAY_MAX = 160
 SERP_DESCRIPTION_MOBILE_DISPLAY_MAX = 120
 
+# Open Graph pregled po platformama — prikaz u admin panelu
+OG_PLATFORM_PROFILES = {
+    "facebook": {
+        "label": "Facebook",
+        "title_max": 60,
+        "description_max": 160,
+        "card_class": "seo-og-preview__card--facebook",
+    },
+    "linkedin": {
+        "label": "LinkedIn",
+        "title_max": 70,
+        "description_max": 160,
+        "card_class": "seo-og-preview__card--linkedin",
+    },
+    "whatsapp": {
+        "label": "WhatsApp",
+        "title_max": 65,
+        "description_max": 90,
+        "card_class": "seo-og-preview__card--whatsapp",
+    },
+}
+DEFAULT_OG_PREVIEW_PLATFORM = "facebook"
+
 
 class TwitterCardType(models.TextChoices):
     """Twitter Card tip — prazno = automatski prema slici."""
@@ -76,3 +99,11 @@ class RobotsMaxImagePreview(models.TextChoices):
     LARGE = "large", _("large — veliki pregled slike")
     STANDARD = "standard", _("standard — manji pregled")
     NONE = "none", _("none — bez pregleda slike")
+
+
+class RobotsMaxSnippet(models.TextChoices):
+    """Google max-snippet direktiva — prazno = podrazumevano ponašanje pretraživača."""
+
+    AUTO = "", _("Podrazumevano (bez direktive)")
+    UNLIMITED = "-1", _("-1 — bez ograničenja isečka")
+    NONE = "0", _("0 — bez isečka u rezultatima")

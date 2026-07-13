@@ -11,12 +11,42 @@
     return input ? input.value.trim() : "";
   }
 
+  function syncIndexToFollow(form) {
+    var indexInput = form.querySelector('[name$="-robots_index"]:checked');
+    if (!indexInput) {
+      return;
+    }
+
+    var allow = indexInput.value === "True" || indexInput.value === "true" || indexInput.value === "on";
+    var followInput = form.querySelector('[name$="-robots_follow"]');
+    if (followInput) {
+      followInput.checked = allow;
+    }
+  }
+
+  function indexChecked(form) {
+    var checked = form.querySelector('[name$="-robots_index"]:checked');
+    if (checked) {
+      return (
+        checked.value === "True" ||
+        checked.value === "true" ||
+        checked.value === "on"
+      );
+    }
+
+    var input = form.querySelector('[name$="-robots_index"]');
+    return input ? input.checked : true;
+  }
+
   function buildRobotsContent(values) {
     var parts = [];
     parts.push(values.index ? "index" : "noindex");
     parts.push(values.follow ? "follow" : "nofollow");
     if (values.nosnippet) parts.push("nosnippet");
     if (values.noarchive) parts.push("noarchive");
+    if (values.maxSnippet) {
+      parts.push("max-snippet:" + values.maxSnippet);
+    }
     if (values.maxImagePreview) {
       parts.push("max-image-preview:" + values.maxImagePreview);
     }
@@ -24,11 +54,13 @@
   }
 
   function collectValues(form) {
+    syncIndexToFollow(form);
     return {
-      index: fieldChecked(form, "robots_index"),
+      index: indexChecked(form),
       follow: fieldChecked(form, "robots_follow"),
       nosnippet: fieldChecked(form, "robots_nosnippet"),
       noarchive: fieldChecked(form, "robots_noarchive"),
+      maxSnippet: fieldValue(form, "robots_max_snippet"),
       maxImagePreview: fieldValue(form, "robots_max_image_preview"),
     };
   }
@@ -69,6 +101,7 @@
       '[name$="-robots_follow"]',
       '[name$="-robots_nosnippet"]',
       '[name$="-robots_noarchive"]',
+      '[name$="-robots_max_snippet"]',
       '[name$="-robots_max_image_preview"]',
     ];
 

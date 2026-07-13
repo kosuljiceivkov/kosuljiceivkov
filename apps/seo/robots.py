@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 
-from apps.seo.constants import RobotsMaxImagePreview
+from apps.seo.constants import RobotsMaxImagePreview, RobotsMaxSnippet
 from apps.seo.models import SeoMetadata
 
 
@@ -15,12 +15,13 @@ def build_robots_meta_content(
     robots_nosnippet: bool = False,
     robots_noarchive: bool = False,
     robots_max_image_preview: str = RobotsMaxImagePreview.AUTO,
+    robots_max_snippet: str = RobotsMaxSnippet.AUTO,
 ) -> str:
     """
     Gradi vrednost za <meta name="robots" content="...">.
 
     Redosled direktiva prati Google preporuke: index/noindex, follow/nofollow,
-    zatim opcione direktive (nosnippet, noarchive, max-image-preview).
+    zatim opcione direktive (nosnippet, noarchive, max-snippet, max-image-preview).
     """
     parts: list[str] = [
         "index" if robots_index else "noindex",
@@ -32,6 +33,10 @@ def build_robots_meta_content(
 
     if robots_noarchive:
         parts.append("noarchive")
+
+    snippet = (robots_max_snippet or RobotsMaxSnippet.AUTO).strip()
+    if snippet and snippet != RobotsMaxSnippet.AUTO:
+        parts.append(f"max-snippet:{snippet}")
 
     preview = (robots_max_image_preview or RobotsMaxImagePreview.AUTO).strip()
     if preview and preview != RobotsMaxImagePreview.AUTO:
@@ -51,6 +56,7 @@ def resolve_robots_directive(metadata: SeoMetadata | None) -> str:
         robots_nosnippet=metadata.robots_nosnippet,
         robots_noarchive=metadata.robots_noarchive,
         robots_max_image_preview=metadata.robots_max_image_preview,
+        robots_max_snippet=metadata.robots_max_snippet,
     )
 
 
@@ -72,6 +78,7 @@ def build_robots_preview(metadata: SeoMetadata | None = None, **overrides) -> Ro
         "robots_nosnippet": False,
         "robots_noarchive": False,
         "robots_max_image_preview": RobotsMaxImagePreview.AUTO,
+        "robots_max_snippet": RobotsMaxSnippet.AUTO,
     }
     if metadata is not None:
         values.update(
@@ -81,6 +88,7 @@ def build_robots_preview(metadata: SeoMetadata | None = None, **overrides) -> Ro
                 "robots_nosnippet": metadata.robots_nosnippet,
                 "robots_noarchive": metadata.robots_noarchive,
                 "robots_max_image_preview": metadata.robots_max_image_preview,
+                "robots_max_snippet": metadata.robots_max_snippet,
             }
         )
     values.update({key: value for key, value in overrides.items() if value is not None})

@@ -393,6 +393,82 @@
   pointer-events: none;
 }
 
+/* Live character counters for SEO fields */
+.seo-char-counter {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.seo-char-counter--empty {
+  color: var(--body-quiet-color, #6b7280);
+}
+
+.seo-char-counter--good {
+  color: #15803d;
+}
+
+.seo-char-counter--ok {
+  color: #ca8a04;
+}
+
+.seo-char-counter--bad {
+  color: #b45309;
+}
+
+.seo-char-counter--over {
+  color: #b91c1c;
+}
+
+/* Dark admin theme — readable SEO readonly panels */
+html[data-theme="dark"] .blog-post-editor__drawer .seo-analyzer,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-keyword-analyzer,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-og-preview,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-twitter-preview,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-schema-preview,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-serp-preview,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-robots-preview,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-image-seo,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-cornerstone,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-internal-linking,
+html[data-theme="dark"] .blog-post-editor__drawer .readonly .seo-analyzer,
+html[data-theme="dark"] .blog-post-editor__drawer .readonly .seo-analyzer--empty,
+html[data-theme="dark"] .blog-post-editor__drawer .readonly .seo-og-preview {
+  background: #fff !important;
+  color: #1f2937 !important;
+  border-color: #d5dadf !important;
+}
+
+html[data-theme="dark"] .blog-post-editor__drawer .seo-analyzer--empty,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-analyzer--empty p,
+html[data-theme="dark"] .blog-post-editor__drawer .readonly .seo-analyzer--empty,
+html[data-theme="dark"] .blog-post-editor__drawer .readonly .seo-analyzer--empty p {
+  color: #4b5563 !important;
+}
+
+html[data-theme="dark"] .blog-post-editor__drawer .seo-analyzer__hint,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-analyzer__message,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-analyzer__recommendation,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-analyzer__meta p {
+  color: #4b5563 !important;
+}
+
+html[data-theme="dark"] .blog-post-editor__drawer .seo-analyzer__check-body strong,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-og-preview__meta th,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-og-preview__meta td,
+html[data-theme="dark"] .blog-post-editor__drawer .seo-og-preview__meta code,
+html[data-theme="dark"] .blog-post-editor__drawer .readonly .seo-og-preview__meta th,
+html[data-theme="dark"] .blog-post-editor__drawer .readonly .seo-og-preview__meta td,
+html[data-theme="dark"] .blog-post-editor__drawer .readonly .seo-og-preview__meta code {
+  color: #1f2937 !important;
+}
+
+html[data-theme="dark"] .blog-post-editor__drawer .seo-char-counter--empty {
+  color: #6b7280 !important;
+}
+
 .seo-robots-preview {
   margin-top: 8px;
   padding: 12px 14px;

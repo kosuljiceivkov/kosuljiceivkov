@@ -14,6 +14,7 @@ from apps.seo.constants import (
     META_DESCRIPTION_MAX_LENGTH,
     OgType,
     RobotsMaxImagePreview,
+    RobotsMaxSnippet,
     SECONDARY_KEYWORDS_MAX_LENGTH,
     SEO_TITLE_MAX_LENGTH,
     SeoSchemaType,
@@ -51,12 +52,18 @@ class SeoMetadata(models.Model):
         "Fokus ključna reč",
         max_length=KEYWORD_MAX_LENGTH,
         blank=True,
+        help_text=_(
+            "Samo za CMS analizu i preporuke — ne izlazi u HTML meta tagove."
+        ),
     )
     secondary_keywords = models.CharField(
         "Sekundarne ključne reči",
         max_length=SECONDARY_KEYWORDS_MAX_LENGTH,
         blank=True,
-        help_text=_("Odvojite zarezom, npr. cement, fasada, temelj."),
+        help_text=_(
+            "Odvojite zarezom, npr. cement, fasada, temelj. "
+            "Samo za internu analizu — ne izlaze u HTML."
+        ),
     )
     canonical_url = models.URLField(
         "Kanonski URL",
@@ -96,6 +103,25 @@ class SeoMetadata(models.Model):
         help_text=_(
             "Kontroliše veličinu pregleda slike u rezultatima. "
             "Podrazumevano = bez eksplicitne direktive."
+        ),
+    )
+    robots_max_snippet = models.CharField(
+        "Robots: max-snippet",
+        max_length=16,
+        choices=RobotsMaxSnippet.choices,
+        blank=True,
+        default=RobotsMaxSnippet.AUTO,
+        help_text=_(
+            "Kontroliše dužinu tekstualnog isečka u rezultatima. "
+            "Podrazumevano = bez eksplicitne direktive."
+        ),
+    )
+    include_in_sitemap = models.BooleanField(
+        "Uključi u sitemap",
+        default=True,
+        help_text=_(
+            "Isključite za stranice koje ne želite u sitemap.xml "
+            "(npr. thank-you, landing bez SEO vrednosti)."
         ),
     )
 
@@ -256,3 +282,104 @@ class SeoMetadata(models.Model):
             for keyword in self.secondary_keywords.split(",")
             if keyword.strip()
         ]
+
+
+class RedirectType(models.TextChoices):
+    PERMANENT = "301", _("301 — trajno preusmerenje")
+    TEMPORARY = "302", _("302 — privremeno preusmerenje")
+    GONE = "410", _("410 — stranica trajno uklonjena")
+
+
+def normalize_redirect_path(path: str) -> str:
+    """Normalizuje putanju: bez domena, sa vodećom kosom crtom, sa završnom kosom crtom."""
+    value = (path or "").strip()
+    if not value:
+        return ""
+    if "://" in value:
+        from urllib.parse import urlparse
+
+        value = urlparse(value).path or "/"
+    value = value.split("?")[0].split("#")[0]
+    if not value.startswith("/"):
+        value = f"/{value}"
+    if not value.endswith("/"):
+        value = f"{value}/"
+    return value
+
+
+class Redirect(models.Model):
+    """301/302/410 preusmerenja — hvataju se tek kada bi stranica vratila 404."""
+
+    old_path = models.CharField(
+        "Stara putanja",
+        max_length=255,
+        unique=True,
+        help_text=_("Putanja bez domena, npr. /blog/stari-naslov/."),
+    )
+    new_path = models.CharField(
+        "Nova putanja",
+        max_length=255,
+        blank=True,
+        help_text=_("Odredište preusmerenja. Prazno za 410 (uklonjena stranica)."),
+    )
+    redirect_type = models.CharField(
+        "Tip",
+        max_length=3,
+        choices=RedirectType.choices,
+        default=RedirectType.PERMANENT,
+    )
+    is_active = models.BooleanField(
+        "Aktivno",
+        default=True,
+    )
+    note = models.CharField(
+        "Napomena",
+        max_length=255,
+        blank=True,
+        help_text=_("Interna napomena, npr. razlog promene slug-a."),
+    )
+    created_at = models.DateTimeField("Kreirano", auto_now_add=True)
+    updated_at = models.DateTimeField("Ažurirano", auto_now=True)
+
+    class Meta:
+        verbose_name = "Preusmerenje"
+        verbose_name_plural = "Preusmerenja"
+        ordering = ["-updated_at"]
+        indexes = [
+            models.Index(fields=["old_path", "is_active"]),
+        ]
+
+    def __str__(self):
+        if self.redirect_type == RedirectType.GONE:
+            return f"{self.old_path} → 410"
+        return f"{self.old_path} → {self.new_path} ({self.redirect_type})"
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        super().clean()
+        self.old_path = normalize_redirect_path(self.old_path)
+        self.new_path = normalize_redirect_path(self.new_path)
+
+        if not self.old_path:
+            raise ValidationError({"old_path": _("Stara putanja je obavezna.")})
+
+        if self.redirect_type == RedirectType.GONE:
+            self.new_path = ""
+            return
+
+        if not self.new_path:
+            raise ValidationError(
+                {"new_path": _("Nova putanja je obavezna za 301/302 preusmerenja.")}
+            )
+        if self.old_path == self.new_path:
+            raise ValidationError(
+                {"new_path": _("Nova putanja ne sme biti ista kao stara.")}
+            )
+
+    def save(self, *args, **kwargs):
+        self.old_path = normalize_redirect_path(self.old_path)
+        self.new_path = normalize_redirect_path(self.new_path)
+        if self.redirect_type == RedirectType.GONE:
+            self.new_path = ""
+        super().save(*args, **kwargs)

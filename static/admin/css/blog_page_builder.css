@@ -1275,11 +1275,11 @@
 
 /* ——— Django admin chrome (fullscreen builder) ——— */
 
-body.blog-visual-builder-admin #content {
+body.visual-builder-admin #content {
   padding: 0;
 }
 
-body.blog-visual-builder-admin #content-main {
+body.visual-builder-admin #content-main {
   padding: 0;
   margin: 0;
 }
@@ -1288,11 +1288,11 @@ body.blog-visual-builder-admin .breadcrumbs {
   display: none;
 }
 
-body.blog-visual-builder-admin .change-form {
+body.visual-builder-admin .change-form {
   margin: 0;
 }
 
-body.blog-visual-builder-admin .blog-post-editor--visual {
+body.visual-builder-admin .blog-post-editor--visual {
   margin: 0;
   min-height: calc(100vh - var(--header-height, 0px));
 }
@@ -1448,6 +1448,16 @@ html[data-theme="dark"] .blog-post-editor--visual .blog-post-editor__drawer .inl
 html[data-theme="dark"] .blog-post-editor--visual .blog-post-editor__drawer .inline-related > h3 .inline_label {
   color: #1f2937 !important;
   background: var(--blog-editor-accent-soft, #f5d4cc) !important;
+}
+
+html[data-theme="dark"] .blog-post-editor--visual .blog-post-editor__drawer .readonly,
+html[data-theme="dark"] .blog-post-editor--visual .blog-post-editor__drawer .form-row .readonly {
+  background: transparent !important;
+  color: #e8e8e8 !important;
+}
+
+html[data-theme="dark"] .blog-post-editor--visual .blog-post-editor__drawer fieldset h2 {
+  color: #fff !important;
 }
 
 /* ——— Drawer form fields ——— */

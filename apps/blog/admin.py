@@ -14,6 +14,7 @@ from .admin_api import (
     page_upload_video_view,
 )
 from .admin_change import (
+    DRAFT_SLUG_PREFIX,
     build_blog_change_form_context,
     create_visual_builder_draft,
     maybe_update_slug_from_title,
@@ -144,8 +145,36 @@ class BlogPostAdmin(admin.ModelAdmin):
         return super().change_view(request, object_id, form_url, extra_context)
 
     def save_model(self, request, obj, form, change):
+        old_slug = ""
+        if change and obj.pk:
+            old_slug = (
+                BlogPost.objects.filter(pk=obj.pk)
+                .values_list("slug", flat=True)
+                .first()
+                or ""
+            )
+
         maybe_update_slug_from_title(obj)
         super().save_model(request, obj, form, change)
+
+        if (
+            old_slug
+            and old_slug != obj.slug
+            and not old_slug.startswith(DRAFT_SLUG_PREFIX)
+        ):
+            from apps.seo.redirects import create_redirect_for_url_change
+
+            old_url = reverse("frontend:blog_detail", kwargs={"slug": old_slug})
+            redirect = create_redirect_for_url_change(
+                old_url,
+                obj.get_absolute_url(),
+                note=f"Automatski: promena slug-a objave „{obj.title[:100]}”",
+            )
+            if redirect is not None:
+                messages.info(
+                    request,
+                    f"Kreirano 301 preusmerenje: {redirect.old_path} → {redirect.new_path}",
+                )
 
     def get_urls(self):
         urls = super().get_urls()

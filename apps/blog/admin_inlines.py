@@ -4,6 +4,7 @@ from django.contrib.contenttypes.admin import GenericStackedInline
 
 from apps.seo.admin import SeoAnalyzerAdminMixin, SeoMetadataInline
 from apps.seo.models import SeoMetadata
+from apps.seo.services import get_seo_metadata
 
 
 class BlogSeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
@@ -20,3 +21,8 @@ class BlogSeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
     verbose_name_plural = "SEO"
     readonly_fields = SeoMetadataInline.readonly_fields
     fieldsets = SeoMetadataInline.fieldsets
+
+    def get_extra(self, request, obj=None, **kwargs):
+        if obj is None:
+            return 0
+        return 0 if get_seo_metadata(obj) else 1

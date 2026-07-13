@@ -8,7 +8,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
+from apps.seo.ai_readiness import analyze_ai_readiness
 from apps.seo.analysis_ui import (
+    render_ai_readiness_html,
     render_cornerstone_analysis_html,
     render_image_seo_html,
     render_internal_linking_html,
@@ -17,9 +19,11 @@ from apps.seo.analysis_ui import (
     render_readability_analysis_html,
     render_schema_preview_html,
     render_serp_preview_html,
+    render_slug_analysis_html,
     render_twitter_preview_html,
     render_unified_scoring_html,
 )
+from apps.seo.constants import DEFAULT_OG_PREVIEW_PLATFORM
 from apps.seo.image_seo import analyze_image_seo
 from apps.seo.serp_preview import build_serp_preview
 from apps.seo.unified_scoring import analyze_unified_seo
@@ -33,6 +37,7 @@ from apps.seo.readability_analyzer import analyze_readability_for_object
 from apps.seo.schema.engine import preview_schema_bundle
 from apps.seo.schema.validation import SchemaValidationResult
 from apps.seo.services import get_seo_metadata
+from apps.seo.slug_analyzer import analyze_slug, analyze_slug_for_object
 
 
 def _apply_live_editor_overrides(content_object, payload: dict) -> None:
@@ -43,6 +48,10 @@ def _apply_live_editor_overrides(content_object, payload: dict) -> None:
     body_plaintext = payload.get("body_plaintext", None)
     if body_plaintext is not None:
         content_object.body_plaintext = body_plaintext or ""
+
+    body_page = payload.get("body_page", None)
+    if isinstance(body_page, dict) and hasattr(content_object, "body_page"):
+        content_object.body_page = body_page
 
 
 @require_POST
@@ -57,8 +66,16 @@ def image_seo_analysis_api(request):
 
     _apply_live_editor_overrides(content_object, payload)
 
+    body_page = payload.get("body_page")
+    body_page_override = body_page if isinstance(body_page, dict) else None
+
     if content_object is not None:
-        result = analyze_image_seo(content_object, metadata, visible_only=False)
+        result = analyze_image_seo(
+            content_object,
+            metadata,
+            visible_only=False,
+            body_page=body_page_override,
+        )
     else:
         from apps.seo.image_seo import ImageSeoResult
 
@@ -166,6 +183,66 @@ def keyword_analysis_api(request):
 
 
 @require_POST
+def slug_analysis_api(request):
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({"error": "Neispravan JSON."}, status=400)
+
+    content_object = _load_content_object(payload)
+    metadata = get_seo_metadata(content_object) if content_object else None
+    overrides = _payload_overrides(payload)
+
+    if content_object is not None:
+        result = analyze_slug_for_object(
+            content_object,
+            metadata,
+            overrides=overrides,
+        )
+    else:
+        result = analyze_slug(
+            overrides.get("url_slug", ""),
+            focus_keyword=overrides.get("focus_keyword", ""),
+        )
+
+    data = result.to_dict()
+    data["html"] = render_slug_analysis_html(result)
+    return JsonResponse(data)
+
+
+@require_POST
+def ai_readiness_api(request):
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({"error": "Neispravan JSON."}, status=400)
+
+    content_object = _load_content_object(payload)
+    metadata = get_seo_metadata(content_object) if content_object else None
+    overrides = _payload_overrides(payload)
+
+    _apply_live_editor_overrides(content_object, payload)
+
+    if content_object is not None:
+        result = analyze_ai_readiness(
+            content_object,
+            metadata,
+            overrides=overrides,
+            visible_only=False,
+        )
+    else:
+        from apps.seo.ai_readiness import AiReadinessResult
+
+        result = AiReadinessResult(
+            message="Sačuvajte objavu da biste videli AI readiness analizu.",
+        )
+
+    data = result.to_dict()
+    data["html"] = render_ai_readiness_html(result)
+    return JsonResponse(data)
+
+
+@require_POST
 def readability_analysis_api(request):
     try:
         payload = json.loads(request.body.decode("utf-8"))
@@ -248,7 +325,8 @@ def open_graph_preview_api(request):
         )
 
     data = tags.to_dict()
-    data["html"] = render_open_graph_preview_html(tags)
+    platform = payload.get("platform") or DEFAULT_OG_PREVIEW_PLATFORM
+    data["html"] = render_open_graph_preview_html(tags, platform=platform)
     return JsonResponse(data)
 
 

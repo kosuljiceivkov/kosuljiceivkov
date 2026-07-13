@@ -30,8 +30,6 @@ def get_site_seo_defaults(request=None):
         "canonical": canonical,
         "og_url": canonical,
         "robots": "index, follow",
-        "keywords": getattr(settings, "SEO_DEFAULT_KEYWORDS", ""),
-        "focus_keyword": "",
         "og_type": "website",
         "og_title": title,
         "og_description": description,

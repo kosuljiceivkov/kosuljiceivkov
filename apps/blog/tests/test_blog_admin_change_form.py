@@ -96,6 +96,8 @@ class BlogPostAdminChangeFormTests(TestCase):
         self.assertIn('id="blog-initial-page"', content)
         self.assertIn("page/upload-image", content)
         self.assertNotIn("blog-document-editor.bundle.js", content)
+        self.assertIn("data-seo-og-preview", content)
+        self.assertIn("seo-og-preview__card", content)
 
     def test_change_form_includes_preview_link(self):
         post = create_visual_builder_draft()

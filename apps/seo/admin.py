@@ -2,10 +2,14 @@
 
 from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericStackedInline
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.utils.html import format_html, format_html_join
 
+from apps.seo.ai_readiness import analyze_ai_readiness
 from apps.seo.analysis_ui import (
+    render_ai_readiness_html,
     render_cornerstone_analysis_html,
     render_empty_analysis_html,
     render_image_seo_html,
@@ -16,6 +20,7 @@ from apps.seo.analysis_ui import (
     render_robots_preview_html,
     render_schema_preview_html,
     render_serp_preview_html,
+    render_slug_analysis_html,
     render_twitter_preview_html,
     render_unified_scoring_html,
 )
@@ -29,9 +34,11 @@ from apps.seo.keyword_analyzer import analyze_content_object
 from apps.seo.open_graph import build_open_graph_tags, validate_og_image_file
 from apps.seo.readability_analyzer import analyze_readability_for_object
 from apps.seo.schema.engine import preview_schema_bundle
+from apps.seo.slug_analyzer import analyze_slug_for_object
 from apps.seo.twitter_card import build_twitter_card_tags
-from apps.seo.models import SeoMetadata
+from apps.seo.models import Redirect, SeoMetadata
 from apps.seo.dashboard_actions import apply_bulk_action
+from apps.seo.forms import SeoMetadataAdminForm
 
 
 class SeoAnalyzerAdminMixin:
@@ -49,7 +56,9 @@ class SeoAnalyzerAdminMixin:
     unified_score_readonly_field = "unified_score_panel"
     serp_preview_readonly_field = "serp_preview_panel"
     robots_preview_readonly_field = "robots_preview_panel"
+    slug_analysis_readonly_field = "slug_analysis_panel"
     image_seo_readonly_field = "image_seo_analysis_panel"
+    ai_readiness_readonly_field = "ai_readiness_panel"
 
     class Media:
         css = {
@@ -63,6 +72,8 @@ class SeoAnalyzerAdminMixin:
         }
         js = (
             "admin/js/seo_keyword_analyzer.js",
+            "admin/js/seo_slug_analyzer.js",
+            "admin/js/seo_ai_readiness.js",
             "admin/js/seo_readability_analyzer.js",
             "admin/js/seo_serp_preview.js",
             "admin/js/seo_robots_preview.js",
@@ -73,6 +84,7 @@ class SeoAnalyzerAdminMixin:
             "admin/js/seo_internal_linking.js",
             "admin/js/seo_cornerstone.js",
             "admin/js/seo_unified_score.js",
+            "admin/js/seo_char_counter.js",
         )
 
     def _analyzer_config_html(self, *, api_name: str, content_type_id=None, object_id=None):
@@ -83,6 +95,41 @@ class SeoAnalyzerAdminMixin:
             content_type_id or "",
             object_id or "",
         )
+
+    def _resolve_inline_content_object(self, obj):
+        if obj is None:
+            return None
+
+        content_object = getattr(obj, "content_object", None)
+        if content_object is not None and getattr(content_object, "pk", None):
+            return content_object
+
+        content_type_id = getattr(obj, "content_type_id", None)
+        object_id = getattr(obj, "object_id", None)
+        if not content_type_id or not object_id:
+            return None
+
+        try:
+            content_type = ContentType.objects.get(pk=content_type_id)
+            model_class = content_type.model_class()
+            if model_class is None:
+                return None
+            return model_class.objects.get(pk=object_id)
+        except (ContentType.DoesNotExist, ObjectDoesNotExist):
+            return None
+
+    def _inline_analyzer_config_ids(self, obj, content_object=None):
+        content_object = content_object or self._resolve_inline_content_object(obj)
+        content_type_id = getattr(obj, "content_type_id", None) if obj is not None else None
+        object_id = getattr(obj, "object_id", None) if obj is not None else None
+
+        if content_object is not None and getattr(content_object, "pk", None):
+            if not content_type_id:
+                content_type_id = ContentType.objects.get_for_model(content_object).pk
+            if not object_id:
+                object_id = content_object.pk
+
+        return content_type_id, object_id
 
     @admin.display(description="Analiza ključne reči")
     def keyword_analysis_panel(self, obj):
@@ -162,37 +209,22 @@ class SeoAnalyzerAdminMixin:
 
     @admin.display(description="Open Graph pregled")
     def og_preview_panel(self, obj):
-        config_html = self._analyzer_config_html(api_name="seo_open_graph_preview")
-
-        if obj is None:
-            return format_html(
-                "{}{}",
-                render_empty_analysis_html(
-                    "Unesite Open Graph podatke — pregled se ažurira dok kucate.",
-                    analyzer_type="open_graph",
-                ),
-                config_html,
-            )
-
-        content_object = getattr(obj, "content_object", None)
-        if content_object is None or not getattr(content_object, "pk", None):
-            return format_html(
-                "{}{}",
-                render_empty_analysis_html(
-                    "Sačuvajte objavu da biste videli pun pregled deljenja.",
-                    analyzer_type="open_graph",
-                ),
-                config_html,
-            )
-
-        tags = build_open_graph_tags(content_object, metadata=obj, visible_only=False)
+        request = getattr(self, "_current_request", None)
+        content_object = self._resolve_inline_content_object(obj)
+        tags = build_open_graph_tags(
+            content_object,
+            request,
+            metadata=obj,
+            visible_only=False,
+        )
+        content_type_id, object_id = self._inline_analyzer_config_ids(obj, content_object)
         return format_html(
             "{}{}",
             render_open_graph_preview_html(tags),
             self._analyzer_config_html(
                 api_name="seo_open_graph_preview",
-                content_type_id=obj.content_type_id,
-                object_id=obj.object_id,
+                content_type_id=content_type_id,
+                object_id=object_id,
             ),
         )
 
@@ -335,6 +367,78 @@ class SeoAnalyzerAdminMixin:
             render_internal_linking_html(result),
             self._analyzer_config_html(
                 api_name="seo_internal_linking_analysis",
+                content_type_id=obj.content_type_id,
+                object_id=obj.object_id,
+            ),
+        )
+
+    @admin.display(description="Analiza slug-a")
+    def slug_analysis_panel(self, obj):
+        config_html = self._analyzer_config_html(api_name="seo_slug_analysis")
+
+        if obj is None:
+            return format_html(
+                "{}{}",
+                render_empty_analysis_html(
+                    "Unesite slug u detaljima objave — analiza se ažurira uživo.",
+                    analyzer_type="slug",
+                ),
+                config_html,
+            )
+
+        content_object = getattr(obj, "content_object", None)
+        if content_object is None or not getattr(content_object, "pk", None):
+            return format_html(
+                "{}{}",
+                render_empty_analysis_html(
+                    "Sačuvajte objavu da biste videli analizu slug-a.",
+                    analyzer_type="slug",
+                ),
+                config_html,
+            )
+
+        result = analyze_slug_for_object(content_object, obj)
+        return format_html(
+            "{}{}",
+            render_slug_analysis_html(result),
+            self._analyzer_config_html(
+                api_name="seo_slug_analysis",
+                content_type_id=obj.content_type_id,
+                object_id=obj.object_id,
+            ),
+        )
+
+    @admin.display(description="AI readiness")
+    def ai_readiness_panel(self, obj):
+        config_html = self._analyzer_config_html(api_name="seo_ai_readiness")
+
+        if obj is None:
+            return format_html(
+                "{}{}",
+                render_empty_analysis_html(
+                    "Sačuvajte objavu da biste videli AI readiness analizu.",
+                    analyzer_type="ai_readiness",
+                ),
+                config_html,
+            )
+
+        content_object = getattr(obj, "content_object", None)
+        if content_object is None or not getattr(content_object, "pk", None):
+            return format_html(
+                "{}{}",
+                render_empty_analysis_html(
+                    "Sačuvajte objavu da biste videli AI readiness analizu.",
+                    analyzer_type="ai_readiness",
+                ),
+                config_html,
+            )
+
+        result = analyze_ai_readiness(content_object, obj)
+        return format_html(
+            "{}{}",
+            render_ai_readiness_html(result),
+            self._analyzer_config_html(
+                api_name="seo_ai_readiness",
                 content_type_id=obj.content_type_id,
                 object_id=obj.object_id,
             ),
@@ -588,6 +692,7 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
     """Yoast-style SEO panel u editoru bloga i CMS stranica."""
 
     model = SeoMetadata
+    form = SeoMetadataAdminForm
     extra = 0
     max_num = 1
     can_delete = True
@@ -596,6 +701,7 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
     verbose_name_plural = "SEO"
     readonly_fields = (
         SeoAnalyzerAdminMixin.keyword_readonly_field,
+        SeoAnalyzerAdminMixin.slug_analysis_readonly_field,
         SeoAnalyzerAdminMixin.readability_readonly_field,
         SeoAnalyzerAdminMixin.og_image_validation_field,
         SeoAnalyzerAdminMixin.og_preview_readonly_field,
@@ -608,6 +714,7 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
         SeoAnalyzerAdminMixin.serp_preview_readonly_field,
         SeoAnalyzerAdminMixin.robots_preview_readonly_field,
         SeoAnalyzerAdminMixin.image_seo_readonly_field,
+        SeoAnalyzerAdminMixin.ai_readiness_readonly_field,
     )
     fieldsets = (
         (
@@ -631,7 +738,8 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
                     "canonical_url",
                 ),
                 "description": (
-                    "Google SERP pregled se ažurira uživo dok menjate naslov i meta opis."
+                    "Google SERP pregled se ažurira uživo dok menjate naslov i meta opis. "
+                    "Ključne reči služe samo za CMS analizu — ne izlaze u HTML."
                 ),
             },
         ),
@@ -643,12 +751,14 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
                     "robots_follow",
                     "robots_nosnippet",
                     "robots_noarchive",
+                    "robots_max_snippet",
                     "robots_max_image_preview",
+                    "include_in_sitemap",
                     SeoAnalyzerAdminMixin.robots_preview_readonly_field,
                 ),
                 "description": (
-                    "Kontrolišite indeksiranje, praćenje linkova i prikaz u rezultatima pretrage. "
-                    "Meta tag ispod se ažurira uživo."
+                    "Kontrolišite indeksiranje, sitemap i prikaz u rezultatima pretrage. "
+                    "„Sakrij od Google-a” automatski isključuje stranicu iz sitemap-a."
                 ),
             },
         ),
@@ -665,7 +775,7 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
                     SeoAnalyzerAdminMixin.og_preview_readonly_field,
                 ),
                 "description": (
-                    "Pregled kako će link izgledati na Facebook-u i LinkedIn-u. "
+                    "Pregled po platformama (Facebook, LinkedIn, WhatsApp). "
                     "Prazna polja koriste SEO naslov, meta opis i kanonski URL."
                 ),
             },
@@ -714,6 +824,15 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
             },
         ),
         (
+            "Analiza slug-a",
+            {
+                "fields": (SeoAnalyzerAdminMixin.slug_analysis_readonly_field,),
+                "description": (
+                    "Dužina, format, jedinstvenost i ključna reč u URL slug-u."
+                ),
+            },
+        ),
+        (
             "Analiza ključne reči",
             {
                 "fields": (SeoAnalyzerAdminMixin.keyword_readonly_field,),
@@ -737,8 +856,18 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
             {
                 "fields": (SeoAnalyzerAdminMixin.image_seo_readonly_field,),
                 "description": (
-                    "Alt tekst, nazivi fajlova, dimenzije i kompresija — "
+                    "Alt tekst, nazivi fajlova, dimenzije, kompresija i lazy-loading — "
                     "sačuvajte objavu nakon izmena u builderu."
+                ),
+            },
+        ),
+        (
+            "AI readiness",
+            {
+                "fields": (SeoAnalyzerAdminMixin.ai_readiness_readonly_field,),
+                "description": (
+                    "Koliko je sadržaj spreman za AI pretrage i asistente — "
+                    "jasan H1, direktan odgovor na početku, FAQ, strukturirani podaci."
                 ),
             },
         ),
@@ -757,6 +886,7 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
 
 @admin.register(SeoMetadata)
 class SeoMetadataAdmin(SeoAnalyzerAdminMixin, admin.ModelAdmin):
+    form = SeoMetadataAdminForm
     actions = (
         recalculate_seo_scores_action,
         mark_cornerstone_action,
@@ -797,6 +927,7 @@ class SeoMetadataAdmin(SeoAnalyzerAdminMixin, admin.ModelAdmin):
     )
     readonly_fields = (
         SeoAnalyzerAdminMixin.keyword_readonly_field,
+        SeoAnalyzerAdminMixin.slug_analysis_readonly_field,
         SeoAnalyzerAdminMixin.readability_readonly_field,
         SeoAnalyzerAdminMixin.og_image_validation_field,
         SeoAnalyzerAdminMixin.og_preview_readonly_field,
@@ -809,6 +940,7 @@ class SeoMetadataAdmin(SeoAnalyzerAdminMixin, admin.ModelAdmin):
         SeoAnalyzerAdminMixin.serp_preview_readonly_field,
         SeoAnalyzerAdminMixin.robots_preview_readonly_field,
         SeoAnalyzerAdminMixin.image_seo_readonly_field,
+        SeoAnalyzerAdminMixin.ai_readiness_readonly_field,
         "seo_score",
         "keyword_score",
         "readability_score",
@@ -833,6 +965,33 @@ class SeoMetadataAdmin(SeoAnalyzerAdminMixin, admin.ModelAdmin):
             "Sistem",
             {
                 "fields": ("content_type", "object_id", "updated_at"),
+            },
+        ),
+    )
+
+
+@admin.register(Redirect)
+class RedirectAdmin(admin.ModelAdmin):
+    list_display = (
+        "old_path",
+        "new_path",
+        "redirect_type",
+        "is_active",
+        "note",
+        "updated_at",
+    )
+    list_filter = ("redirect_type", "is_active")
+    search_fields = ("old_path", "new_path", "note")
+    ordering = ("-updated_at",)
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": ("old_path", "new_path", "redirect_type", "is_active", "note"),
+                "description": (
+                    "Preusmerenja se primenjuju samo kada stranica ne postoji (404). "
+                    "Za 410 ostavite novu putanju praznu."
+                ),
             },
         ),
     )

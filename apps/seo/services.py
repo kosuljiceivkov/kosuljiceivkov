@@ -32,13 +32,24 @@ def get_seo_metadata(content_object) -> SeoMetadata | None:
         records = prefetched["seo_metadata"]
         return records[0] if records else None
 
+    from django.contrib.contenttypes.models import ContentType
+
+    content_types = [
+        ContentType.objects.get_for_model(content_object, for_concrete_model=False),
+    ]
+    concrete_model = content_object._meta.concrete_model
+    if concrete_model is not content_object._meta.model:
+        content_types.append(
+            ContentType.objects.get_for_model(concrete_model, for_concrete_model=True)
+        )
+
     return (
         SeoMetadata.objects.filter(
-            content_type__app_label=content_object._meta.app_label,
-            content_type__model=content_object._meta.model_name,
+            content_type__in=content_types,
             object_id=content_object.pk,
         )
         .select_related("content_type")
+        .order_by("-pk")
         .first()
     )
 
@@ -185,8 +196,6 @@ def build_seo_context(
         "description": description,
         "canonical": canonical,
         "robots": resolve_robots_directive(metadata),
-        "keywords": resolve_keywords(metadata),
-        "focus_keyword": metadata.focus_keyword.strip() if metadata else "",
         "og_type": og_tags.og_type,
         "og_title": og_tags.og_title,
         "og_description": og_tags.og_description,

@@ -2,6 +2,7 @@ from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 
 from apps.blog.models import BlogPost
+from apps.seo.sitemap_filters import exclude_seo_hidden
 
 
 class StaticViewSitemap(Sitemap):
@@ -24,11 +25,12 @@ class BlogPostSitemap(Sitemap):
     priority = 0.7
 
     def items(self):
-        return (
+        queryset = (
             BlogPost.objects.publicly_visible()
             .only("slug", "updated_at", "publish_date")
             .order_by("-publish_date", "-created_at")
         )
+        return exclude_seo_hidden(queryset, BlogPost)
 
     def lastmod(self, obj):
         return obj.updated_at
@@ -51,6 +53,7 @@ class CMSPageSitemap(Sitemap):
             .only("slug", "page_type", "updated_at")
             .order_by("title")
         )
+        pages = exclude_seo_hidden(pages, CMSPage)
         return [page for page in pages if page.get_absolute_url()]
 
     def lastmod(self, obj):

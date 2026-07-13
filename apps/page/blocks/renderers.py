@@ -110,6 +110,13 @@ class ImageBlockRenderer:
         align = settings.get("align", "left")
         if align not in {"left", "center", "right"}:
             align = "left"
+        explicit_loading = str(attrs.get("loading") or "").strip().lower()
+        if explicit_loading in {"eager", "lazy", "auto"}:
+            loading = explicit_loading
+        else:
+            image_index = int(context.extra.get("page_image_index", 0))
+            loading = "eager" if image_index == 0 else "lazy"
+            context.extra["page_image_index"] = image_index + 1
         return render_to_string(
             "page/blocks/image.html",
             {
@@ -118,6 +125,7 @@ class ImageBlockRenderer:
                 "caption": caption,
                 "width_percent": normalize_width_percent(settings),
                 "align": align,
+                "loading": loading,
                 "render_context": context,
             },
             request=context.request,

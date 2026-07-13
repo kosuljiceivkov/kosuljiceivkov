@@ -6,7 +6,11 @@ import re
 from collections import Counter
 from dataclasses import asdict, dataclass, field
 
-from apps.seo.image_seo_content import PageImageEntry, collect_page_images
+from apps.seo.image_seo_content import (
+    PageImageEntry,
+    collect_page_images,
+    collect_page_images_from_body_page,
+)
 from apps.seo.keyword_analyzer import CheckStatus
 
 IMAGE_MIN_DIMENSION = 200
@@ -153,18 +157,81 @@ def _analyze_compression(entry: PageImageEntry) -> tuple[bool, str]:
     return True, "Veličina fajla je prihvatljiva"
 
 
+def _analyze_lazy_loading(images: list[PageImageEntry]) -> tuple[int, CheckStatus, str, list[ImageIssue]]:
+    if not images:
+        return 15, CheckStatus.NEUTRAL, "Nema slika za proveru lazy-loading strategije.", []
+
+    issues: list[ImageIssue] = []
+    eager_images = [entry for entry in images if entry.loading == "eager"]
+    lazy_images = [entry for entry in images if entry.loading == "lazy"]
+
+    if not eager_images:
+        issues.append(
+            ImageIssue(
+                filename="—",
+                label="LCP / prva slika",
+                issue="Nijedna slika nije eager — prva vidljiva slika treba loading=\"eager\".",
+                severity=CheckStatus.BAD.value,
+            )
+        )
+        return 0, CheckStatus.BAD, "Nema eager slike za brži LCP.", issues
+
+    if len(eager_images) > 2:
+        for entry in eager_images[2:]:
+            issues.append(
+                ImageIssue(
+                    filename=entry.basename,
+                    label=entry.label,
+                    issue="Previše eager slika — koristite lazy za slike ispod prvog ekrana.",
+                    severity=CheckStatus.OK.value,
+                )
+            )
+        return 8, CheckStatus.OK, f"{len(eager_images)} eager slike — zadržite eager samo za LCP sliku.", issues
+
+    below_fold_eager = [
+        entry
+        for entry in eager_images[1:]
+        if entry.source == "page_image"
+    ]
+    for entry in below_fold_eager:
+        issues.append(
+            ImageIssue(
+                filename=entry.basename,
+                label=entry.label,
+                issue="Slika ispod prvog ekrana treba loading=\"lazy\".",
+                severity=CheckStatus.OK.value,
+            )
+        )
+
+    if below_fold_eager:
+        return 10, CheckStatus.OK, "Prva slika je eager, ali neke sledeće takođe — prebacite na lazy.", issues
+
+    if not lazy_images and len(images) > 1:
+        return 10, CheckStatus.OK, "Sve slike su eager — razmislite o lazy za ostale.", issues
+
+    return 15, CheckStatus.GOOD, "Lazy-loading strategija je dobra (eager za LCP, lazy za ostalo).", issues
+
+
 def analyze_image_seo(
     content_object,
     metadata=None,
     *,
     visible_only: bool = False,
+    body_page: dict | None = None,
 ) -> ImageSeoResult:
     if content_object is None or not getattr(content_object, "pk", None):
         return ImageSeoResult(
             message="Sačuvajte objavu da biste pokrenuli analizu slika.",
         )
 
-    images = collect_page_images(content_object, visible_only=visible_only)
+    if isinstance(body_page, dict):
+        images = collect_page_images_from_body_page(
+            content_object,
+            body_page,
+            visible_only=visible_only,
+        )
+    else:
+        images = collect_page_images(content_object, visible_only=visible_only)
     if not images:
         return ImageSeoResult(
             score=70,
@@ -267,7 +334,10 @@ def analyze_image_seo(
                     severity=CheckStatus.BAD.value if entry.file_size >= IMAGE_COMPRESS_BAD_BYTES else CheckStatus.OK.value,
                 )
             )
-    comp_points, comp_status = _ratio_score(compression_good, len(images), max_points=20)
+    comp_points, comp_status = _ratio_score(compression_good, len(images), max_points=15)
+
+    lazy_points, lazy_status, lazy_message, lazy_issues = _analyze_lazy_loading(images)
+    issues.extend(lazy_issues)
 
     checks = [
         ImageSeoCheck(
@@ -312,7 +382,15 @@ def analyze_image_seo(
             status=comp_status,
             message=f"{compression_good}/{len(images)} slika je dovoljno kompresovano.",
             points=comp_points,
-            max_points=20,
+            max_points=15,
+        ),
+        ImageSeoCheck(
+            check_id="lazy_loading",
+            label="Lazy-loading",
+            status=lazy_status,
+            message=lazy_message,
+            points=lazy_points,
+            max_points=15,
         ),
     ]
 
@@ -327,6 +405,7 @@ def analyze_image_seo(
                 "height": entry.height,
                 "file_size_kb": round(entry.file_size / 1024) if entry.file_size else None,
                 "format": entry.format_name or "—",
+                "loading": entry.loading or "—",
             }
         )
 

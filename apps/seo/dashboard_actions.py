@@ -43,13 +43,13 @@ def apply_bulk_action(request, action: str, metadata_ids: list[int]) -> int:
         return updated
 
     if action == "set_noindex":
-        updated = queryset.update(robots_index=False)
-        messages.warning(request, f"Postavljeno noindex: {updated}.")
+        updated = queryset.update(robots_index=False, robots_follow=False, include_in_sitemap=False)
+        messages.warning(request, f"Postavljeno noindex, nofollow i isključeno iz sitemap-a: {updated}.")
         return updated
 
     if action == "set_index":
-        updated = queryset.update(robots_index=True)
-        messages.success(request, f"Postavljeno index: {updated}.")
+        updated = queryset.update(robots_index=True, robots_follow=True, include_in_sitemap=True)
+        messages.success(request, f"Postavljeno index, follow: {updated}.")
         return updated
 
     if action == "set_nofollow":

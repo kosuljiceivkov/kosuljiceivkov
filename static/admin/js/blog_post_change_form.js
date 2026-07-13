@@ -81,6 +81,15 @@
       activePanel = name;
       dedupeDateTimeShortcuts(drawer);
       elevateCalendarPopups();
+      if (name === "seo") {
+        window.requestAnimationFrame(() => {
+          if (window.SeoOgPreview) {
+            const panel = postRoot.querySelector('[data-blog-drawer-panel="seo"]');
+            window.SeoOgPreview.boot(panel || document);
+          }
+          document.dispatchEvent(new CustomEvent("seo-drawer-open"));
+        });
+      }
     }
 
     dedupeDateTimeShortcuts(postRoot);

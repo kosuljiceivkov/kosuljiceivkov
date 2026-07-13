@@ -13,7 +13,9 @@ from apps.seo.cornerstone import CornerstoneAnalysisResult
 from apps.seo.image_seo import ImageSeoResult
 from apps.seo.internal_linking import InternalLinkingResult
 from apps.seo.unified_scoring import UnifiedSeoScoreResult
-from apps.seo.robots import RobotsPreview
+from apps.seo.constants import DEFAULT_OG_PREVIEW_PLATFORM, OG_PLATFORM_PROFILES
+from apps.seo.slug_analyzer import SlugAnalysisResult
+from apps.seo.ai_readiness import AiReadinessResult
 
 STATUS_SCORE_CLASS = {
     KeywordCheckStatus.GOOD: "seo-analyzer__score--good",
@@ -140,6 +142,8 @@ def render_empty_analysis_html(message: str, *, analyzer_type: str = "keyword") 
         "unified_score": "data-seo-unified-score-analyzer",
         "serp": "data-seo-serp-preview",
         "image_seo": "data-seo-image-seo-analyzer",
+        "slug": "data-seo-slug-analyzer",
+        "ai_readiness": "data-seo-ai-readiness-analyzer",
     }.get(analyzer_type, "data-seo-keyword-analyzer")
     return format_html(
         '<div class="seo-analyzer seo-analyzer--empty" {}><p>{}</p></div>',
@@ -161,7 +165,99 @@ def _source_badge(source: str) -> str:
     return labels.get(source, source)
 
 
-def render_open_graph_preview_html(tags: OpenGraphTags) -> str:
+def render_slug_analysis_html(result: SlugAnalysisResult) -> str:
+    if result.message and not result.checks:
+        return render_empty_analysis_html(result.message, analyzer_type="slug")
+
+    score_class = score_status_class(result.score)
+    slug_label = result.slug or "—"
+
+    return format_html(
+        '<div class="seo-analyzer" data-seo-slug-analyzer>'
+        '<div class="seo-analyzer__header">'
+        '<div class="seo-analyzer__score {}" data-seo-score-ring>'
+        '<span class="seo-analyzer__score-value" data-seo-score-value>{}</span>'
+        '<span class="seo-analyzer__score-label">/100</span>'
+        "</div>"
+        '<div class="seo-analyzer__meta">'
+        "<p><strong>Slug:</strong> "
+        '<code data-seo-slug-value>{}</code></p>'
+        "<p><strong>URL pregled:</strong> "
+        '<span data-seo-slug-preview-url>{}</span></p>'
+        '<p class="seo-analyzer__hint">'
+        "Analiza se ažurira dok menjate slug i fokus ključnu reč."
+        "</p></div></div>"
+        '<ul class="seo-analyzer__checks" data-seo-checks-list>{}</ul>'
+        '<div class="seo-analyzer__recommendations-wrap">'
+        "<h4>Preporuke</h4>"
+        '<ul class="seo-analyzer__recommendations" data-seo-recommendations-list>{}</ul>'
+        "</div></div>",
+        score_class,
+        result.score,
+        slug_label,
+        result.preview_url or "—",
+        _render_checks_html(result.checks),
+        format_html_join(
+            "",
+            '<li class="seo-analyzer__recommendation">{}</li>',
+            ((item,) for item in result.recommendations),
+        ),
+    )
+
+
+def render_ai_readiness_html(result: AiReadinessResult) -> str:
+    if result.message and not result.checks:
+        return render_empty_analysis_html(result.message, analyzer_type="ai_readiness")
+
+    score_class = score_status_class(result.score)
+
+    return format_html(
+        '<div class="seo-analyzer" data-seo-ai-readiness-analyzer>'
+        '<div class="seo-analyzer__header">'
+        '<div class="seo-analyzer__score {}" data-seo-score-ring>'
+        '<span class="seo-analyzer__score-value" data-seo-score-value>{}</span>'
+        '<span class="seo-analyzer__score-label">/100</span>'
+        "</div>"
+        '<div class="seo-analyzer__meta">'
+        "<p><strong>AI readiness</strong> — koliko je sadržaj razumljiv "
+        "AI pretragama (Google AI Overviews, ChatGPT, Perplexity).</p>"
+        '<p class="seo-analyzer__hint">'
+        "Analiza se ažurira dok menjate sadržaj u builderu."
+        "</p></div></div>"
+        '<ul class="seo-analyzer__checks" data-seo-checks-list>{}</ul>'
+        '<div class="seo-analyzer__recommendations-wrap">'
+        "<h4>Preporuke</h4>"
+        '<ul class="seo-analyzer__recommendations" data-seo-recommendations-list>{}</ul>'
+        "</div></div>",
+        score_class,
+        result.score,
+        _render_checks_html(result.checks),
+        format_html_join(
+            "",
+            '<li class="seo-analyzer__recommendation">{}</li>',
+            ((item,) for item in result.recommendations),
+        ),
+    )
+
+
+def _truncate_preview_text(text: str, max_length: int) -> str:
+    value = (text or "").strip()
+    if len(value) <= max_length:
+        return value
+    return value[: max_length - 1].rstrip() + "…"
+
+
+def render_open_graph_preview_html(
+    tags: OpenGraphTags,
+    *,
+    platform: str = DEFAULT_OG_PREVIEW_PLATFORM,
+) -> str:
+    profile = OG_PLATFORM_PROFILES.get(platform, OG_PLATFORM_PROFILES[DEFAULT_OG_PREVIEW_PLATFORM])
+    title = _truncate_preview_text(tags.og_title or "Naslov za deljenje", profile["title_max"])
+    description = _truncate_preview_text(
+        tags.og_description or "Opis za društvene mreže",
+        profile["description_max"],
+    )
     image_block = format_html(
         '<div class="seo-og-preview__image seo-og-preview__image--empty">'
         "<span>Bez slike</span></div>"
@@ -199,22 +295,51 @@ def render_open_graph_preview_html(tags: OpenGraphTags) -> str:
         ),
     )
 
+    tabs_html = format_html_join(
+        "",
+        (
+            '<button type="button" class="seo-og-preview__tab{}" '
+            'data-og-platform="{}" aria-pressed="{}">{}</button>'
+        ),
+        (
+            (
+                " seo-og-preview__tab--active" if key == platform else "",
+                key,
+                "true" if key == platform else "false",
+                value["label"],
+            )
+            for key, value in OG_PLATFORM_PROFILES.items()
+        ),
+    )
+
+    domain = ""
+    if tags.og_url:
+        domain = tags.og_url.replace("https://", "").replace("http://", "").split("/")[0]
+    elif tags.og_site_name:
+        domain = tags.og_site_name
+    else:
+        domain = f"{profile['label']} pregled"
+
     return format_html(
-        '<div class="seo-og-preview" data-seo-og-preview>'
-        '<div class="seo-og-preview__card">'
+        '<div class="seo-og-preview" data-seo-og-preview data-og-platform="{}">'
+        '<div class="seo-og-preview__tabs" role="tablist">{}</div>'
+        '<div class="seo-og-preview__card {}">'
         "{}"
         '<div class="seo-og-preview__body">'
-        '<p class="seo-og-preview__domain">{}</p>'
+        '<p class="seo-og-preview__domain" data-og-preview-domain>{}</p>'
         '<p class="seo-og-preview__title" data-og-preview-title>{}</p>'
         '<p class="seo-og-preview__description" data-og-preview-description>{}</p>'
         "</div></div>"
         "{}"
         '<table class="seo-og-preview__meta"><tbody>{}</tbody></table>'
         "</div>",
+        platform,
+        tabs_html,
+        profile["card_class"],
         image_block,
-        tags.og_url.replace("https://", "").replace("http://", "").split("/")[0] if tags.og_url else tags.og_site_name,
-        tags.og_title or "Naslov za deljenje",
-        tags.og_description or "Opis za društvene mreže",
+        domain,
+        title,
+        description,
         validation_html,
         meta_rows,
     )
@@ -839,6 +964,7 @@ def render_image_seo_html(result: ImageSeoResult) -> str:
             "<td>{}</td>"
             "<td>{}</td>"
             "<td>{}</td>"
+            "<td>{}</td>"
             "</tr>"
         ),
         (
@@ -856,13 +982,14 @@ def render_image_seo_html(result: ImageSeoResult) -> str:
                     if row.get("file_size_kb") is not None
                     else "—"
                 ),
+                row.get("loading", "—"),
             )
             for row in result.images
         ),
     )
     if not result.images:
         images_html = format_html(
-            '<tr><td colspan="5" class="seo-image-seo__empty">Nema slika u sadržaju.</td></tr>'
+            '<tr><td colspan="6" class="seo-image-seo__empty">Nema slika u sadržaju.</td></tr>'
         )
 
     issues_html = format_html_join(
@@ -907,7 +1034,7 @@ def render_image_seo_html(result: ImageSeoResult) -> str:
         "<h4>Slike</h4>"
         '<table class="seo-image-seo__table">'
         "<thead><tr>"
-        "<th>Lokacija</th><th>Fajl</th><th>Alt</th><th>Dimenzije</th><th>Veličina</th>"
+        "<th>Lokacija</th><th>Fajl</th><th>Alt</th><th>Dimenzije</th><th>Veličina</th><th>Loading</th>"
         "</tr></thead>"
         '<tbody data-seo-image-list>{}</tbody>'
         "</table></div>"

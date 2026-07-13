@@ -999,6 +999,7 @@
     state.dirty = true;
     setSaveStatus(state.postRoot, "dirty");
     syncPlaintextField(extractPlaintext(state.page));
+    state.postRoot.dispatchEvent(new CustomEvent("blog-page-builder:change", { bubbles: true }));
   }
 
   function extractPlaintext(page) {

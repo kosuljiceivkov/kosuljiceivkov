@@ -106,24 +106,37 @@
   margin-top: 14px;
   border-collapse: collapse;
   font-size: 0.8125rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+/* Eksplicitna pozadina na tr/th/td — admin dark tema inače boji redove u crno. */
+.seo-og-preview__meta tr {
+  background: transparent;
 }
 
 .seo-og-preview__meta th {
   text-align: left;
-  padding: 6px 8px 6px 0;
-  color: var(--body-quiet-color, #666);
+  padding: 8px 10px 8px 12px;
+  background: #f9fafb;
+  color: #374151;
   font-weight: 600;
   vertical-align: top;
   white-space: nowrap;
 }
 
 .seo-og-preview__meta td {
-  padding: 6px 0;
+  padding: 8px 12px 8px 0;
+  background: #f9fafb;
+  color: #1f2937;
   word-break: break-word;
 }
 
 .seo-og-preview__meta code {
   font-size: 0.78rem;
+  color: #111827;
+  background: #eef2ff;
 }
 
 .seo-og-preview__source {
@@ -171,5 +184,52 @@
 
 .seo-og-preview.is-loading {
   opacity: 0.65;
-  pointer-events: none;
+}
+
+.seo-og-preview__tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
+}
+
+.seo-og-preview__tab {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #374151;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+  z-index: 3;
+}
+
+/* Admin readonly polja ne smeju da blokiraju tabove. */
+.readonly .seo-og-preview,
+.readonly .seo-og-preview__tabs,
+.readonly .seo-og-preview__tab {
+  pointer-events: auto;
+}
+
+.seo-og-preview__tab--active {
+  background: #eef2ff;
+  border-color: #818cf8;
+  color: #312e81;
+  font-weight: 600;
+}
+
+.seo-og-preview__card--linkedin .seo-og-preview__title {
+  font-size: 0.95rem;
+}
+
+.seo-og-preview__card--whatsapp .seo-og-preview__title {
+  font-size: 0.9rem;
+}
+
+.seo-og-preview__card--whatsapp .seo-og-preview__description {
+  -webkit-line-clamp: 3;
 }

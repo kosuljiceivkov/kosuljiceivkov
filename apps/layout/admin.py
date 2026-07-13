@@ -15,6 +15,7 @@ from apps.layout.admin_change import build_projekti_change_form_context
 from apps.layout.admin_inlines import ProjektiSeoMetadataInline
 from apps.layout.admin_preview_links import get_admin_preview_url
 from apps.layout.forms import ProjektiPageAdminForm
+from apps.seo.admin import SeoAnalyzerAdminMixin
 
 from .models import CMSPage, ProjektiPage
 
@@ -22,6 +23,9 @@ from .models import CMSPage, ProjektiPage
 @admin.register(ProjektiPage)
 class ProjektiPageAdmin(admin.ModelAdmin):
     """Visual builder editor za stranicu /projekti/."""
+
+    class Media(SeoAnalyzerAdminMixin.Media):
+        pass
 
     change_form_template = "admin/layout/projektipage/change_form.html"
     form = ProjektiPageAdminForm

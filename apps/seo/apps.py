@@ -18,9 +18,11 @@ class SeoConfig(AppConfig):
         from django.urls import path
 
         from apps.seo.admin_views import (
+            ai_readiness_api,
             cornerstone_analysis_api,
             internal_linking_analysis_api,
             image_seo_analysis_api,
+            slug_analysis_api,
             keyword_analysis_api,
             open_graph_preview_api,
             readability_analysis_api,
@@ -34,6 +36,11 @@ class SeoConfig(AppConfig):
 
         def get_urls_with_seo_api():
             custom_urls = [
+                path(
+                    "seo/slug-analysis/",
+                    admin.site.admin_view(slug_analysis_api),
+                    name="seo_slug_analysis",
+                ),
                 path(
                     "seo/keyword-analysis/",
                     admin.site.admin_view(keyword_analysis_api),
@@ -83,6 +90,11 @@ class SeoConfig(AppConfig):
                     "seo/image-seo-analysis/",
                     admin.site.admin_view(image_seo_analysis_api),
                     name="seo_image_seo_analysis",
+                ),
+                path(
+                    "seo/ai-readiness/",
+                    admin.site.admin_view(ai_readiness_api),
+                    name="seo_ai_readiness",
                 ),
             ]
             return custom_urls + original_get_urls()
