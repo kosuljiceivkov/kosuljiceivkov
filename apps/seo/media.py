@@ -1,6 +1,5 @@
-"""SEO slike — istaknuta slika ili prva slika iz buildera."""
+"""SEO slike — istaknuta slika ili page JSON sadržaj."""
 
-from apps.seo.builder_images import get_first_builder_image_field
 from apps.seo.helpers import get_image_dimensions, resolve_absolute_url
 
 __all__ = ("get_image_dimensions", "get_page_seo_image", "apply_seo_image_to_context")
@@ -9,19 +8,23 @@ __all__ = ("get_image_dimensions", "get_page_seo_image", "apply_seo_image_to_con
 def get_page_seo_image(page_object, request=None, *, visible_only=True):
     """
     Vraća (apsolutni_url, širina, visina).
-    Prvo istaknuta slika, zatim prva slika iz page buildera.
+    Prvo istaknuta slika, zatim prva slika iz page JSON-a.
     """
+    _ = visible_only
     featured = getattr(page_object, "featured_image", None)
     if featured and getattr(featured, "name", ""):
         url = resolve_absolute_url(request, featured.url)
         width, height = get_image_dimensions(featured)
         return url, width, height
 
-    builder_image = get_first_builder_image_field(page_object, visible_only=visible_only)
-    if builder_image and getattr(builder_image, "name", ""):
-        url = resolve_absolute_url(request, builder_image.url)
-        width, height = get_image_dimensions(builder_image)
-        return url, width, height
+    from apps.seo.image_seo_content import get_first_page_image_src
+
+    should_render_page = getattr(page_object, "should_render_page", None)
+    if callable(should_render_page) and should_render_page():
+        page_src = get_first_page_image_src(page_object)
+        if page_src:
+            url = resolve_absolute_url(request, page_src)
+            return url or page_src, None, None
 
     return "", None, None
 

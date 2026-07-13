@@ -19,6 +19,11 @@
     return tokenInput ? tokenInput.value : "";
   }
 
+  function liveBodyPlaintext() {
+    var field = document.getElementById("id_body_plaintext");
+    return field ? field.value.trim() : null;
+  }
+
   function getReadabilityConfig(root) {
     if (root.nextElementSibling && root.nextElementSibling.classList.contains("seo-analyzer-config")) {
       return root.nextElementSibling;
@@ -79,9 +84,11 @@
 
     var timer = null;
     var inflight = null;
+    var requestId = 0;
 
     function runAnalysis() {
       if (inflight) inflight.abort();
+      var thisRequestId = ++requestId;
       inflight = new AbortController();
       root.classList.add("is-loading");
 
@@ -95,6 +102,8 @@
           content_type_id: config.dataset.contentTypeId || null,
           object_id: config.dataset.objectId || null,
           excerpt: parentFieldValue(form, "excerpt"),
+          // Live document overrides (Phase 2).
+          body_plaintext: liveBodyPlaintext(),
         }),
         signal: inflight.signal,
       })
@@ -103,6 +112,9 @@
           return response.json();
         })
         .then(function (data) {
+          if (thisRequestId !== requestId) {
+            return;
+          }
           var scoreValue = root.querySelector("[data-seo-score-value]");
           var scoreRing = root.querySelector("[data-seo-score-ring]");
           var difficultyLabel = root.querySelector("[data-seo-difficulty-label]");
@@ -132,7 +144,10 @@
           }
         })
         .finally(function () {
-          root.classList.remove("is-loading");
+          if (thisRequestId === requestId) {
+            root.classList.remove("is-loading");
+            inflight = null;
+          }
         });
     }
 
@@ -145,6 +160,12 @@
     if (excerptInput) {
       excerptInput.addEventListener("input", scheduleAnalysis);
       excerptInput.addEventListener("change", scheduleAnalysis);
+    }
+
+    var bodyPlaintextInput = form.querySelector("#id_body_plaintext");
+    if (bodyPlaintextInput) {
+      bodyPlaintextInput.addEventListener("input", scheduleAnalysis);
+      bodyPlaintextInput.addEventListener("change", scheduleAnalysis);
     }
   }
 

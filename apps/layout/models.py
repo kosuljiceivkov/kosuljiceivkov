@@ -3,13 +3,12 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from apps.core.mixins import SeoContentMixin, TimestampMixin
+from apps.page.constants import PAGE_FORMAT_V1
+from apps.page.schema import page_has_content
 
 
 class CMSPage(SeoContentMixin, TimestampMixin):
-    """
-    CMS stranica — osnova za budući page builder.
-    Specijalni tipovi (npr. projekti) imaju fiksne javne rute.
-    """
+    """CMS stranica sa visual builder sadržajem."""
 
     class PageType(models.TextChoices):
         PROJEKTI = "projekti", "Projekti"
@@ -37,11 +36,29 @@ class CMSPage(SeoContentMixin, TimestampMixin):
         default=True,
         help_text="Neaktivne stranice nisu dostupne posetiocima.",
     )
-    builder_sections = GenericRelation(
-        "layout.Section",
-        related_query_name="cms_page",
-        content_type_field="content_type",
-        object_id_field="object_id",
+    body_page = models.JSONField(
+        "Sadržaj (page JSON)",
+        null=True,
+        blank=True,
+        help_text="Interni iv_page_v1 format za visual builder.",
+    )
+    body_plaintext = models.TextField(
+        "Sadržaj (običan tekst)",
+        blank=True,
+        editable=False,
+        help_text="Automatski izvučen iz page JSON-a za pretragu i SEO.",
+    )
+    body_format = models.CharField(
+        "Format sadržaja",
+        max_length=32,
+        blank=True,
+        default=PAGE_FORMAT_V1,
+        help_text="Verzija internog page formata, npr. iv_page_v1.",
+    )
+    page_version = models.PositiveIntegerField(
+        "Verzija stranice",
+        default=0,
+        help_text="Raste monotono pri svakoj promeni page sadržaja (čuvanje, konflikti).",
     )
     seo_metadata = GenericRelation(
         "seo.SeoMetadata",
@@ -99,10 +116,16 @@ class CMSPage(SeoContentMixin, TimestampMixin):
 
         return get_projekti_page()
 
-    def get_builder_sections(self, *, visible_only=True):
-        from apps.layout.builder_services import get_sections_for_object
+    def has_page_content(self) -> bool:
+        return page_has_content(self.body_page)
 
-        return get_sections_for_object(self, visible_only=visible_only)
+    def should_render_page(self) -> bool:
+        return self.has_page_content()
+
+    def apply_body_page(self, page: dict):
+        from apps.page.update import apply_body_page_update
+
+        return apply_body_page_update(self, page)
 
     def get_seo_context(self, request=None, *, og_type="website"):
         from apps.seo.services import build_seo_context

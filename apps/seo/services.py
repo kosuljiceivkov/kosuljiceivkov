@@ -272,6 +272,31 @@ def refresh_seo_scores(instance: SeoMetadata) -> None:
     instance.image_seo_score = image_result.score
 
 
+SEO_SCORE_UPDATE_FIELDS = (
+    "seo_score",
+    "keyword_score",
+    "readability_score",
+    "internal_linking_score",
+    "image_seo_score",
+    "updated_at",
+)
+
+
+def persist_seo_scores_for_content(content_object) -> SeoMetadata | None:
+    """
+    Recompute and persist stored SEO scores for an existing SeoMetadata row.
+
+    No-op when the content object has no SEO metadata. Score computation runs via
+    the existing SeoMetadata pre_save path (refresh_seo_scores).
+    """
+    metadata = get_seo_metadata(content_object)
+    if metadata is None:
+        return None
+
+    metadata.save(update_fields=list(SEO_SCORE_UPDATE_FIELDS))
+    return metadata
+
+
 def supports_seo(content_object) -> bool:
     """Proverava da li tip sadržaja podržava SEO mixin."""
     return hasattr(content_object, "get_seo_context") and hasattr(

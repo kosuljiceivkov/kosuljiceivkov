@@ -1,8 +1,0 @@
-<div
-    class="builder-row builder-row--gap-{{ row.gap }} builder-row--align-{{ row.vertical_align }}"
-    data-row-id="{{ row.pk }}"
->
-    {% for column in row.columns.all %}
-        {% include "builder/column.html" with column=column %}
-    {% endfor %}
-</div>

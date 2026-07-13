@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 
 from apps.blog.models import BlogCategory, BlogPost
 
-PUBLISHED_POST_FIELDS = (
+PUBLISHED_POST_LIST_FIELDS = (
     "id",
     "title",
     "slug",
@@ -15,13 +15,19 @@ PUBLISHED_POST_FIELDS = (
     "category_id",
 )
 
+PUBLISHED_POST_DETAIL_FIELDS = PUBLISHED_POST_LIST_FIELDS + (
+    "body_page",
+    "body_plaintext",
+    "page_version",
+)
+
 
 def get_published_posts_queryset(*, category=None):
     queryset = (
         BlogPost.objects.publicly_visible()
         .select_related("category", "category__parent")
         .prefetch_related("seo_metadata")
-        .only(*PUBLISHED_POST_FIELDS)
+        .only(*PUBLISHED_POST_LIST_FIELDS)
         .order_by("-publish_date", "-created_at")
     )
     if category is None:
@@ -40,7 +46,7 @@ def get_published_post(slug):
         BlogPost.objects.publicly_visible()
         .select_related("category", "category__parent")
         .prefetch_related("seo_metadata")
-        .only(*PUBLISHED_POST_FIELDS),
+        .only(*PUBLISHED_POST_DETAIL_FIELDS),
         slug=slug,
     )
 

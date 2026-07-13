@@ -35,6 +35,16 @@ from apps.seo.schema.validation import SchemaValidationResult
 from apps.seo.services import get_seo_metadata
 
 
+def _apply_live_editor_overrides(content_object, payload: dict) -> None:
+    """Primeni nesnimljeno stanje editora na objekat za live SEO analizu."""
+    if content_object is None:
+        return
+
+    body_plaintext = payload.get("body_plaintext", None)
+    if body_plaintext is not None:
+        content_object.body_plaintext = body_plaintext or ""
+
+
 @require_POST
 def image_seo_analysis_api(request):
     try:
@@ -44,6 +54,8 @@ def image_seo_analysis_api(request):
 
     content_object = _load_content_object(payload)
     metadata = get_seo_metadata(content_object) if content_object else None
+
+    _apply_live_editor_overrides(content_object, payload)
 
     if content_object is not None:
         result = analyze_image_seo(content_object, metadata, visible_only=False)
@@ -92,6 +104,8 @@ def unified_score_api(request):
     metadata = get_seo_metadata(content_object) if content_object else None
     overrides = _payload_overrides(payload)
 
+    _apply_live_editor_overrides(content_object, payload)
+
     if content_object is not None:
         result = analyze_unified_seo(
             content_object,
@@ -122,6 +136,8 @@ def keyword_analysis_api(request):
     content_object = _load_content_object(payload)
     metadata = get_seo_metadata(content_object) if content_object else None
     overrides = _payload_overrides(payload)
+
+    _apply_live_editor_overrides(content_object, payload)
 
     if content_object is not None:
         result = analyze_content_object(
@@ -158,6 +174,8 @@ def readability_analysis_api(request):
 
     content_object = _load_content_object(payload)
     overrides = {"excerpt": payload.get("excerpt", "")}
+
+    _apply_live_editor_overrides(content_object, payload)
 
     if content_object is not None:
         result = analyze_readability_for_object(
@@ -246,6 +264,8 @@ def cornerstone_analysis_api(request):
     overrides = _payload_overrides(payload)
     overrides["is_cornerstone"] = _parse_bool(payload.get("is_cornerstone"))
 
+    _apply_live_editor_overrides(content_object, payload)
+
     if content_object is not None:
         result = analyze_cornerstone_content(
             content_object,
@@ -275,6 +295,8 @@ def internal_linking_analysis_api(request):
     content_object = _load_content_object(payload)
     metadata = get_seo_metadata(content_object) if content_object else None
     overrides = _payload_overrides(payload)
+
+    _apply_live_editor_overrides(content_object, payload)
 
     if content_object is not None:
         result = analyze_internal_linking(

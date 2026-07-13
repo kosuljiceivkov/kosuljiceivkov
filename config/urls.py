@@ -17,7 +17,6 @@ urlpatterns = [
         RedirectView.as_view(url=static_url(settings.SITE_FAVICON_PNG), permanent=True),
         name="favicon",
     ),
-    path("_nested_admin/", include("nested_admin.urls")),
     path("admin/", admin.site.urls),
     path("robots.txt", robots_txt, name="robots"),
     path(

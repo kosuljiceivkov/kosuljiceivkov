@@ -1,5 +1,5 @@
 """
-Detekcija osiroćenih GenericForeignKey redova i povezanog builder/SEO sadržaja.
+Detekcija osiroćenih GenericForeignKey redova i SEO sadržaja.
 """
 from __future__ import annotations
 
@@ -99,100 +99,10 @@ def _audit_gfk_model(model: type[models.Model]) -> OrphanAuditReport:
 
 
 def audit_broken_generic_references() -> OrphanAuditReport:
-    """Section i SeoMetadata redovi čiji vlasnik ne postoji."""
-    from apps.layout.builder_models import Section
+    """SeoMetadata redovi čiji vlasnik ne postoji."""
     from apps.seo.models import SeoMetadata
 
-    report = OrphanAuditReport()
-    report.merge(_audit_gfk_model(Section))
-    report.merge(_audit_gfk_model(SeoMetadata))
-    return report
-
-
-def audit_builder_hierarchy_integrity() -> OrphanAuditReport:
-    """FK lanac buildera — redovi bez roditelja (van normalnog CASCADE-a)."""
-    from apps.layout.builder_models import (
-        Block,
-        BlockGalleryImage,
-        Carousel,
-        CarouselItem,
-        Column,
-        Row,
-        Section,
-    )
-
-    report = OrphanAuditReport()
-    section_ids = set(Section.objects.values_list("pk", flat=True))
-    row_ids = set(Row.objects.values_list("pk", flat=True))
-    column_ids = set(Column.objects.values_list("pk", flat=True))
-    block_ids = set(Block.objects.values_list("pk", flat=True))
-    carousel_ids = set(Carousel.objects.values_list("pk", flat=True))
-
-    for row in Row.objects.exclude(section_id__in=section_ids).only("pk", "section_id"):
-        report.findings.append(
-            OrphanAuditFinding(
-                category="orphaned_builder_row",
-                model_label=Row._meta.label,
-                pk=row.pk,
-                detail=f"section_id={row.section_id} ne postoji",
-            )
-        )
-
-    for column in Column.objects.exclude(row_id__in=row_ids).only("pk", "row_id"):
-        report.findings.append(
-            OrphanAuditFinding(
-                category="orphaned_builder_column",
-                model_label=Column._meta.label,
-                pk=column.pk,
-                detail=f"row_id={column.row_id} ne postoji",
-            )
-        )
-
-    for block in Block.objects.exclude(column_id__in=column_ids).only("pk", "column_id"):
-        report.findings.append(
-            OrphanAuditFinding(
-                category="orphaned_builder_block",
-                model_label=Block._meta.label,
-                pk=block.pk,
-                detail=f"column_id={block.column_id} ne postoji",
-            )
-        )
-
-    for image in BlockGalleryImage.objects.exclude(block_id__in=block_ids).only(
-        "pk", "block_id"
-    ):
-        report.findings.append(
-            OrphanAuditFinding(
-                category="orphaned_gallery_image",
-                model_label=BlockGalleryImage._meta.label,
-                pk=image.pk,
-                detail=f"block_id={image.block_id} ne postoji",
-            )
-        )
-
-    for carousel in Carousel.objects.exclude(block_id__in=block_ids).only("pk", "block_id"):
-        report.findings.append(
-            OrphanAuditFinding(
-                category="orphaned_carousel",
-                model_label=Carousel._meta.label,
-                pk=carousel.pk,
-                detail=f"block_id={carousel.block_id} ne postoji",
-            )
-        )
-
-    for item in CarouselItem.objects.exclude(carousel_id__in=carousel_ids).only(
-        "pk", "carousel_id"
-    ):
-        report.findings.append(
-            OrphanAuditFinding(
-                category="orphaned_carousel_item",
-                model_label=CarouselItem._meta.label,
-                pk=item.pk,
-                detail=f"carousel_id={item.carousel_id} ne postoji",
-            )
-        )
-
-    return report
+    return _audit_gfk_model(SeoMetadata)
 
 
 def audit_orphaned_media_references() -> OrphanAuditReport:
@@ -232,7 +142,6 @@ def audit_orphaned_media_references() -> OrphanAuditReport:
 def run_orphan_audit(*, include_media: bool = True) -> OrphanAuditReport:
     report = OrphanAuditReport()
     report.merge(audit_broken_generic_references())
-    report.merge(audit_builder_hierarchy_integrity())
     if include_media:
         report.merge(audit_orphaned_media_references())
     return report

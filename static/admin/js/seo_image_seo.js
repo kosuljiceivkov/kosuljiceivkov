@@ -1,6 +1,8 @@
 (function () {
   "use strict";
 
+  var DEBOUNCE_MS = 650;
+
   function scoreClass(score) {
     if (score >= 70) return "seo-analyzer__score--good";
     if (score >= 40) return "seo-analyzer__score--ok";
@@ -17,6 +19,11 @@
       return root.nextElementSibling;
     }
     return null;
+  }
+
+  function liveBodyPlaintext() {
+    var field = document.getElementById("id_body_plaintext");
+    return field ? field.value.trim() : null;
   }
 
   function renderChecks(container, checks) {
@@ -115,10 +122,13 @@
     var apiUrl = config ? config.dataset.seoAnalyzerApi : null;
     if (!apiUrl || !config.dataset.objectId) return;
 
+    var timer = null;
     var inflight = null;
+    var requestId = 0;
 
     function runAnalysis() {
       if (inflight) inflight.abort();
+      var thisRequestId = ++requestId;
       inflight = new AbortController();
       root.classList.add("is-loading");
 
@@ -131,6 +141,8 @@
         body: JSON.stringify({
           content_type_id: config.dataset.contentTypeId,
           object_id: config.dataset.objectId,
+          // Live document overrides (Phase 2).
+          body_plaintext: liveBodyPlaintext(),
         }),
         signal: inflight.signal,
       })
@@ -139,6 +151,9 @@
           return response.json();
         })
         .then(function (data) {
+          if (thisRequestId !== requestId) {
+            return;
+          }
           if (data.message && !data.checks) return;
 
           var scoreValue = root.querySelector("[data-seo-score-value]");
@@ -172,8 +187,22 @@
           }
         })
         .finally(function () {
-          root.classList.remove("is-loading");
+          if (thisRequestId === requestId) {
+            root.classList.remove("is-loading");
+            inflight = null;
+          }
         });
+    }
+
+    function scheduleAnalysis() {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(runAnalysis, DEBOUNCE_MS);
+    }
+
+    var bodyPlaintextInput = form.querySelector("#id_body_plaintext");
+    if (bodyPlaintextInput) {
+      bodyPlaintextInput.addEventListener("input", scheduleAnalysis);
+      bodyPlaintextInput.addEventListener("change", scheduleAnalysis);
     }
 
     runAnalysis();

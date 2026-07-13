@@ -24,6 +24,11 @@
     return tokenInput ? tokenInput.value : "";
   }
 
+  function liveBodyPlaintext() {
+    var field = document.getElementById("id_body_plaintext");
+    return field ? field.value.trim() : null;
+  }
+
   function getConfig(root) {
     if (root.nextElementSibling && root.nextElementSibling.classList.contains("seo-analyzer-config")) {
       return root.nextElementSibling;
@@ -41,6 +46,7 @@
       seo_title: fieldValue(form, "seo_title"),
       meta_description: fieldValue(form, "meta_description"),
       focus_keyword: fieldValue(form, "focus_keyword"),
+      body_plaintext: liveBodyPlaintext(),
     };
   }
 
@@ -92,9 +98,11 @@
 
     var timer = null;
     var inflight = null;
+    var requestId = 0;
 
     function runAnalysis() {
       if (inflight) inflight.abort();
+      var thisRequestId = ++requestId;
       inflight = new AbortController();
       root.classList.add("is-loading");
 
@@ -112,6 +120,9 @@
           return response.json();
         })
         .then(function (data) {
+          if (thisRequestId !== requestId) {
+            return;
+          }
           var scoreValue = root.querySelector("[data-seo-score-value]");
           var scoreRing = root.querySelector("[data-seo-score-ring]");
           var focusKeyword = root.querySelector("[data-seo-focus-keyword]");
@@ -132,7 +143,10 @@
           }
         })
         .finally(function () {
-          root.classList.remove("is-loading");
+          if (thisRequestId === requestId) {
+            root.classList.remove("is-loading");
+            inflight = null;
+          }
         });
     }
 
@@ -156,6 +170,13 @@
         input.addEventListener("change", scheduleAnalysis);
       }
     });
+
+    // Document JSON changes sync into `#id_body_plaintext`; trigger analysis on typing.
+    var bodyPlaintextInput = form.querySelector("#id_body_plaintext");
+    if (bodyPlaintextInput) {
+      bodyPlaintextInput.addEventListener("input", scheduleAnalysis);
+      bodyPlaintextInput.addEventListener("change", scheduleAnalysis);
+    }
   }
 
   function boot() {

@@ -1,0 +1,16 @@
+{% load seo_tags %}
+<section class="page-hero page-hero--compact{% if extra_class %} {{ extra_class }}{% endif %}">
+    <div class="container"{% if animate != False %} data-animate="fade-up"{% endif %}>
+        {% if seo_object %}
+            {% render_breadcrumbs seo_object %}
+        {% else %}
+            {% render_breadcrumbs %}
+        {% endif %}
+        {% if title %}
+        <h1 class="page-hero__title">{{ title }}</h1>
+        {% endif %}
+        {% if lead %}
+        <p class="page-hero__lead">{{ lead }}</p>
+        {% endif %}
+    </div>
+</section>

@@ -8,6 +8,8 @@ from django.utils import timezone
 
 from apps.core.mixins import TimestampMixin
 
+from apps.page.schema import page_has_content
+
 from .querysets import BlogCategoryManager, BlogPostManager
 
 
@@ -121,7 +123,24 @@ class BlogPost(SeoContentMixin, TimestampMixin):
         upload_to="blog/featured/%Y/%m/",
         storage=blog_images_storage,
         blank=True,
-        help_text="Prikazuje se na kartici u listi bloga. Sadržaj članka gradi se u builderu ispod.",
+        help_text="Prikazuje se na kartici u listi bloga i u zaglavlju članka.",
+    )
+    body_page = models.JSONField(
+        "Sadržaj (page JSON)",
+        null=True,
+        blank=True,
+        help_text="Interni iv_page_v1 format za visual builder.",
+    )
+    body_plaintext = models.TextField(
+        "Sadržaj (običan tekst)",
+        blank=True,
+        editable=False,
+        help_text="Automatski izvučen iz page JSON-a za pretragu i SEO.",
+    )
+    page_version = models.PositiveIntegerField(
+        "Verzija stranice",
+        default=0,
+        help_text="Raste monotono pri svakoj promeni page sadržaja (čuvanje, konflikti, revizije).",
     )
     publish_date = models.DateField(
         "Datum objave",
@@ -141,12 +160,6 @@ class BlogPost(SeoContentMixin, TimestampMixin):
         related_name="posts",
         verbose_name="Kategorija",
         help_text="Koristi se za hijerarhijske breadcrumb stavke i filtriranje.",
-    )
-    builder_sections = GenericRelation(
-        "layout.Section",
-        related_query_name="blog_post",
-        content_type_field="content_type",
-        object_id_field="object_id",
     )
     seo_metadata = GenericRelation(
         "seo.SeoMetadata",
@@ -168,10 +181,16 @@ class BlogPost(SeoContentMixin, TimestampMixin):
     def get_absolute_url(self):
         return reverse("frontend:blog_detail", kwargs={"slug": self.slug})
 
-    def get_builder_sections(self, *, visible_only=True):
-        from apps.layout.builder_services import get_sections_for_object
+    def has_page_content(self) -> bool:
+        return page_has_content(self.body_page)
 
-        return get_sections_for_object(self, visible_only=visible_only)
+    def should_render_page(self) -> bool:
+        return self.has_page_content()
+
+    def apply_body_page(self, page: dict) -> "PageUpdateResult":
+        from apps.page.update import PageUpdateResult, apply_body_page_update
+
+        return apply_body_page_update(self, page)
 
     def get_seo_context(self, request=None, *, og_type="article"):
         from apps.seo.services import build_seo_context

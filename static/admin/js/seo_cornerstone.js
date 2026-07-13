@@ -29,6 +29,11 @@
     return tokenInput ? tokenInput.value : "";
   }
 
+  function liveBodyPlaintext() {
+    var field = document.getElementById("id_body_plaintext");
+    return field ? field.value.trim() : null;
+  }
+
   function getConfig(root) {
     if (root.nextElementSibling && root.nextElementSibling.classList.contains("seo-analyzer-config")) {
       return root.nextElementSibling;
@@ -47,6 +52,7 @@
       meta_description: fieldValue(form, "meta_description"),
       focus_keyword: fieldValue(form, "focus_keyword"),
       is_cornerstone: checkboxValue(form, "is_cornerstone"),
+      body_plaintext: liveBodyPlaintext(),
     };
   }
 
@@ -192,9 +198,11 @@
 
     var timer = null;
     var inflight = null;
+    var requestId = 0;
 
     function runAnalysis() {
       if (inflight) inflight.abort();
+      var thisRequestId = ++requestId;
       inflight = new AbortController();
       root.classList.add("is-loading");
 
@@ -212,6 +220,9 @@
           return response.json();
         })
         .then(function (data) {
+          if (thisRequestId !== requestId) {
+            return;
+          }
           if (data.message && !data.checks) {
             root.innerHTML = "<p>" + data.message + "</p>";
             return;
@@ -249,7 +260,10 @@
           }
         })
         .finally(function () {
-          root.classList.remove("is-loading");
+          if (thisRequestId === requestId) {
+            root.classList.remove("is-loading");
+            inflight = null;
+          }
         });
     }
 
@@ -278,6 +292,12 @@
         input.addEventListener("change", scheduleAnalysis);
       }
     });
+
+    var bodyPlaintextInput = form.querySelector("#id_body_plaintext");
+    if (bodyPlaintextInput) {
+      bodyPlaintextInput.addEventListener("input", scheduleAnalysis);
+      bodyPlaintextInput.addEventListener("change", scheduleAnalysis);
+    }
   }
 
   function boot() {

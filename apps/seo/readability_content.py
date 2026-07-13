@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from apps.layout.builder_models import Block
-from apps.seo.content_analysis import _iter_blocks, _paragraph_text, _heading_text
+from apps.page.constants import BlockType as PageBlockType
 from apps.seo.content_text import get_content_plain_text, normalize_whitespace, split_sentences
 
 
@@ -41,48 +40,60 @@ def re_split_paragraphs(text: str) -> list[str]:
 
 
 def extract_readability_content(page_object, *, visible_only=False) -> ReadabilityContentInput:
-    paragraphs: list[str] = []
-    headings: list[HeadingEntry] = []
-    content_chunks: list[str] = []
+    should_render_page = getattr(page_object, "should_render_page", None)
+    if callable(should_render_page) and should_render_page():
+        paragraphs: list[str] = []
+        headings: list[HeadingEntry] = []
 
-    excerpt = getattr(page_object, "excerpt", "") if page_object else ""
-    if excerpt and excerpt.strip():
-        paragraphs.extend(_split_paragraphs(excerpt.strip()))
-        content_chunks.append(excerpt.strip())
+        excerpt = getattr(page_object, "excerpt", "") if page_object else ""
+        if excerpt and excerpt.strip():
+            paragraphs.extend(_split_paragraphs(excerpt.strip()))
 
-    for block in _iter_blocks(page_object, visible_only=visible_only):
-        heading = _heading_text(block)
-        if heading:
-            headings.append(
-                HeadingEntry(
-                    level=block.heading_level or Block.HeadingLevel.H2,
-                    text=heading,
-                )
-            )
-            content_chunks.append(heading)
+        title = normalize_whitespace(getattr(page_object, "title", "") or "")
+        if title:
+            headings.append(HeadingEntry(level="h1", text=title))
 
-        paragraph = _paragraph_text(block)
-        if paragraph:
-            paragraphs.extend(_split_paragraphs(paragraph) or [paragraph])
-            content_chunks.append(paragraph)
+        body_page = getattr(page_object, "body_page", None) or {}
+        for section in body_page.get("sections") or []:
+            for row in section.get("rows") or []:
+                for column in row.get("columns") or []:
+                    for block in column.get("blocks") or []:
+                        if not isinstance(block, dict):
+                            continue
+                        block_type = block.get("type")
+                        attrs = block.get("attrs") or {}
+                        if block_type == PageBlockType.HEADING:
+                            heading_text = normalize_whitespace(str(attrs.get("text", "")))
+                            level = str(attrs.get("level", 2))
+                            if heading_text:
+                                headings.append(HeadingEntry(level=f"h{level}", text=heading_text))
+                        if block_type == PageBlockType.TEXT:
+                            paragraph_text = normalize_whitespace(str(attrs.get("text", "")))
+                            if paragraph_text:
+                                paragraphs.extend(_split_paragraphs(paragraph_text) or [paragraph_text])
 
-    if page_object is not None and getattr(page_object, "pk", None):
         full_text = get_content_plain_text(page_object, visible_only=visible_only, max_length=20000)
-    else:
-        full_text = normalize_whitespace(" ".join(content_chunks))
+        if not paragraphs and full_text:
+            paragraphs = split_sentences(full_text) or [full_text]
+        sentences = split_sentences(full_text)
+        word_count = len(full_text.split()) if full_text else 0
+        return ReadabilityContentInput(
+            content=full_text.strip(),
+            sentences=sentences,
+            paragraphs=paragraphs,
+            headings=headings,
+            word_count=word_count,
+        )
 
-    if not paragraphs and full_text:
-        paragraphs = split_sentences(full_text) or [full_text]
-
+    full_text = get_content_plain_text(page_object, visible_only=visible_only, max_length=20000)
+    paragraphs = _split_paragraphs(full_text) if full_text else []
     sentences = split_sentences(full_text)
-    word_count = len(full_text.split()) if full_text else 0
-
     return ReadabilityContentInput(
         content=full_text.strip(),
         sentences=sentences,
         paragraphs=paragraphs,
-        headings=headings,
-        word_count=word_count,
+        headings=[],
+        word_count=len(full_text.split()) if full_text else 0,
     )
 
 

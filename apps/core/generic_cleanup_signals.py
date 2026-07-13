@@ -1,5 +1,5 @@
 """
-Signali za automatsko brisanje GenericForeignKey sadržaja (builder, SEO).
+Signali za automatsko brisanje GenericForeignKey sadržaja (SEO) i JSON medija.
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ def _on_owner_pre_delete(sender, instance, **kwargs):
 
 
 def connect_generic_cleanup_signals() -> None:
-    """Povezuje pre_delete na modele sa builder_sections / seo_metadata."""
+    """Povezuje pre_delete na modele sa seo_metadata."""
     global _signals_connected
     if _signals_connected:
         return

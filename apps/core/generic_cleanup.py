@@ -1,5 +1,5 @@
 """
-Brisanje sadržaja vezanog preko GenericForeignKey (builder, SEO) pri brisanju vlasnika.
+Brisanje sadržaja vezanog preko GenericForeignKey (SEO) pri brisanju vlasnika.
 """
 from __future__ import annotations
 
@@ -12,13 +12,12 @@ from django.db import models
 logger = logging.getLogger("apps.core.generic_cleanup")
 
 GENERIC_OWNED_RELATION_NAMES: tuple[str, ...] = (
-    "builder_sections",
     "seo_metadata",
 )
 
 
 def iter_generic_content_owner_models() -> Iterable[type[models.Model]]:
-    """Modeli koji imaju builder_sections i/ili seo_metadata GenericRelation."""
+    """Modeli koji imaju seo_metadata GenericRelation."""
     for model in apps.get_models():
         if model._meta.abstract or model._meta.proxy:
             continue
@@ -27,12 +26,7 @@ def iter_generic_content_owner_models() -> Iterable[type[models.Model]]:
 
 
 def cleanup_generic_owned_content(instance: models.Model) -> dict[str, int]:
-    """
-    Obriši sav builder i SEO sadržaj vezan za instancu pre brisanja vlasnika.
-
-    Section.delete() kaskadno uklanja Row → Column → Block → galeriju/karusel.
-    post_delete signali za medije se okidaju za svaki obrisani model.
-    """
+    """Obriši sav SEO sadržaj vezan za instancu pre brisanja vlasnika."""
     deleted_counts: dict[str, int] = {}
 
     for relation_name in GENERIC_OWNED_RELATION_NAMES:
@@ -57,5 +51,7 @@ def cleanup_generic_owned_content(instance: models.Model) -> dict[str, int]:
 
 
 def cleanup_generic_owned_content_before_delete(instance: models.Model) -> None:
-    """Poziva se iz pre_delete — GFK deca moraju nestati pre vlasnika."""
+    from apps.core.json_media import cleanup_host_json_media
+
+    cleanup_host_json_media(instance)
     cleanup_generic_owned_content(instance)

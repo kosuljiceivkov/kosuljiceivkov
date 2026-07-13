@@ -4,7 +4,7 @@ from apps.layout.models import CMSPage
 
 
 class ProjektiPageAdminForm(forms.ModelForm):
-    """Pojednostavljena forma — slug i tip su uvek fiksni."""
+    """Forma za visual builder — slug i tip su uvek fiksni."""
 
     class Meta:
         model = CMSPage

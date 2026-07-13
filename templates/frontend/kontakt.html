@@ -1,18 +1,9 @@
 {% extends "base.html" %}
-{% load seo_tags %}
 
 {% block body_class %}page-kontakt{% endblock %}
 
 {% block content %}
-<section class="page-hero page-hero--compact contact-hero">
-    <div class="container">
-        {% render_breadcrumbs %}
-        <h1 class="page-hero__title">Kontakt</h1>
-        <p class="page-hero__lead">
-            Za procenu, ponudu i dogovor oko radova pozovite nas direktno — odgovaramo telefonom.
-        </p>
-    </div>
-</section>
+{% include "partials/page_breadcrumb_hero.html" with extra_class="contact-hero" title="Kontakt" lead="Za procenu, ponudu i dogovor oko radova pozovite nas direktno — odgovaramo telefonom." animate=False %}
 
 <section class="section contact-page">
     <div class="container contact-page__content">

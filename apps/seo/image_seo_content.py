@@ -5,11 +5,11 @@ from __future__ import annotations
 import os
 import re
 from dataclasses import dataclass
+from urllib.parse import urlparse
 
 from PIL import Image, UnidentifiedImageError
 
-from apps.layout.builder_models import Block
-from apps.seo.content_analysis import _iter_blocks
+from apps.page.constants import BlockType as PageBlockType
 from apps.seo.helpers import get_image_dimensions
 
 _FILENAME_STEM = re.compile(r"^(.+?)(?:\.[a-z0-9]{2,5})?$", re.I)
@@ -43,35 +43,25 @@ def _text_has_alt(value: str) -> bool:
 
 def page_has_missing_alt(page_object, *, visible_only: bool = False) -> bool:
     """Brza provera alt teksta bez otvaranja fajlova slika."""
+    _ = visible_only
     if page_object is None or not getattr(page_object, "pk", None):
         return False
 
-    featured = getattr(page_object, "featured_image", None)
-    if featured and getattr(featured, "name", ""):
-        title_alt = getattr(page_object, "title", "") or ""
-        if not _text_has_alt(title_alt):
-            return True
-
-    for block in _iter_blocks(page_object, visible_only=visible_only):
-        if block.block_type == Block.BlockType.IMAGE and block.image:
-            if getattr(block.image, "name", "") and not _text_has_alt(
-                block.image_alt or block.image_caption
-            ):
-                return True
-
-        if block.block_type == Block.BlockType.GALLERY:
-            for gallery_image in block.gallery_images.all():
-                if gallery_image.image and getattr(gallery_image.image, "name", ""):
-                    if not _text_has_alt(gallery_image.alt_text or gallery_image.caption):
-                        return True
-
-        if block.block_type == Block.BlockType.CAROUSEL:
-            carousel = getattr(block, "carousel", None)
-            if carousel is not None:
-                for item in carousel.items.all():
-                    if item.image and getattr(item.image, "name", ""):
-                        if not _text_has_alt(item.alt_text or item.title):
+    should_render_page = getattr(page_object, "should_render_page", None)
+    if callable(should_render_page) and should_render_page():
+        body_page = getattr(page_object, "body_page", None) or {}
+        for section in body_page.get("sections") or []:
+            for row in section.get("rows") or []:
+                for column in row.get("columns") or []:
+                    for block in column.get("blocks") or []:
+                        if not isinstance(block, dict) or block.get("type") != PageBlockType.IMAGE:
+                            continue
+                        attrs = block.get("attrs") or {}
+                        src = str(attrs.get("src") or attrs.get("path") or "").strip()
+                        alt = str(attrs.get("alt") or "").strip()
+                        if src and not alt:
                             return True
+        return False
 
     return False
 
@@ -136,11 +126,75 @@ def _entry_from_field(
     )
 
 
+def get_first_page_image_src(page_object) -> str:
+    should_render_page = getattr(page_object, "should_render_page", None)
+    if not callable(should_render_page) or not should_render_page():
+        return ""
+
+    body_page = getattr(page_object, "body_page", None) or {}
+    for section in body_page.get("sections") or []:
+        for row in section.get("rows") or []:
+            for column in row.get("columns") or []:
+                for block in column.get("blocks") or []:
+                    if not isinstance(block, dict) or block.get("type") != PageBlockType.IMAGE:
+                        continue
+                    attrs = block.get("attrs") or {}
+                    src = str(attrs.get("src") or attrs.get("path") or "").strip()
+                    if src:
+                        return src
+    return ""
+
+
 def collect_page_images(page_object, *, visible_only: bool = False) -> list[PageImageEntry]:
+    _ = visible_only
     if page_object is None or not getattr(page_object, "pk", None):
         return []
 
     images: list[PageImageEntry] = []
+
+    should_render_page = getattr(page_object, "should_render_page", None)
+    if callable(should_render_page) and should_render_page():
+        featured = getattr(page_object, "featured_image", None)
+        featured_entry = _entry_from_field(
+            image_field=featured,
+            source="featured",
+            label="Istaknuta slika",
+            alt_text=getattr(page_object, "title", "") or "",
+        )
+        if featured_entry is not None:
+            images.append(featured_entry)
+
+        body_page = getattr(page_object, "body_page", None) or {}
+        index = 0
+        for section in body_page.get("sections") or []:
+            for row in section.get("rows") or []:
+                for column in row.get("columns") or []:
+                    for block in column.get("blocks") or []:
+                        if not isinstance(block, dict) or block.get("type") != PageBlockType.IMAGE:
+                            continue
+                        attrs = block.get("attrs") or {}
+                        src = str(attrs.get("src") or attrs.get("path") or "").strip()
+                        if not src:
+                            continue
+                        index += 1
+                        path = src
+                        if "://" in path:
+                            path = urlparse(path).path or path
+                        basename = os.path.basename(path.split("?")[0].split("#")[0])
+                        images.append(
+                            PageImageEntry(
+                                source="page_image",
+                                label=f"Slika (visual builder) #{index}",
+                                alt_text=str(attrs.get("alt") or "").strip(),
+                                filename=src,
+                                basename=basename,
+                                width=None,
+                                height=None,
+                                file_size=0,
+                                format_name="",
+                            )
+                        )
+        return images
 
     featured = getattr(page_object, "featured_image", None)
     featured_entry = _entry_from_field(
@@ -151,40 +205,5 @@ def collect_page_images(page_object, *, visible_only: bool = False) -> list[Page
     )
     if featured_entry is not None:
         images.append(featured_entry)
-
-    for block in _iter_blocks(page_object, visible_only=visible_only):
-        if block.block_type == Block.BlockType.IMAGE and block.image:
-            entry = _entry_from_field(
-                image_field=block.image,
-                source="builder_image",
-                label=f"Slika (blok #{block.pk})",
-                alt_text=block.image_alt or block.image_caption or "",
-            )
-            if entry is not None:
-                images.append(entry)
-
-        if block.block_type == Block.BlockType.GALLERY:
-            for index, gallery_image in enumerate(block.gallery_images.all(), start=1):
-                entry = _entry_from_field(
-                    image_field=gallery_image.image,
-                    source="gallery",
-                    label=f"Galerija #{block.pk} · slika {index}",
-                    alt_text=gallery_image.alt_text or gallery_image.caption or "",
-                )
-                if entry is not None:
-                    images.append(entry)
-
-        if block.block_type == Block.BlockType.CAROUSEL:
-            carousel = getattr(block, "carousel", None)
-            if carousel is not None:
-                for index, item in enumerate(carousel.items.all(), start=1):
-                    entry = _entry_from_field(
-                        image_field=item.image,
-                        source="carousel",
-                        label=f"Karusel #{block.pk} · slajd {index}",
-                        alt_text=item.alt_text or item.title or "",
-                    )
-                    if entry is not None:
-                        images.append(entry)
 
     return images

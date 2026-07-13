@@ -1,0 +1,7 @@
+<section class="{{ section.css_classes }}" data-section-id="{{ section.id }}">
+    <div class="iv-page-section__inner">
+        {% for row in section.rows %}
+            {% include "page/row.html" with row=row %}
+        {% endfor %}
+    </div>
+</section>

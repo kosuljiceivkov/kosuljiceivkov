@@ -102,7 +102,16 @@ def is_still_referenced(
     *,
     exclude_instance: models.Model | None = None,
 ) -> bool:
-    return count_references(name, storage, exclude_instance=exclude_instance) > 0
+    identity = media_identity(name, storage)
+    if identity is None:
+        return False
+
+    if count_references(name, storage, exclude_instance=exclude_instance) > 0:
+        return True
+
+    from apps.core.json_media import collect_json_media_identities
+
+    return identity in collect_json_media_identities()
 
 
 def delete_storage_file(name: str, storage: object, *, dry_run: bool = False) -> str:
@@ -267,6 +276,8 @@ def _tally_result(stats: CleanupStats, result: CleanupResult) -> None:
 
 def collect_db_media_identities() -> set[tuple[str, str]]:
     """Sve (storage_key, name) parove referencirane u bazi."""
+    from apps.core.json_media import collect_json_media_identities
+
     identities: set[tuple[str, str]] = set()
     for ref in get_media_field_refs():
         qs = (
@@ -283,6 +294,8 @@ def collect_db_media_identities() -> set[tuple[str, str]]:
             identity = media_identity(name, storage)
             if identity:
                 identities.add(identity)
+
+    identities |= collect_json_media_identities()
     return identities
 
 

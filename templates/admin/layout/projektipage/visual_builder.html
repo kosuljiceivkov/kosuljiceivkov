@@ -1,0 +1,166 @@
+{% load i18n static admin_urls %}
+
+<div
+  class="blog-post-editor blog-post-editor--visual"
+  data-blog-post-editor
+  data-draft-title-placeholder="{{ blog_draft_title_placeholder }}"
+  data-draft-slug-prefix="{{ blog_draft_slug_prefix }}"
+>
+  <div class="blog-post-editor__topbar blog-post-editor__topbar--visual">
+    <div class="blog-post-editor__topbar-left">
+      <a class="blog-post-editor__back" href="{{ blog_changelist_url }}">← Admin</a>
+      <span class="blog-post-editor__mode-pill">Visual builder</span>
+      <span class="blog-post-editor__status-pill{% if original.is_active %} is-published{% endif %}">
+        {% if original.is_active %}Aktivna{% else %}Neaktivna{% endif %}
+      </span>
+      <span
+        class="blog-post-editor__save-status"
+        data-blog-save-status
+        data-state="saved"
+        title=""
+      >
+        <span class="blog-post-editor__save-dot" aria-hidden="true"></span>
+        <span data-blog-save-label>Sačuvano</span>
+      </span>
+    </div>
+    <div class="blog-post-editor__topbar-right">
+      {% if blog_preview_url %}
+        <a
+          class="blog-post-editor__preview-link"
+          href="{{ blog_preview_url }}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Pregled ↗</a>
+      {% endif %}
+      <button type="submit" class="blog-post-editor__primary-action" name="_save">
+        Sačuvaj
+      </button>
+      <details class="blog-post-editor__overflow">
+        <summary aria-label="{% translate 'More actions' %}">···</summary>
+        <div class="blog-post-editor__overflow-menu">
+          <a href="{% url opts|admin_urlname:'history' original.pk|admin_urlquote %}">{% translate "History" %}</a>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="blog-post-editor__layout blog-post-editor__layout--visual">
+    <div class="blog-post-editor__writing">
+      <div class="blog-post-editor__hidden-fields">
+        {% for field in adminform.form.hidden_fields %}{{ field }}{% endfor %}
+        <input
+          type="hidden"
+          name="body_plaintext"
+          id="id_body_plaintext"
+          value="{{ original.body_plaintext|default:''|escape }}"
+        >
+      </div>
+
+      <div class="blog-post-editor__blocker" data-blog-blocker hidden role="alert">
+        <p class="blog-post-editor__blocker-message" data-blog-blocker-message></p>
+      </div>
+
+      <div
+        class="blog-page-builder"
+        data-blog-page-builder
+        data-page-save-url="{{ blog_page_save_url }}"
+        data-upload-url="{{ blog_upload_url }}"
+        data-video-upload-url="{{ blog_video_upload_url }}"
+        data-cleanup-pending-url="{{ blog_cleanup_pending_url }}"
+        data-page-version="{{ blog_page_version }}"
+        data-focus-title="{% if blog_focus_title %}1{% else %}0{% endif %}"
+      >
+        {{ blog_initial_page|json_script:"blog-initial-page" }}
+        {{ blog_builder_catalog|json_script:"blog-builder-catalog" }}
+
+        <div class="blog-page-builder__workspace">
+          <aside class="blog-page-builder__panel" data-builder-panel>
+            <div class="blog-page-builder__panel-browse" data-builder-panel-browse>
+              <div class="blog-page-builder__panel-tabs" role="tablist">
+                <button type="button" class="is-active" data-panel-tab="widgets" role="tab">Elementi</button>
+                <button type="button" data-panel-tab="navigator" role="tab">Navigator</button>
+              </div>
+              <div class="blog-page-builder__panel-body" data-builder-panel-widgets></div>
+              <div class="blog-page-builder__panel-body" data-builder-panel-navigator hidden></div>
+            </div>
+            <div class="blog-page-builder__panel-edit" data-builder-panel-edit hidden>
+              <button type="button" class="blog-page-builder__panel-back" data-builder-panel-back>
+                ← Nazad
+              </button>
+              <h3 class="blog-page-builder__panel-edit-title" data-builder-panel-edit-title></h3>
+              <div class="blog-page-builder__panel-edit-body" data-builder-inspector-body></div>
+            </div>
+          </aside>
+
+          <div class="blog-page-builder__stage">
+            <div class="blog-page-builder__page-sheet">
+              <div class="blog-post-editor__title-wrap blog-post-editor__title-wrap--visual">
+                {{ adminform.form.title.errors }}
+                {{ adminform.form.title }}
+              </div>
+              <div class="blog-page-builder__canvas" data-builder-canvas></div>
+            </div>
+            <button type="button" class="blog-page-builder__add-section-fab" data-builder-add-section title="Dodaj sekciju">
+              +
+            </button>
+          </div>
+        </div>
+
+        <div class="blog-page-builder__toast" data-builder-toast hidden role="status"></div>
+      </div>
+    </div>
+
+    <aside class="blog-post-editor__drawer blog-post-editor__drawer--docked" data-blog-drawer hidden aria-hidden="true">
+      <div class="blog-post-editor__drawer-header">
+        <h2 class="blog-post-editor__drawer-title" data-blog-drawer-title>Detalji</h2>
+        <button type="button" class="blog-post-editor__drawer-close" data-blog-drawer-close aria-label="Zatvori">×</button>
+      </div>
+      <div class="blog-post-editor__drawer-body">
+        <div class="blog-post-editor__drawer-panel" data-blog-drawer-panel="details">
+          <div class="blog-post-editor__field blog-post-editor__field--checkbox">
+            {{ adminform.form.is_active }}
+            {{ adminform.form.is_active.label_tag }}
+          </div>
+          <div class="blog-post-editor__field blog-post-editor__field--readonly">
+            <span class="blog-post-editor__field-label">Javna adresa</span>
+            <p class="blog-post-editor__readonly-value">
+              <a href="/projekti/" target="_blank" rel="noopener noreferrer">/projekti/</a>
+            </p>
+          </div>
+        </div>
+
+        <div class="blog-post-editor__drawer-panel" data-blog-drawer-panel="seo" hidden>
+          {% for inline_admin_formset in inline_admin_formsets %}
+            {% include inline_admin_formset.opts.template %}
+          {% endfor %}
+        </div>
+
+        <div class="blog-post-editor__drawer-panel" data-blog-drawer-panel="publish" hidden>
+          <div class="blog-post-editor__field blog-post-editor__field--readonly">
+            <span class="blog-post-editor__field-label">Kreirano</span>
+            <p class="blog-post-editor__readonly-value">{{ original.created_at }}</p>
+          </div>
+          <div class="blog-post-editor__field blog-post-editor__field--readonly">
+            <span class="blog-post-editor__field-label">Ažurirano</span>
+            <p class="blog-post-editor__readonly-value">{{ original.updated_at }}</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <nav class="blog-post-editor__rail blog-post-editor__rail--visual" aria-label="Paneli stranice">
+      <button type="button" class="blog-post-editor__rail-btn" data-blog-drawer-trigger="details" title="Detalji">
+        <span class="blog-post-editor__rail-icon" aria-hidden="true">☰</span>
+        <span>Detalji</span>
+      </button>
+      <button type="button" class="blog-post-editor__rail-btn" data-blog-drawer-trigger="seo" title="SEO">
+        <span class="blog-post-editor__rail-icon" aria-hidden="true">◎</span>
+        <span>SEO{% if blog_seo_score is not None %} {{ blog_seo_score }}{% endif %}</span>
+      </button>
+      <button type="button" class="blog-post-editor__rail-btn" data-blog-drawer-trigger="publish" title="Istorija">
+        <span class="blog-post-editor__rail-icon" aria-hidden="true">▶</span>
+        <span>Istorija</span>
+      </button>
+    </nav>
+  </div>
+</div>

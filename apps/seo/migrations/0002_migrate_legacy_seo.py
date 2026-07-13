@@ -9,8 +9,11 @@ def migrate_legacy_seo_fields(apps, schema_editor):
     BlogPost = apps.get_model("blog", "BlogPost")
     CMSPage = apps.get_model("layout", "CMSPage")
 
-    blog_ct = ContentType.objects.get(app_label="blog", model="blogpost")
-    cms_ct = ContentType.objects.get(app_label="layout", model="cmspage")
+    try:
+        blog_ct = ContentType.objects.get(app_label="blog", model="blogpost")
+        cms_ct = ContentType.objects.get(app_label="layout", model="cmspage")
+    except ContentType.DoesNotExist:
+        return
 
     seo_rows = []
     for post in BlogPost.objects.all().iterator():

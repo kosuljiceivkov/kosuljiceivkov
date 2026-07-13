@@ -1,9 +1,9 @@
 """Admin interfejs za SEO metapodatke."""
 
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericStackedInline
 from django.urls import reverse
 from django.utils.html import format_html, format_html_join
-import nested_admin
 
 from apps.seo.analysis_ui import (
     render_cornerstone_analysis_html,
@@ -584,7 +584,7 @@ def set_index_action(modeladmin, request, queryset):
     )
 
 
-class SeoMetadataInline(SeoAnalyzerAdminMixin, nested_admin.NestedGenericStackedInline):
+class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
     """Yoast-style SEO panel u editoru bloga i CMS stranica."""
 
     model = SeoMetadata
@@ -764,6 +764,11 @@ class SeoMetadataAdmin(SeoAnalyzerAdminMixin, admin.ModelAdmin):
         set_noindex_action,
         set_index_action,
     )
+
+    def has_module_permission(self, request):
+        """Sakrij iz levog menija — SEO se uređuje u editoru objave (fioka SEO)."""
+        return False
+
     list_display = (
         "content_object",
         "seo_title",
@@ -831,9 +836,3 @@ class SeoMetadataAdmin(SeoAnalyzerAdminMixin, admin.ModelAdmin):
             },
         ),
     )
-    change_list_template = "admin/seo/seometadata/change_list.html"
-
-    def changelist_view(self, request, extra_context=None):
-        extra_context = extra_context or {}
-        extra_context["seo_dashboard_url"] = reverse("admin:seo_dashboard")
-        return super().changelist_view(request, extra_context=extra_context)

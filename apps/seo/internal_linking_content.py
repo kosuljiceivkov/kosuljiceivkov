@@ -9,8 +9,6 @@ from urllib.parse import urlparse
 from django.contrib.contenttypes.models import ContentType
 
 from apps.blog.models import BlogPost
-from apps.layout.builder_models import Block
-from apps.seo.content_analysis import _iter_blocks
 from apps.seo.content_text import normalize_whitespace
 from apps.seo.models import SeoMetadata
 from apps.seo.services import resolve_seo_title
@@ -101,52 +99,30 @@ def extract_internal_links_from_object(
 
     links: list[InternalLink] = []
 
-    for block in _iter_blocks(page_object, visible_only=visible_only):
-        if block.block_type == Block.BlockType.TEXT and block.text_content:
-            for href, anchor in extract_links_from_html(block.text_content):
-                if _is_internal_href(href):
-                    links.append(
-                        InternalLink(
-                            href=href,
-                            anchor_text=anchor or _strip_html(block.text_content)[:80],
-                            source="html",
-                        )
-                    )
+    should_render_page = getattr(page_object, "should_render_page", None)
+    if callable(should_render_page) and should_render_page():
+        from apps.page.constants import BlockType as PageBlockType
 
-        if block.block_type == Block.BlockType.IMAGE and block.image_link_url:
-            href = block.image_link_url.strip()
-            if _is_internal_href(href):
-                links.append(
-                    InternalLink(
-                        href=href,
-                        anchor_text=(block.image_alt or block.image_caption or "").strip(),
-                        source="image",
-                    )
-                )
-
-        if block.block_type == Block.BlockType.BUTTON and block.button_url:
-            href = block.button_url.strip()
-            if _is_internal_href(href):
-                links.append(
-                    InternalLink(
-                        href=href,
-                        anchor_text=(block.button_label or "").strip(),
-                        source="button",
-                    )
-                )
-
-        if block.block_type == Block.BlockType.CAROUSEL:
-            carousel = getattr(block, "carousel", None)
-            if carousel is not None:
-                for item in carousel.items.all():
-                    if item.button_url and _is_internal_href(item.button_url):
-                        links.append(
-                            InternalLink(
-                                href=item.button_url.strip(),
-                                anchor_text=(item.button_text or item.title or item.alt_text or "").strip(),
-                                source="carousel",
+        body_page = getattr(page_object, "body_page", None) or {}
+        for section in body_page.get("sections") or []:
+            for row in section.get("rows") or []:
+                for column in row.get("columns") or []:
+                    for block in column.get("blocks") or []:
+                        if not isinstance(block, dict):
+                            continue
+                        if block.get("type") != PageBlockType.BUTTON:
+                            continue
+                        attrs = block.get("attrs") or {}
+                        href = str(attrs.get("href", "")).strip()
+                        if href and _is_internal_href(href):
+                            links.append(
+                                InternalLink(
+                                    href=href,
+                                    anchor_text=str(attrs.get("label", "")).strip(),
+                                    source="button",
+                                )
                             )
-                        )
+        return links
 
     return links
 

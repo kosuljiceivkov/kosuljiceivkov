@@ -1,4 +1,4 @@
-"""SEO dashboard — bulk akcije."""
+"""SEO admin bulk akcije (ModelAdmin action handleri)."""
 
 from __future__ import annotations
 

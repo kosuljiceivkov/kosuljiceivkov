@@ -1,19 +1,12 @@
 {% extends "base.html" %}
-{% load builder_tags seo_tags %}
-
-{# SEO tagovi se renderuju u base.html: {% render_seo_meta seo_object %} #}
-{# Vidi templates/seo/usage_examples.html za sve načine korišćenja. #}
+{% load page_tags %}
 
 {% block content %}
 <article class="blog-article">
-    <div class="container container--narrow">
-        {% render_breadcrumbs post %}
-    </div>
+    {% include "partials/page_breadcrumb_hero.html" with seo_object=post %}
 
-    {% if is_admin_preview %}
-        {% render_page_builder post visible_only=False %}
-    {% else %}
-        {% render_page_builder post %}
+    {% if post.should_render_page %}
+        {% render_blog_page post %}
     {% endif %}
 
     <div class="container container--narrow">

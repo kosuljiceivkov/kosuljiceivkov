@@ -34,15 +34,14 @@ DJANGO_APPS = [
     "django.contrib.sitemaps",
 ]
 
-THIRD_PARTY_APPS = [
-    "nested_admin",
-]
+THIRD_PARTY_APPS = []
 
 LOCAL_APPS = [
     "apps.core",
     "apps.seo",
     "apps.blog",
     "apps.layout",
+    "apps.page",
     "apps.frontend",
 ]
 
@@ -228,7 +227,6 @@ CACHES = {
         "LOCATION": "cementnekosuljiceivkov-default",
     },
 }
-BUILDER_CACHE_TIMEOUT = env.int("BUILDER_CACHE_TIMEOUT", default=3600)
 
 # Logging
 LOGGING = {

@@ -1,9 +1,0 @@
-{% load builder_tags %}
-<div
-    class="builder-column {{ column.get_responsive_css_classes }}"
-    data-column-id="{{ column.pk }}"
->
-        {% for block in column.blocks.all %}
-            {% render_builder_block block %}
-        {% endfor %}
-</div>

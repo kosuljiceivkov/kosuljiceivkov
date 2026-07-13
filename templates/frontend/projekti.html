@@ -1,13 +1,7 @@
 {% extends "base.html" %}
-{% load builder_tags seo_tags %}
+{% load page_tags %}
 
 {% block content %}
-<div class="container container--narrow">
-    {% render_breadcrumbs page %}
-</div>
-{% if is_admin_preview %}
-    {% render_page_builder page visible_only=False %}
-{% else %}
-    {% render_page_builder page %}
-{% endif %}
+{% include "partials/page_breadcrumb_hero.html" with seo_object=page %}
+{% render_cms_page page %}
 {% endblock %}

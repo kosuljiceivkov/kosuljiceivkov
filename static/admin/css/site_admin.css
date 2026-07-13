@@ -1,4 +1,176 @@
+/* Cementne košuljice Ivkov — admin brand theming */
+
+:root {
+  --iv-brand-red: #dd4327;
+  --iv-brand-red-hover: #c73b22;
+  --iv-brand-red-muted: #f5d4cc;
+  --iv-brand-gold: #f2b705;
+  --iv-brand-gold-hover: #d9a004;
+  --iv-brand-gold-muted: #f8e6a8;
+  --iv-brand-dark: #1b1b1d;
+  --iv-brand-text: #222222;
+}
+
+html[data-theme="light"],
+:root {
+  --primary: var(--iv-brand-red);
+  --secondary: var(--iv-brand-dark);
+  --accent: var(--iv-brand-gold);
+  --primary-fg: #fff;
+
+  --header-bg: var(--iv-brand-dark);
+  --header-color: #fff;
+  --header-branding-color: var(--iv-brand-gold);
+  --header-link-color: #fff;
+
+  --breadcrumbs-bg: #2e2e2e;
+  --breadcrumbs-fg: #d4d4d4;
+  --breadcrumbs-link-fg: var(--iv-brand-gold);
+
+  --link-fg: var(--iv-brand-red);
+  --link-hover-color: var(--iv-brand-red-hover);
+  --link-selected-fg: var(--iv-brand-red-hover);
+
+  --button-fg: var(--iv-brand-text);
+  --button-bg: var(--iv-brand-gold);
+  --button-hover-bg: var(--iv-brand-gold-hover);
+  --default-button-bg: var(--iv-brand-gold);
+  --default-button-hover-bg: var(--iv-brand-gold-hover);
+
+  --object-tools-fg: #fff;
+  --object-tools-bg: #5c5c5c;
+  --object-tools-hover-bg: var(--iv-brand-dark);
+
+  --selected-row: var(--iv-brand-gold-muted);
+  --selected-bg: var(--iv-brand-gold-muted);
+
+  --font-family-primary:
+    "Inter",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
+html[data-theme="dark"] {
+  --primary: var(--iv-brand-red);
+  --secondary: var(--iv-brand-dark);
+  --accent: var(--iv-brand-gold);
+
+  --header-bg: var(--iv-brand-dark);
+  --header-branding-color: var(--iv-brand-gold);
+  --header-link-color: #fff;
+
+  --breadcrumbs-bg: #2e2e2e;
+  --breadcrumbs-link-fg: var(--iv-brand-gold);
+
+  --link-fg: #f5b8ad;
+  --link-hover-color: var(--iv-brand-gold);
+  --link-selected-fg: var(--iv-brand-gold);
+
+  --button-fg: var(--iv-brand-text);
+  --button-bg: var(--iv-brand-gold);
+  --button-hover-bg: var(--iv-brand-gold-hover);
+  --default-button-bg: var(--iv-brand-gold);
+  --default-button-hover-bg: var(--iv-brand-gold-hover);
+
+  --object-tools-fg: #fff;
+  --object-tools-bg: #5c5c5c;
+  --object-tools-hover-bg: var(--iv-brand-dark);
+
+  --selected-row: #4a3b12;
+  --selected-bg: #3a2f10;
+}
+
+#header {
+  border-bottom: 3px solid var(--iv-brand-red);
+}
+
+#branding #site-name a {
+  color: var(--iv-brand-gold);
+  font-weight: 700;
+}
+
+/* Inter nema 300 — Django user-tools koristi 300 pa browser lažno renderuje slova */
+#user-tools,
+#user-tools a,
+#logout-form button {
+  font-weight: 400;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#user-tools strong {
+  font-weight: 600;
+}
+
+.module h2,
+.module caption,
+.inline-group h2 {
+  background: var(--iv-brand-dark);
+}
+
+#nav-sidebar .current-app .section {
+  color: var(--iv-brand-red);
+}
+
+html[data-theme="dark"] #nav-sidebar .current-app .section:link,
+html[data-theme="dark"] #nav-sidebar .current-app .section:visited {
+  color: var(--iv-brand-gold);
+}
+
+#nav-sidebar .current-model {
+  background: var(--iv-brand-gold-muted);
+}
+
+#nav-sidebar .current-model a,
+#nav-sidebar .current-model a:link,
+#nav-sidebar .current-model a:visited,
+#nav-sidebar .current-model td {
+  color: var(--iv-brand-text) !important;
+  font-weight: 600;
+}
+
+#nav-sidebar .current-model a:hover,
+#nav-sidebar .current-model a:focus {
+  color: var(--iv-brand-red) !important;
+}
+
+html[data-theme="dark"] #nav-sidebar .current-model {
+  background: #3d3518;
+  box-shadow: inset 3px 0 0 var(--iv-brand-gold);
+}
+
+html[data-theme="dark"] #nav-sidebar .current-model a,
+html[data-theme="dark"] #nav-sidebar .current-model a:link,
+html[data-theme="dark"] #nav-sidebar .current-model a:visited,
+html[data-theme="dark"] #nav-sidebar .current-model td {
+  color: #fff !important;
+}
+
+html[data-theme="dark"] #nav-sidebar .current-model a:hover,
+html[data-theme="dark"] #nav-sidebar .current-model a:focus {
+  color: var(--iv-brand-gold) !important;
+}
+
+html[data-theme="dark"] #nav-sidebar .module table a {
+  color: #e8e8e8;
+}
+
+html[data-theme="dark"] #nav-sidebar .module table a:hover,
+html[data-theme="dark"] #nav-sidebar .module table a:focus {
+  color: var(--iv-brand-gold);
+}
+
 /* Sakrij filter sidebar u celom adminu */
+
+#nav-filter {
+  display: none !important;
+}
 
 #changelist-filter {
   display: none !important;
@@ -7,4 +179,28 @@
 #changelist .changelist-form-container {
   flex: 1 1 100%;
   max-width: 100%;
+}
+
+/* Readable help / hint text across admin */
+.help,
+p.help,
+.form-row .help,
+.form-row p.help,
+fieldset .description,
+.description {
+  color: #4b5563 !important;
+}
+
+/* Prevent clipped text in native selects */
+body.change-form select {
+  min-height: 2.2rem;
+  line-height: 1.35;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  color-scheme: light;
+}
+
+html[data-theme="dark"] body.change-form select option {
+  background: #fff;
+  color: #1f2937;
 }

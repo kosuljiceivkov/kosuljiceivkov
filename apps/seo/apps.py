@@ -29,17 +29,11 @@ class SeoConfig(AppConfig):
             twitter_card_preview_api,
             unified_score_api,
         )
-        from apps.seo.dashboard_views import seo_dashboard_view
 
         original_get_urls = admin.site.get_urls
 
         def get_urls_with_seo_api():
             custom_urls = [
-                path(
-                    "seo/dashboard/",
-                    admin.site.admin_view(seo_dashboard_view),
-                    name="seo_dashboard",
-                ),
                 path(
                     "seo/keyword-analysis/",
                     admin.site.admin_view(keyword_analysis_api),
