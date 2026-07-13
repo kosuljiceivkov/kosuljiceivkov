@@ -1,0 +1,22 @@
+# Jedinstveni LF u repou (Linux/Render) — bez LF/CRLF upozorenja na git add.
+# Ne utiče na rad aplikacije; samo normalizuje krajeve linija u Git-u.
+
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.mp4 binary
+*.webm binary
+*.pyc binary

@@ -13,10 +13,22 @@ django-admin makemessages
 django-admin compilemessages
 
 
-Git commit and push commands:
+Git commit, push i deploy na Render:
 
+# Preporučeno (jedna komanda, push sa ponovnim pokušajem):
+.\scripts\deploy.ps1
+.\scripts\deploy.ps1 -Message "kratak opis izmene"
+
+# Ručno (isto kao ranije):
 git add .
 git commit -m "update"
 git push
+
+# Render: povezan na GitHub main — svaki uspešan git push pokreće deploy.
+# Prati status na https://dashboard.render.com
+
+Napomene:
+- LF/CRLF upozorenja: rešeno .gitattributes u repou (jednom pokreni: git add --renormalize . && git commit -m "Normalize line endings")
+- "Unlink of pack file failed": repozitorijum je na USB disku (X: VERBATIM) — zatvori druge Git procese i ponovi push, ili koristi .\scripts\deploy.ps1
 
 git push --force - nakon backup kopiranja
