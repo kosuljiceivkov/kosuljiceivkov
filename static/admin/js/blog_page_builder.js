@@ -837,8 +837,9 @@
   }
 
   function getActiveTextEditable(state, block) {
+    const className = block.type === "heading" ? "iv-page-heading" : "iv-page-text";
     return state.canvas.querySelector(
-      `.blog-page-builder__block[data-block-id="${block.id}"] .iv-page-text[contenteditable="true"]`,
+      `.blog-page-builder__block[data-block-id="${block.id}"] .${className}[contenteditable="true"]`,
     );
   }
 
@@ -1010,7 +1011,7 @@
           for (const block of column.blocks || []) {
             const attrs = block.attrs || {};
             if (block.type === "heading" || block.type === "text") {
-              let text = String(attrs.text || "").trim();
+              let text = htmlToPlainText(String(attrs.text || "")).trim();
               if (block.type === "text") {
                 text = htmlToPlainText(normalizePlaceholderText(attrs.text, TEXT_BLOCK_PLACEHOLDER)).trim();
               }
@@ -1489,6 +1490,23 @@
     bodyEl.appendChild(row);
   }
 
+  function syncInspectorFontSizeInput(bodyEl, block, state) {
+    const editable = getActiveTextEditable(state, block);
+    const fontSizeInput = bodyEl.querySelector(".blog-page-builder__inspector-number");
+    if (!editable || !fontSizeInput) {
+      return;
+    }
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0 && editable.contains(selection.anchorNode)) {
+      syncFontSizeInputFromSelection(editable, fontSizeInput);
+      return;
+    }
+    const bookmark = state.textSelectionBookmark;
+    if (bookmark?.range && bookmark.blockId === block.id) {
+      syncFontSizeInputFromRange(editable, bookmark.range, fontSizeInput);
+    }
+  }
+
   function renderEditPanel(state) {
     const bodyEl = state.inspectorBody;
     if (!bodyEl || !state.selection) {
@@ -1511,36 +1529,28 @@
     }
 
     if (state.selection.type === "heading") {
+      const headingBlock = state.selection.block;
       appendSelectField(
         bodyEl,
-        "Nivo naslova",
-        String(state.selection.block.attrs.level || 2),
+        "Nivo naslova (H1–H4)",
+        String(headingBlock.attrs.level || 2),
         ["1", "2", "3", "4"],
         (value) => {
-          state.selection.block.attrs.level = Number(value);
+          headingBlock.attrs.level = Number(value);
           markDirty(state);
           renderCanvas(state);
         },
       );
+      appendTextFormatToolbar(bodyEl, headingBlock, state);
+      appendTextFontSizeField(bodyEl, headingBlock, state);
+      syncInspectorFontSizeInput(bodyEl, headingBlock, state);
     }
 
     if (state.selection.type === "text") {
       const textBlock = state.selection.block;
       appendTextFormatToolbar(bodyEl, textBlock, state);
       appendTextFontSizeField(bodyEl, textBlock, state);
-      const editable = getActiveTextEditable(state, textBlock);
-      const fontSizeInput = bodyEl.querySelector(".blog-page-builder__inspector-number");
-      if (editable && fontSizeInput) {
-        const selection = window.getSelection();
-        if (selection && selection.rangeCount > 0 && editable.contains(selection.anchorNode)) {
-          syncFontSizeInputFromSelection(editable, fontSizeInput);
-        } else {
-          const bookmark = state.textSelectionBookmark;
-          if (bookmark?.range && bookmark.blockId === textBlock.id) {
-            syncFontSizeInputFromRange(editable, bookmark.range, fontSizeInput);
-          }
-        }
-      }
+      syncInspectorFontSizeInput(bodyEl, textBlock, state);
     }
 
     if (state.selection.type === "image") {
@@ -1923,11 +1933,12 @@
       heading.className = `iv-page-heading ${blockAlignClass(block, "iv-page-heading")}`;
       heading.contentEditable = "true";
       heading.spellcheck = true;
-      heading.textContent = block.attrs.text || "";
-      heading.addEventListener("input", () => {
-        block.attrs.text = heading.textContent;
+      setEditableHtml(heading, block.attrs.text || "");
+      bindEditablePlaceholderRich(heading, "Unesite naslov…", (value) => {
+        block.attrs.text = value;
         markDirty(state);
       });
+      bindTextSelectionBookmark(state, block, heading);
       preview.appendChild(heading);
       return;
     }

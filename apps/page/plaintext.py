@@ -36,10 +36,7 @@ def _block_plaintext(block: Any) -> str:
     if not isinstance(attrs, dict):
         attrs = {}
 
-    if block_type == BlockType.HEADING:
-        return str(attrs.get("text", "")).strip()
-
-    if block_type == BlockType.TEXT:
+    if block_type in {BlockType.HEADING, BlockType.TEXT}:
         return inline_html_to_plaintext(str(attrs.get("text", "")))
 
     if block_type == BlockType.BUTTON:

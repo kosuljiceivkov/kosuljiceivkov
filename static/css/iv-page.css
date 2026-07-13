@@ -148,11 +148,25 @@
   margin-top: 1rem;
 }
 
+/* Nivo H1–H4 je samo semantički — veličina, težina i stil dolaze ručno
+   (toolbar / inline HTML), ne iz tipografije za h1–h4. */
 .iv-page-heading {
   margin: 0;
-  line-height: 1.15;
+  line-height: 1.25;
   overflow-wrap: anywhere;
   word-break: break-word;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: inherit;
+  font-style: inherit;
+  color: inherit;
+  letter-spacing: normal;
+  text-decoration: none;
+  text-wrap: pretty;
+}
+
+.iv-page-heading u {
+  text-underline-offset: 0.12em;
 }
 
 .iv-page-text {

@@ -17,7 +17,7 @@ class HeadingBlockRenderer:
 
     def render_html(self, block: dict[str, Any], *, context: RenderContext) -> str:
         attrs = block.get("attrs") or {}
-        text = str(attrs.get("text", "")).strip()
+        text = sanitize_inline_html(str(attrs.get("text", "")).strip())
         if not text:
             return ""
         level = attrs.get("level", 2)
@@ -36,8 +36,10 @@ class HeadingBlockRenderer:
         )
 
     def extract_plaintext(self, block: dict[str, Any]) -> str:
+        from apps.page.rich_text import inline_html_to_plaintext
+
         attrs = block.get("attrs") or {}
-        return str(attrs.get("text", "")).strip()
+        return inline_html_to_plaintext(str(attrs.get("text", "")))
 
 
 class TextBlockRenderer:

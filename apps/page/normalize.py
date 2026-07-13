@@ -36,7 +36,9 @@ def _sanitize_text_blocks(page: dict[str, Any]) -> dict[str, Any]:
                 if not isinstance(column, dict):
                     continue
                 for block in column.get("blocks") or []:
-                    if not isinstance(block, dict) or block.get("type") != BlockType.TEXT:
+                    if not isinstance(block, dict):
+                        continue
+                    if block.get("type") not in {BlockType.TEXT, BlockType.HEADING}:
                         continue
                     attrs = block.setdefault("attrs", {})
                     if isinstance(attrs, dict) and isinstance(attrs.get("text"), str):

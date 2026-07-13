@@ -535,7 +535,8 @@
   background: var(--vb-accent-soft);
 }
 
-.blog-page-builder__block-preview .iv-page-text u {
+.blog-page-builder__block-preview .iv-page-text u,
+.blog-page-builder__block-preview .iv-page-heading u {
   text-underline-offset: 0.12em;
 }
 
@@ -1077,6 +1078,18 @@
   margin: 0;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+/* Isto kao .iv-page-heading na sajtu: nivo ne određuje veličinu/težinu. */
+.blog-page-builder__block-preview .iv-page-heading {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: inherit;
+  font-style: inherit;
+  color: inherit;
+  letter-spacing: normal;
+  text-decoration: none;
+  line-height: 1.25;
 }
 
 .blog-page-builder__block-preview [contenteditable="true"] {

@@ -51,21 +51,16 @@ def extract_page_analysis_parts(content_object, *, visible_only=True) -> dict:
         if not isinstance(attrs, dict):
             attrs = {}
 
-        if block_type == BlockType.HEADING:
-            heading = normalize_whitespace(str(attrs.get("text", "")))
-            if heading:
-                content_chunks.append(heading)
-                if not first_heading:
-                    first_heading = heading
-
-        if block_type == BlockType.TEXT:
+        if block_type in {BlockType.HEADING, BlockType.TEXT}:
             from apps.page.rich_text import inline_html_to_plaintext
 
-            paragraph = normalize_whitespace(inline_html_to_plaintext(str(attrs.get("text", ""))))
-            if paragraph:
-                content_chunks.append(paragraph)
-                if not first_paragraph:
-                    first_paragraph = paragraph
+            plain = normalize_whitespace(inline_html_to_plaintext(str(attrs.get("text", ""))))
+            if plain:
+                content_chunks.append(plain)
+                if block_type == BlockType.HEADING and not first_heading:
+                    first_heading = plain
+                if block_type == BlockType.TEXT and not first_paragraph:
+                    first_paragraph = plain
 
         if block_type == BlockType.IMAGE:
             src = str(attrs.get("src") or attrs.get("path") or "").strip()

@@ -5,7 +5,11 @@ from __future__ import annotations
 from apps.page.structure import ROW_PRESETS
 
 BUILDER_ELEMENTS = (
-    {"id": "heading", "label": "Naslov", "description": "Naslov H1–H4"},
+    {
+        "id": "heading",
+        "label": "Naslov",
+        "description": "H1–H4 (nivo je semantički; veličina i format ručno)",
+    },
     {"id": "text", "label": "Tekst", "description": "Paragraf"},
     {"id": "image", "label": "Slika", "description": "Slika sa alt tekstom"},
     {"id": "video", "label": "Video", "description": "YouTube video"},
