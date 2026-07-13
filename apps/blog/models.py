@@ -116,7 +116,10 @@ class BlogPost(SeoContentMixin, TimestampMixin):
     excerpt = models.TextField(
         "Uvod",
         blank=True,
-        help_text="Kratak tekst na kartici bloga. Prazno = koristi se meta opis.",
+        help_text=(
+            "Kratak sažetak za karticu bloga, meta opis (ako je prazan), "
+            "društvene mreže i AI preglede. Jedno polje — više izlaza."
+        ),
     )
     featured_image = models.ImageField(
         "Istaknuta slika",
@@ -186,6 +189,16 @@ class BlogPost(SeoContentMixin, TimestampMixin):
 
     def should_render_page(self) -> bool:
         return self.has_page_content()
+
+    def get_reading_time_minutes(self) -> int:
+        from apps.seo.reading_time import reading_time_for_content_object
+
+        return reading_time_for_content_object(self)
+
+    def was_updated_after_publish(self) -> bool:
+        if not self.updated_at or not self.publish_date:
+            return False
+        return self.updated_at.date() > self.publish_date
 
     def apply_body_page(self, page: dict) -> "PageUpdateResult":
         from apps.page.update import PageUpdateResult, apply_body_page_update

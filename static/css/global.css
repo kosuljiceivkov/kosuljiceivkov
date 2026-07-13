@@ -385,6 +385,19 @@ a:hover {
     color: var(--color-text-muted);
 }
 
+.blog-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    align-items: center;
+    margin-bottom: var(--space-2);
+}
+
+.blog-card__reading-time {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
 .blog-card__category {
     display: inline-block;
     margin-left: var(--space-2);

@@ -7,9 +7,12 @@
             {% endif %}
         </div>
         <div class="blog-card__body">
-            <time class="blog-card__date" datetime="{{ post.publish_date|date:'Y-m-d' }}">
-                {{ post.publish_date|date:"d.m.Y." }}
-            </time>
+            <div class="blog-card__meta">
+                <time class="blog-card__date" datetime="{{ post.publish_date|date:'Y-m-d' }}">
+                    {{ post.publish_date|date:"d.m.Y." }}
+                </time>
+                <span class="blog-card__reading-time">{{ post.get_reading_time_minutes }} min</span>
+            </div>
             <h2 class="blog-card__title">{{ post.title }}</h2>
             {% if post.excerpt %}
             <p class="blog-card__excerpt">{{ post.excerpt }}</p>

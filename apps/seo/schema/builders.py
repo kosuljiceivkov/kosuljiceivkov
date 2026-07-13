@@ -186,6 +186,10 @@ def build_article_schema(
     if image_url:
         schema["image"] = [image_url]
 
+    from apps.seo.reading_time import iso_duration_minutes, reading_time_for_content_object
+
+    schema["timeRequired"] = iso_duration_minutes(reading_time_for_content_object(content_object))
+
     publisher = build_organization_schema(request)
     if publisher:
         schema["publisher"] = {

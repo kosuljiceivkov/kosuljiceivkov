@@ -5,6 +5,20 @@
 <article class="blog-article">
     {% include "partials/page_breadcrumb_hero.html" with seo_object=post %}
 
+    <div class="container container--narrow">
+        <div class="blog-article__meta">
+            <time datetime="{{ post.publish_date|date:'Y-m-d' }}">
+                Objavljeno: {{ post.publish_date|date:"d.m.Y." }}
+            </time>
+            {% if post.was_updated_after_publish %}
+            <time datetime="{{ post.updated_at|date:'c' }}">
+                Ažurirano: {{ post.updated_at|date:"d.m.Y." }}
+            </time>
+            {% endif %}
+            <span>{{ post.get_reading_time_minutes }} min čitanja</span>
+        </div>
+    </div>
+
     {% if post.should_render_page %}
         {% render_blog_page post %}
     {% endif %}

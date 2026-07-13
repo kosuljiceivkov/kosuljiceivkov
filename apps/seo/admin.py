@@ -33,6 +33,7 @@ from apps.seo.internal_linking import analyze_internal_linking
 from apps.seo.keyword_analyzer import analyze_content_object
 from apps.seo.open_graph import build_open_graph_tags, validate_og_image_file
 from apps.seo.readability_analyzer import analyze_readability_for_object
+from apps.seo.reading_time import reading_time_for_content_object
 from apps.seo.schema.engine import preview_schema_bundle
 from apps.seo.slug_analyzer import analyze_slug_for_object
 from apps.seo.twitter_card import build_twitter_card_tags
@@ -47,6 +48,7 @@ class SeoAnalyzerAdminMixin:
     keyword_readonly_field = "keyword_analysis_panel"
     readability_readonly_field = "readability_analysis_panel"
     og_preview_readonly_field = "og_preview_panel"
+    reading_time_readonly_field = "reading_time_panel"
     og_image_validation_field = "og_image_validation_panel"
     twitter_preview_readonly_field = "twitter_preview_panel"
     twitter_image_validation_field = "twitter_image_validation_panel"
@@ -226,6 +228,20 @@ class SeoAnalyzerAdminMixin:
                 content_type_id=content_type_id,
                 object_id=object_id,
             ),
+        )
+
+    @admin.display(description="Vreme čitanja")
+    def reading_time_panel(self, obj):
+        content_object = self._resolve_inline_content_object(obj)
+        if content_object is None:
+            return format_html(
+                '<p class="seo-analyzer__hint">Procena će biti dostupna kada objava ima sadržaj.</p>'
+            )
+        minutes = reading_time_for_content_object(content_object)
+        return format_html(
+            '<p class="seo-analyzer__hint">≈ <strong>{} min</strong> čitanja '
+            "(na osnovu teksta u builderu i uvoda).</p>",
+            minutes,
         )
 
     @admin.display(description="Validacija Twitter slike")
@@ -705,6 +721,7 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
         SeoAnalyzerAdminMixin.readability_readonly_field,
         SeoAnalyzerAdminMixin.og_image_validation_field,
         SeoAnalyzerAdminMixin.og_preview_readonly_field,
+        SeoAnalyzerAdminMixin.reading_time_readonly_field,
         SeoAnalyzerAdminMixin.twitter_image_validation_field,
         SeoAnalyzerAdminMixin.twitter_preview_readonly_field,
         SeoAnalyzerAdminMixin.schema_preview_readonly_field,
@@ -734,19 +751,23 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
                     "meta_description",
                     SeoAnalyzerAdminMixin.serp_preview_readonly_field,
                     "focus_keyword",
-                    "secondary_keywords",
-                    "canonical_url",
+                    SeoAnalyzerAdminMixin.reading_time_readonly_field,
+                    SeoAnalyzerAdminMixin.og_preview_readonly_field,
                 ),
                 "description": (
-                    "Google SERP pregled se ažurira uživo dok menjate naslov i meta opis. "
-                    "Ključne reči služe samo za CMS analizu — ne izlaze u HTML."
+                    "Naslov i meta opis automatski pokreću Google pregled, Open Graph i "
+                    "Twitter. Fokus ključna reč je samo za CMS analizu — ne izlazi kao "
+                    "zastareli meta keywords tag u HTML-u."
                 ),
             },
         ),
         (
-            "Robots",
+            "Napredno — URL, robots i schema",
             {
+                "classes": ("collapse",),
                 "fields": (
+                    "canonical_url",
+                    "secondary_keywords",
                     "robots_index",
                     "robots_follow",
                     "robots_nosnippet",
@@ -755,16 +776,23 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
                     "robots_max_image_preview",
                     "include_in_sitemap",
                     SeoAnalyzerAdminMixin.robots_preview_readonly_field,
+                    "schema_type",
+                    "breadcrumb_title",
+                    SeoAnalyzerAdminMixin.schema_preview_readonly_field,
+                    "is_cornerstone",
+                    SeoAnalyzerAdminMixin.cornerstone_readonly_field,
                 ),
                 "description": (
-                    "Kontrolišite indeksiranje, sitemap i prikaz u rezultatima pretrage. "
-                    "„Sakrij od Google-a” automatski isključuje stranicu iz sitemap-a."
+                    "Kanonski URL i robots se automatski generišu. Schema.org JSON-LD "
+                    "se gradi iz sadržaja (BlogPosting, FAQ, breadcrumb). Menjajte samo "
+                    "ako znate zašto."
                 ),
             },
         ),
         (
-            "Open Graph",
+            "Napredno — Open Graph i Twitter",
             {
+                "classes": ("collapse",),
                 "fields": (
                     "og_title",
                     "og_description",
@@ -772,18 +800,6 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
                     SeoAnalyzerAdminMixin.og_image_validation_field,
                     "og_type",
                     "og_url",
-                    SeoAnalyzerAdminMixin.og_preview_readonly_field,
-                ),
-                "description": (
-                    "Pregled po platformama (Facebook, LinkedIn, WhatsApp). "
-                    "Prazna polja koriste SEO naslov, meta opis i kanonski URL."
-                ),
-            },
-        ),
-        (
-            "Twitter",
-            {
-                "fields": (
                     "twitter_title",
                     "twitter_description",
                     "twitter_image",
@@ -792,40 +808,15 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
                     SeoAnalyzerAdminMixin.twitter_preview_readonly_field,
                 ),
                 "description": (
-                    "Pregled Twitter / X Card-a. Prazna polja koriste Open Graph vrednosti."
-                ),
-            },
-        ),
-        (
-            "Schema.org",
-            {
-                "fields": (
-                    "schema_type",
-                    "breadcrumb_title",
-                    SeoAnalyzerAdminMixin.schema_preview_readonly_field,
-                ),
-                "description": (
-                    "JSON-LD za Google Rich Results: Article, BlogPosting, FAQPage, "
-                    "WebPage, Person, Organization i BreadcrumbList."
-                ),
-            },
-        ),
-        (
-            "Cornerstone sadržaj",
-            {
-                "fields": (
-                    "is_cornerstone",
-                    SeoAnalyzerAdminMixin.cornerstone_readonly_field,
-                ),
-                "description": (
-                    "Označite glavne tematske članke. Supporting objave treba da linkuju "
-                    "ka cornerstone-u; sistem prikazuje orphan upozorenja i preporuke klastera."
+                    "Prazna polja koriste SEO naslov, meta opis, istaknutu sliku i "
+                    "kanonski URL. Većina objava ne treba ručne OG/Twitter vrednosti."
                 ),
             },
         ),
         (
             "Analiza slug-a",
             {
+                "classes": ("collapse",),
                 "fields": (SeoAnalyzerAdminMixin.slug_analysis_readonly_field,),
                 "description": (
                     "Dužina, format, jedinstvenost i ključna reč u URL slug-u."
@@ -835,6 +826,7 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
         (
             "Analiza ključne reči",
             {
+                "classes": ("collapse",),
                 "fields": (SeoAnalyzerAdminMixin.keyword_readonly_field,),
                 "description": (
                     "Zeleno = odlično · Žuto = može bolje · Crveno = potrebno poboljšanje"
@@ -844,6 +836,7 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
         (
             "Analiza čitljivosti",
             {
+                "classes": ("collapse",),
                 "fields": (SeoAnalyzerAdminMixin.readability_readonly_field,),
                 "description": (
                     "Provera dužine rečenica i pasusa, pasiva, prelaznih reči, "
@@ -854,6 +847,7 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
         (
             "Analiza slika",
             {
+                "classes": ("collapse",),
                 "fields": (SeoAnalyzerAdminMixin.image_seo_readonly_field,),
                 "description": (
                     "Alt tekst, nazivi fajlova, dimenzije, kompresija i lazy-loading — "
@@ -864,6 +858,7 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
         (
             "AI readiness",
             {
+                "classes": ("collapse",),
                 "fields": (SeoAnalyzerAdminMixin.ai_readiness_readonly_field,),
                 "description": (
                     "Koliko je sadržaj spreman za AI pretrage i asistente — "
@@ -874,6 +869,7 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
         (
             "Interni linkovi",
             {
+                "classes": ("collapse",),
                 "fields": (SeoAnalyzerAdminMixin.internal_linking_readonly_field,),
                 "description": (
                     "Preporuke povezivanja ka povezanim člancima, anchor tekst "
