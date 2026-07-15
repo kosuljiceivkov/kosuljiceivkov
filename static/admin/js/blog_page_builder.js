@@ -60,11 +60,11 @@
     width_mobile: 12,
     width_tablet: 12,
     width_desktop: 12,
-    horizontal_align: "left",
+    horizontal_align: "center",
   };
 
   const DEFAULT_BLOCK_SETTINGS = {
-    align: "left",
+    align: "center",
   };
 
   const MEDIA_WIDTH_MIN = 10;
@@ -375,7 +375,7 @@
   }
 
   function blockAlignClass(block, prefix) {
-    const align = (block.settings || {}).align || "left";
+    const align = (block.settings || {}).align || "center";
     return `${prefix}--align-${align}`;
   }
 
@@ -396,6 +396,20 @@
     return px == null ? null : `${px}px`;
   }
 
+  function normalizeEditorTextEntities(value) {
+    const textarea = document.createElement("textarea");
+    let normalized = String(value || "");
+    for (let index = 0; index < 8; index += 1) {
+      textarea.innerHTML = normalized;
+      const decoded = textarea.value;
+      if (decoded === normalized) {
+        break;
+      }
+      normalized = decoded;
+    }
+    return normalized.replace(/\u00a0/g, " ");
+  }
+
   function sanitizeEditableHtml(html) {
     const wrapper = document.createElement("div");
     wrapper.innerHTML = html || "";
@@ -405,6 +419,7 @@
       const children = [...node.childNodes];
       children.forEach((child) => {
         if (child.nodeType === Node.TEXT_NODE) {
+          child.nodeValue = normalizeEditorTextEntities(child.nodeValue);
           return;
         }
         if (child.nodeType !== Node.ELEMENT_NODE) {
@@ -454,7 +469,7 @@
   function htmlToPlainText(html) {
     const wrapper = document.createElement("div");
     wrapper.innerHTML = html || "";
-    return (wrapper.textContent || "").trim();
+    return normalizeEditorTextEntities(wrapper.textContent || "").trim();
   }
 
   function getEditableHtml(element) {
@@ -472,11 +487,7 @@
       element.classList.add("is-empty");
       return;
     }
-    if (value.includes("<")) {
-      element.innerHTML = sanitizeEditableHtml(value);
-    } else {
-      element.textContent = value;
-    }
+    element.innerHTML = sanitizeEditableHtml(value);
     element.classList.remove("is-empty");
   }
 
@@ -916,7 +927,7 @@
   }
 
   function mediaAlignClass(block) {
-    const align = (block.settings || {}).align || "left";
+    const align = (block.settings || {}).align || "center";
     return `iv-page-media iv-page-media--align-${align}`;
   }
 
@@ -2119,7 +2130,7 @@
   }
 
   function renderBlockPreview(state, block, preview) {
-    const align = (block.settings || {}).align || "left";
+      const align = (block.settings || {}).align || "center";
 
     if (block.type === "heading") {
       const level = block.attrs.level || 2;

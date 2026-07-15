@@ -108,7 +108,7 @@ def _column_css_classes(settings: dict[str, Any]) -> str:
     mobile = settings.get("width_mobile", 12)
     tablet = settings.get("width_tablet", 12)
     desktop = settings.get("width_desktop", 12)
-    align = settings.get("horizontal_align", "left")
+    align = settings.get("horizontal_align", "center")
     return " ".join(
         filter(
             None,

@@ -3,13 +3,24 @@
 from __future__ import annotations
 
 import re
-from html import escape
+from html import escape, unescape
 from html.parser import HTMLParser
 
 ALLOWED_INLINE_TAGS = frozenset({"b", "strong", "i", "em", "u", "br", "span"})
 FONT_SIZE_MIN_PX = 8
 FONT_SIZE_MAX_PX = 96
 _FONT_SIZE_RE = re.compile(r"font-size:\s*([0-9]+(?:\.[0-9]+)?)px", re.IGNORECASE)
+
+
+def normalize_html_entities(value: str) -> str:
+    """Dekodira višestruko escape-ovane entitete i pretvara NBSP u običan razmak."""
+    normalized = value or ""
+    for _ in range(8):
+        decoded = unescape(normalized)
+        if decoded == normalized:
+            break
+        normalized = decoded
+    return normalized.replace("\xa0", " ")
 
 
 def normalize_font_size_px(style: str) -> str | None:
@@ -53,7 +64,7 @@ class _InlineHTMLSanitizer(HTMLParser):
             self._open_tags.pop()
 
     def handle_data(self, data: str) -> None:
-        self._parts.append(escape(data))
+        self._parts.append(escape(normalize_html_entities(data)))
 
     def get_html(self) -> str:
         while self._open_tags:
@@ -67,7 +78,7 @@ def sanitize_inline_html(value: str) -> str:
     if not raw:
         return ""
     if "<" not in raw:
-        return escape(raw)
+        return escape(normalize_html_entities(raw))
     parser = _InlineHTMLSanitizer()
     parser.feed(raw)
     parser.close()
@@ -77,4 +88,4 @@ def sanitize_inline_html(value: str) -> str:
 def inline_html_to_plaintext(value: str) -> str:
     from django.utils.html import strip_tags
 
-    return strip_tags(value or "").strip()
+    return normalize_html_entities(strip_tags(value or "")).strip()

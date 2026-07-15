@@ -42,9 +42,9 @@ def build_builder_catalog() -> dict:
             {"id": "vertical_align", "label": "Vertikalno", "type": "enum", "options": ["top", "center", "bottom"]},
         ],
         "column_settings": [
-            {"id": "horizontal_align", "label": "Poravnanje", "type": "enum", "options": ["left", "center", "right"]},
+            {"id": "horizontal_align", "label": "Poravnanje teksta kolone", "type": "enum", "options": ["left", "center", "right"]},
         ],
         "block_settings": [
-            {"id": "align", "label": "Poravnanje teksta", "type": "enum", "options": ["left", "center", "right"]},
+            {"id": "align", "label": "Poravnanje elementa", "type": "enum", "options": ["left", "center", "right"]},
         ],
     }

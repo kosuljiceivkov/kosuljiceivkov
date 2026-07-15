@@ -4,6 +4,7 @@ from django.test import RequestFactory
 
 from apps.page.normalize import normalize_page
 from apps.page.plaintext import extract_page_plaintext
+from apps.page.rich_text import inline_html_to_plaintext, sanitize_inline_html
 from apps.page.rendering import get_page_renderer
 from apps.page.rendering.base import RenderContext
 from apps.page.structure import create_heading_block, create_text_block
@@ -67,3 +68,27 @@ class PageTextFormattingTests(PageMediaBlockTests):
         page = self._page_with_block(block)
 
         self.assertEqual(extract_page_plaintext(page), "Naslov")
+
+    def test_sanitizer_decodes_repeated_nbsp_entities_once(self):
+        value = "Prvi&amp;amp;amp;nbsp;drugi"
+
+        sanitized = sanitize_inline_html(value)
+
+        self.assertEqual(sanitized, "Prvi drugi")
+        self.assertEqual(sanitize_inline_html(sanitized), sanitized)
+
+    def test_sanitizer_normalizes_nbsp_inside_formatting(self):
+        value = "<b>Prvi&nbsp;drugi</b>"
+
+        self.assertEqual(sanitize_inline_html(value), "<b>Prvi drugi</b>")
+        self.assertEqual(inline_html_to_plaintext(value), "Prvi drugi")
+
+    def test_repeated_page_normalization_does_not_accumulate_escaping(self):
+        block = create_text_block(text="Prvi&amp;nbsp;drugi")
+        page = self._page_with_block(block)
+
+        once = normalize_page(page)
+        twice = normalize_page(once)
+        text = twice["sections"][0]["rows"][0]["columns"][0]["blocks"][0]["attrs"]["text"]
+
+        self.assertEqual(text, "Prvi drugi")

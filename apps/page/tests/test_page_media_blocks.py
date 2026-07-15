@@ -182,6 +182,14 @@ class PageMediaBlockTests(TestCase):
         self.assertNotIn("column_gap", section["rows"][0]["settings"])
         self.assertNotIn("padding", section["rows"][0]["columns"][0]["settings"])
 
+    def test_new_columns_and_blocks_are_centered_by_default(self):
+        section = create_section()
+        column = section["rows"][0]["columns"][0]
+        block = create_text_block(text="Centrirano")
+
+        self.assertEqual(column["settings"]["horizontal_align"], "center")
+        self.assertEqual(block["settings"]["align"], "center")
+
     def test_invalid_width_percent_fails_validation(self):
         block = create_image_block()
         block["attrs"]["src"] = "/media/demo.jpg"

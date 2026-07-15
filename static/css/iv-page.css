@@ -23,9 +23,10 @@
 }
 
 .iv-page-section--width-contained .iv-page-section__inner {
-  max-width: var(--container-max, 72rem);
+  width: min(90%, 72rem);
+  max-width: none;
   margin-inline: auto;
-  padding-inline: var(--container-padding, 1rem);
+  padding-inline: 0;
 }
 
 .iv-page-section--width-full .iv-page-section__inner {
@@ -50,7 +51,8 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   width: 100%;
-  gap: 1.25rem;
+  column-gap: 0.75rem;
+  row-gap: 1.5rem;
   align-items: start;
 }
 
@@ -126,6 +128,11 @@
   margin-top: 1rem;
 }
 
+.iv-page-block {
+  width: 100%;
+  min-width: 0;
+}
+
 /* Nivo H1–H4 je samo semantički — veličina, težina i stil dolaze ručno
    (toolbar / inline HTML), ne iz tipografije za h1–h4. */
 .iv-page-heading {
@@ -149,9 +156,18 @@
 
 .iv-page-text {
   margin: 0;
+  width: 100%;
   max-width: 65ch;
   line-height: 1.65;
   font-size: 1rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.iv-page-text * {
+  max-width: 100%;
+  overflow-wrap: inherit;
+  word-break: inherit;
 }
 
 .iv-page-section--align-center .iv-page-text {
@@ -163,21 +179,23 @@
 }
 
 .iv-page-media {
+  display: block;
+  box-sizing: border-box;
   max-width: 100%;
 }
 
 .iv-page-media--align-left {
-  margin-right: auto;
-  margin-left: 0;
+  margin-inline-start: 0 !important;
+  margin-inline-end: auto !important;
 }
 
 .iv-page-media--align-center {
-  margin-inline: auto;
+  margin-inline: auto !important;
 }
 
 .iv-page-media--align-right {
-  margin-left: auto;
-  margin-right: 0;
+  margin-inline-start: auto !important;
+  margin-inline-end: 0 !important;
 }
 
 .iv-page-image {
