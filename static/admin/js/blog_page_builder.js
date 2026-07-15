@@ -5,6 +5,7 @@
   "use strict";
 
   const PAGE_SAVE_TIMEOUT_MS = 30000;
+  const VIDEO_UPLOAD_TIMEOUT_MS = 10 * 60 * 1000;
 
   const ROW_PRESETS = {
     one: [12],
@@ -1507,6 +1508,48 @@
     }
   }
 
+  function appendVideoUploadProgress(bodyEl, upload) {
+    const wrap = document.createElement("div");
+    wrap.className = "blog-page-builder__upload-progress";
+    wrap.dataset.videoUploadProgress = "1";
+    wrap.setAttribute("role", "status");
+    wrap.setAttribute("aria-live", "polite");
+
+    const label = document.createElement("div");
+    label.className = "blog-page-builder__upload-progress-label";
+    label.dataset.videoUploadProgressLabel = "1";
+    const percent = Number.isFinite(upload.percent) ? upload.percent : 0;
+    label.textContent = percent > 0 ? `Otpremanje: ${percent}%` : "Priprema otpremanja…";
+
+    const progress = document.createElement("progress");
+    progress.className = "blog-page-builder__upload-progress-bar";
+    progress.max = 100;
+    progress.value = percent;
+    progress.dataset.videoUploadProgressBar = "1";
+    progress.setAttribute("aria-label", "Napredak otpremanja video fajla");
+
+    wrap.appendChild(label);
+    wrap.appendChild(progress);
+    bodyEl.appendChild(wrap);
+  }
+
+  function updateVideoUploadProgress(state, block, percent) {
+    const normalized = Math.max(0, Math.min(100, Math.round(percent || 0)));
+    state.videoUploadProgress = { blockId: block.id, percent: normalized };
+
+    if (state.selection?.block?.id !== block.id) {
+      return;
+    }
+    const label = state.inspectorBody?.querySelector("[data-video-upload-progress-label]");
+    const progress = state.inspectorBody?.querySelector("[data-video-upload-progress-bar]");
+    if (label) {
+      label.textContent = normalized > 0 ? `Otpremanje: ${normalized}%` : "Priprema otpremanja…";
+    }
+    if (progress) {
+      progress.value = normalized;
+    }
+  }
+
   function renderEditPanel(state) {
     const bodyEl = state.inspectorBody;
     if (!bodyEl || !state.selection) {
@@ -1578,54 +1621,65 @@
     }
 
     if (state.selection.type === "video") {
-      appendTextField(bodyEl, "YouTube URL", state.selection.block.attrs.url, (value) => {
-        state.selection.block.attrs.url = value;
+      const videoBlock = state.selection.block;
+      const activeUpload = state.videoUploadProgress;
+      const isUploading = Boolean(activeUpload && activeUpload.blockId === videoBlock.id);
+
+      appendTextField(bodyEl, "YouTube URL", videoBlock.attrs.url, (value) => {
+        videoBlock.attrs.url = value;
         if (value.trim()) {
-          state.selection.block.attrs.path = "";
-          state.selection.block.attrs.src = "";
+          videoBlock.attrs.path = "";
+          videoBlock.attrs.src = "";
         }
         markDirty(state);
         renderCanvas(state);
       });
       const uploadBtn = document.createElement("button");
       uploadBtn.type = "button";
-      uploadBtn.textContent = "Otpremi video fajl";
+      uploadBtn.textContent = isUploading ? "Otpremanje videa…" : "Otpremi video fajl";
       uploadBtn.className = "blog-page-builder__inspector-btn";
+      uploadBtn.disabled = isUploading;
       uploadBtn.addEventListener("click", () => {
-        state.pendingVideoBlock = state.selection.block;
+        state.pendingVideoBlock = videoBlock;
         state.videoFileInput.click();
       });
       bodyEl.appendChild(uploadBtn);
-      if (state.selection.block.attrs.path || state.selection.block.attrs.src) {
+
+      if (isUploading) {
+        appendVideoUploadProgress(bodyEl, activeUpload);
+      }
+
+      if (videoBlock.attrs.path || videoBlock.attrs.src) {
         const clearBtn = document.createElement("button");
         clearBtn.type = "button";
         clearBtn.textContent = "Ukloni video fajl";
         clearBtn.className = "blog-page-builder__inspector-btn";
         clearBtn.addEventListener("click", () => {
-          state.selection.block.attrs.path = "";
-          state.selection.block.attrs.src = "";
+          videoBlock.attrs.path = "";
+          videoBlock.attrs.src = "";
           markDirty(state);
           renderCanvas(state);
+          renderEditPanel(state);
         });
         bodyEl.appendChild(clearBtn);
       }
-      appendTextField(bodyEl, "Opis", state.selection.block.attrs.caption, (value) => {
-        state.selection.block.attrs.caption = value;
+      appendTextField(bodyEl, "Opis", videoBlock.attrs.caption, (value) => {
+        videoBlock.attrs.caption = value;
         markDirty(state);
         renderCanvas(state);
       }, true);
       appendSelectField(
         bodyEl,
         "Odnos strana",
-        state.selection.block.settings.aspect || "16:9",
+        videoBlock.settings.aspect || "16:9",
         ["16:9", "4:3"],
         (value) => {
-          state.selection.block.settings.aspect = value;
+          videoBlock.settings.aspect = value;
           markDirty(state);
           renderCanvas(state);
         },
       );
-      appendMediaWidthField(bodyEl, state.selection.block, state);
+      appendMediaWidthField(bodyEl, videoBlock, state);
     }
 
     if (state.selection.type === "faq") {
@@ -1867,37 +1921,59 @@
     }
   }
 
-  async function uploadVideo(state, file, block) {
+  function uploadVideo(state, file, block, onProgress) {
     if (!state.videoUploadUrl || !file) {
-      return { ok: false, message: "Otpremanje videa nije dostupno." };
+      return Promise.resolve({ ok: false, message: "Otpremanje videa nije dostupno." });
     }
 
     const formData = new FormData();
     formData.append("video", file);
 
-    try {
-      const response = await fetch(state.videoUploadUrl, {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "X-CSRFToken": getCsrfToken() },
-        body: formData,
-      });
-      const data = await response.json();
-      if (!response.ok || !data.ok) {
-        return { ok: false, message: "Otpremanje videa nije uspelo." };
-      }
+    return new Promise((resolve) => {
+      const request = new XMLHttpRequest();
+      request.open("POST", state.videoUploadUrl);
+      request.withCredentials = true;
+      request.timeout = VIDEO_UPLOAD_TIMEOUT_MS;
+      request.responseType = "json";
+      request.setRequestHeader("X-CSRFToken", getCsrfToken());
 
-      block.attrs.src = data.url;
-      block.attrs.path = data.path;
-      block.attrs.url = "";
-      trackSessionUpload(state, "project_videos", data.path);
-      markDirty(state);
-      renderCanvas(state);
-      renderEditPanel(state);
-      return { ok: true };
-    } catch (_error) {
-      return { ok: false, message: "Mrežna greška pri otpremanju videa." };
-    }
+      request.upload.addEventListener("progress", (event) => {
+        if (event.lengthComputable && typeof onProgress === "function") {
+          onProgress((event.loaded / event.total) * 100);
+        }
+      });
+
+      request.addEventListener("load", () => {
+        const data = request.response || {};
+        if (request.status < 200 || request.status >= 300 || !data.ok) {
+          resolve({ ok: false, message: data.error || "Otpremanje videa nije uspelo." });
+          return;
+        }
+
+        if (typeof onProgress === "function") {
+          onProgress(100);
+        }
+        block.attrs.src = data.url;
+        block.attrs.path = data.path;
+        block.attrs.url = "";
+        trackSessionUpload(state, "project_videos", data.path);
+        markDirty(state);
+        renderCanvas(state);
+        resolve({ ok: true });
+      });
+
+      request.addEventListener("error", () => {
+        resolve({ ok: false, message: "Mrežna greška pri otpremanju videa." });
+      });
+      request.addEventListener("timeout", () => {
+        resolve({ ok: false, message: "Otpremanje videa je trajalo predugo. Pokušajte ponovo." });
+      });
+      request.addEventListener("abort", () => {
+        resolve({ ok: false, message: "Otpremanje videa je prekinuto." });
+      });
+
+      request.send(formData);
+    });
   }
 
   function normalizePlaceholderText(text, placeholder) {
@@ -2523,6 +2599,7 @@
       selection: null,
       pendingImageBlock: null,
       pendingVideoBlock: null,
+      videoUploadProgress: null,
       fileInput,
       videoFileInput,
     };
@@ -2553,9 +2630,24 @@
       if (!file || !state.pendingVideoBlock) {
         return;
       }
-      const result = await uploadVideo(state, file, state.pendingVideoBlock);
+      const block = state.pendingVideoBlock;
+      state.pendingVideoBlock = null;
+      updateVideoUploadProgress(state, block, 0);
+      renderEditPanel(state);
+      const result = await uploadVideo(
+        state,
+        file,
+        block,
+        (percent) => updateVideoUploadProgress(state, block, percent),
+      );
+      state.videoUploadProgress = null;
+      if (state.selection?.block?.id === block.id) {
+        renderEditPanel(state);
+      }
       if (!result.ok) {
         showToast(state.root, result.message, true);
+      } else {
+        showToast(state.root, "Video fajl je uspešno otpremljen.");
       }
     });
 
