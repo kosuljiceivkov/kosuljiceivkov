@@ -184,11 +184,16 @@ class VideoBlockRenderer:
         elif file_src.startswith("/") and context.request is not None:
             file_src = context.request.build_absolute_uri(file_src)
 
+        poster = str(attrs.get("poster", "")).strip()
+        if poster.startswith("/") and context.request is not None:
+            poster = context.request.build_absolute_uri(poster)
+
         return render_to_string(
             "page/blocks/video.html",
             {
                 "embed_url": embed_url,
                 "file_src": file_src if not embed_url else "",
+                "poster": poster if not embed_url else "",
                 "caption": str(attrs.get("caption", "")).strip(),
                 "aspect_class": aspect.replace(":", "-"),
                 "width_percent": normalize_width_percent(settings),

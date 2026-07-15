@@ -932,6 +932,23 @@
   box-sizing: border-box;
 }
 
+.blog-page-builder__row.is-drop-before::before,
+.blog-page-builder__row.is-drop-after::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--vb-accent);
+  box-shadow: 0 0 0 2px var(--vb-outline-soft);
+  pointer-events: none;
+  z-index: 30;
+}
+
+.blog-page-builder__row.is-drop-before::before { top: 0; }
+.blog-page-builder__row.is-drop-after::after { bottom: 0; }
+
 .blog-page-builder__row-chrome {
   position: absolute;
   top: 0;
@@ -973,7 +990,6 @@
 .blog-page-builder__columns {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 0;
   max-width: 100%;
   box-sizing: border-box;
 }
@@ -985,6 +1001,53 @@
   min-width: 0;
   padding: 0.2rem;
   box-sizing: border-box;
+}
+
+.blog-page-builder__column.is-drop-before::before,
+.blog-page-builder__column.is-drop-after::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--vb-accent);
+  box-shadow: 0 0 0 2px var(--vb-outline-soft);
+  pointer-events: none;
+  z-index: 30;
+}
+
+.blog-page-builder__column.is-drop-before::before { left: 0; }
+.blog-page-builder__column.is-drop-after::after { right: 0; }
+
+.blog-page-builder__column-drag {
+  position: absolute;
+  top: 0.2rem;
+  left: 50%;
+  z-index: 24;
+  transform: translate(-50%, -50%);
+  min-width: 1.8rem;
+  height: 1.45rem;
+  padding: 0 0.35rem;
+  border: 0;
+  border-radius: 3px;
+  background: var(--vb-chrome);
+  color: #fff;
+  cursor: grab;
+  opacity: 0;
+  pointer-events: none;
+  touch-action: none;
+}
+
+.blog-page-builder__column:hover .blog-page-builder__column-drag,
+.blog-page-builder__column.is-selected .blog-page-builder__column-drag {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.blog-page-builder__column-drag.is-dragging {
+  cursor: grabbing;
+  opacity: 1;
 }
 
 .blog-page-builder__column.is-target .blog-page-builder__column-inner {
@@ -1739,6 +1802,24 @@ html[data-theme="dark"] .blog-post-editor--visual .blog-post-editor__drawer fiel
   width: 100%;
   height: 100%;
   border: none;
+}
+
+.blog-page-builder__video-preview--file {
+  display: flex;
+  justify-content: center;
+  height: auto;
+  padding-bottom: 0;
+  background: transparent;
+}
+
+.blog-page-builder__video-preview--file video {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 32rem;
+  object-fit: contain;
+  background: #000;
 }
 
 .blog-page-builder__video-placeholder {

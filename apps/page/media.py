@@ -112,11 +112,36 @@ class EditorMediaService:
             return request.build_absolute_uri(url)
         return url
 
+    def build_public_url_or_rollback(
+        self,
+        path: str,
+        *,
+        request=None,
+        storage_alias: str,
+    ) -> str:
+        """Ne ostavlja upload u storage-u ako URL ne može da se generiše."""
+        try:
+            return self.build_public_url(
+                path,
+                request=request,
+                storage_alias=storage_alias,
+            )
+        except Exception:
+            try:
+                storages[storage_alias].delete(path)
+            except Exception:
+                pass
+            raise
+
     def upload_image(self, upload: UploadedFile, *, request=None) -> EditorImageUploadResult:
         path = self.save_image(upload)
         return EditorImageUploadResult(
             path=path,
-            url=self.build_public_url(path, request=request, storage_alias="blog_images"),
+            url=self.build_public_url_or_rollback(
+                path,
+                request=request,
+                storage_alias="blog_images",
+            ),
             alt="",
         )
 
@@ -124,5 +149,9 @@ class EditorMediaService:
         path = self.save_video(upload)
         return EditorVideoUploadResult(
             path=path,
-            url=self.build_public_url(path, request=request, storage_alias="project_videos"),
+            url=self.build_public_url_or_rollback(
+                path,
+                request=request,
+                storage_alias="project_videos",
+            ),
         )

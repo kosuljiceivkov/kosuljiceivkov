@@ -2,10 +2,17 @@
 
 from django.test import RequestFactory, TestCase
 
+from apps.page.catalog.elements import build_builder_catalog
 from apps.page.rendering import get_page_renderer
 from apps.page.rendering.base import RenderContext
 from apps.page.schema import empty_page
-from apps.page.structure import create_faq_block, create_image_block, create_video_block
+from apps.page.structure import (
+    create_faq_block,
+    create_image_block,
+    create_section,
+    create_text_block,
+    create_video_block,
+)
 from apps.page.validation import PageValidationError, validate_page_or_raise
 
 
@@ -113,6 +120,67 @@ class PageMediaBlockTests(TestCase):
         )
 
         self.assertIn('style="width: 75%;"', html)
+
+    def test_renders_uploaded_video_in_native_ratio_with_poster(self):
+        block = create_video_block()
+        block["attrs"]["src"] = "/media/page/videos/demo.mp4"
+        block["attrs"]["poster"] = "/media/blog/document/video-poster.jpg"
+
+        html = self.renderer.render(
+            self._page_with_block(block),
+            context=RenderContext(request=self.request),
+        )
+
+        self.assertIn("iv-page-video--file", html)
+        self.assertIn('poster="http://testserver/media/blog/document/video-poster.jpg"', html)
+        self.assertIn('src="http://testserver/media/page/videos/demo.mp4"', html)
+
+    def test_saved_spacing_settings_do_not_affect_rendering(self):
+        page = self._page_with_block(create_text_block(text="Razmaci"))
+        section = page["sections"][0]
+        section["settings"]["row_gap"] = "lg"
+        section["settings"]["padding_top"] = 11
+        row = section["rows"][0]
+        row["settings"]["column_gap"] = 16
+        row["columns"][0]["settings"]["padding"] = 17
+
+        validate_page_or_raise(page)
+        html = self.renderer.render(page, context=RenderContext(request=self.request))
+
+        self.assertNotIn("iv-page-section--row-gap", html)
+        self.assertNotIn("iv-page-row--gap", html)
+        self.assertNotIn("iv-page-col--pad", html)
+        self.assertNotIn('style="', html)
+
+    def test_builder_catalog_has_no_spacing_controls(self):
+        catalog = build_builder_catalog()
+        field_ids = {
+            field["id"]
+            for group in ("section_settings", "row_settings", "column_settings")
+            for field in catalog[group]
+        }
+
+        self.assertTrue(
+            {
+                "padding_top",
+                "padding_bottom",
+                "margin_top",
+                "margin_bottom",
+                "row_gap",
+                "column_gap",
+                "padding",
+            }.isdisjoint(field_ids)
+        )
+
+    def test_new_sections_do_not_store_spacing_settings(self):
+        section = create_section()
+
+        self.assertNotIn("padding_top", section["settings"])
+        self.assertNotIn("padding_bottom", section["settings"])
+        self.assertNotIn("margin_bottom", section["settings"])
+        self.assertNotIn("row_gap", section["settings"])
+        self.assertNotIn("column_gap", section["rows"][0]["settings"])
+        self.assertNotIn("padding", section["rows"][0]["columns"][0]["settings"])
 
     def test_invalid_width_percent_fails_validation(self):
         block = create_image_block()

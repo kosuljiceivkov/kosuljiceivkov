@@ -88,38 +88,36 @@ class HtmlPageRenderer:
 
 
 def _section_css_classes(settings: dict[str, Any]) -> str:
-    padding_top = settings.get("padding_top", "md")
-    padding_bottom = settings.get("padding_bottom", "md")
-    margin_top = settings.get("margin_top", "none")
-    margin_bottom = settings.get("margin_bottom", "none")
     container_width = settings.get("container_width", "contained")
     background = settings.get("background", "default")
 
     classes = [
         "iv-page-section",
-        f"iv-page-section--pad-top-{padding_top}",
-        f"iv-page-section--pad-bottom-{padding_bottom}",
-        f"iv-page-section--margin-top-{margin_top}",
-        f"iv-page-section--margin-bottom-{margin_bottom}",
         f"iv-page-section--width-{container_width}",
         f"iv-page-section--bg-{background}",
     ]
-    return " ".join(classes)
+    return " ".join(filter(None, classes))
 
 
 def _row_css_classes(settings: dict[str, Any]) -> str:
-    gap = settings.get("column_gap", "md")
     valign = settings.get("vertical_align", "top")
-    return f"iv-page-row iv-page-row--gap-{gap} iv-page-row--align-{valign}"
+    return f"iv-page-row iv-page-row--align-{valign}"
 
 
 def _column_css_classes(settings: dict[str, Any]) -> str:
     mobile = settings.get("width_mobile", 12)
     tablet = settings.get("width_tablet", 12)
     desktop = settings.get("width_desktop", 12)
-    padding = settings.get("padding", "none")
     align = settings.get("horizontal_align", "left")
-    return (
-        f"iv-page-col col-mobile-{mobile} col-tablet-{tablet} col-desktop-{desktop} "
-        f"iv-page-col--pad-{padding} iv-page-col--align-{align}"
+    return " ".join(
+        filter(
+            None,
+            (
+                "iv-page-col",
+                f"col-mobile-{mobile}",
+                f"col-tablet-{tablet}",
+                f"col-desktop-{desktop}",
+                f"iv-page-col--align-{align}",
+            ),
+        )
     )

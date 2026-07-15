@@ -107,8 +107,6 @@ SECTION_TEMPLATES: dict[str, SectionTemplate] = {
                 label="Klasičan",
                 layout_id="one_full",
                 default_settings={
-                    "padding_top": "lg",
-                    "padding_bottom": "lg",
                     "container_width": "contained",
                     "background": "default",
                     "text_align": "left",
@@ -120,8 +118,6 @@ SECTION_TEMPLATES: dict[str, SectionTemplate] = {
                 label="Centriran",
                 layout_id="one_full",
                 default_settings={
-                    "padding_top": "lg",
-                    "padding_bottom": "lg",
                     "container_width": "contained",
                     "background": "default",
                     "text_align": "center",
@@ -141,8 +137,6 @@ SECTION_TEMPLATES: dict[str, SectionTemplate] = {
                 label="Svetla",
                 layout_id="one_full",
                 default_settings={
-                    "padding_top": "md",
-                    "padding_bottom": "md",
                     "container_width": "contained",
                     "background": "light",
                     "text_align": "center",
@@ -154,8 +148,6 @@ SECTION_TEMPLATES: dict[str, SectionTemplate] = {
                 label="Tamna",
                 layout_id="one_full",
                 default_settings={
-                    "padding_top": "md",
-                    "padding_bottom": "md",
                     "container_width": "contained",
                     "background": "dark",
                     "text_align": "center",

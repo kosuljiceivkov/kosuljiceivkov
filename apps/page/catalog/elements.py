@@ -35,19 +35,13 @@ def build_builder_catalog() -> dict:
             for preset_id in ROW_PRESETS
         ],
         "section_settings": [
-            {"id": "padding_top", "label": "Gornji padding", "type": "enum", "options": ["none", "sm", "md", "lg"]},
-            {"id": "padding_bottom", "label": "Donji padding", "type": "enum", "options": ["none", "sm", "md", "lg"]},
-            {"id": "margin_top", "label": "Gornja margina", "type": "enum", "options": ["none", "sm", "md", "lg"]},
-            {"id": "margin_bottom", "label": "Donja margina", "type": "enum", "options": ["none", "sm", "md", "lg"]},
             {"id": "background", "label": "Pozadina", "type": "enum", "options": ["default", "light", "dark", "accent"]},
             {"id": "container_width", "label": "Širina", "type": "enum", "options": ["contained", "full"]},
         ],
         "row_settings": [
-            {"id": "column_gap", "label": "Razmak kolona", "type": "enum", "options": ["none", "sm", "md", "lg"]},
             {"id": "vertical_align", "label": "Vertikalno", "type": "enum", "options": ["top", "center", "bottom"]},
         ],
         "column_settings": [
-            {"id": "padding", "label": "Padding", "type": "enum", "options": ["none", "sm", "md", "lg"]},
             {"id": "horizontal_align", "label": "Poravnanje", "type": "enum", "options": ["left", "center", "right"]},
         ],
         "block_settings": [

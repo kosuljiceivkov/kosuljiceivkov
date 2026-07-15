@@ -67,6 +67,7 @@ def build_content_security_policy(media_origins: list[str]) -> str:
     """CSP za javni sajt."""
     img_sources = ["'self'", "data:"] + media_origins
     img_src = " ".join(img_sources)
+    media_src = " ".join(["'self'"] + media_origins)
 
     directives = [
         "default-src 'self'",
@@ -77,9 +78,10 @@ def build_content_security_policy(media_origins: list[str]) -> str:
         "script-src 'self'",
         f"style-src 'self' 'unsafe-inline'",
         f"img-src {img_src}",
+        f"media-src {media_src}",
         "font-src 'self'",
         "connect-src 'self'",
-        "frame-src 'none'",
+        "frame-src https://www.youtube.com https://www.youtube-nocookie.com",
         "upgrade-insecure-requests",
     ]
     return "; ".join(directives)

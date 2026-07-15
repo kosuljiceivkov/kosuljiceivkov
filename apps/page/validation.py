@@ -11,8 +11,6 @@ from apps.page.schema import is_supported_page
 from apps.page.structure import ROW_PRESETS, MEDIA_WIDTH_PERCENT_MAX, MEDIA_WIDTH_PERCENT_MIN
 
 _DISALLOWED_LINK_SCHEMES = ("javascript", "data", "vbscript")
-_ALLOWED_PADDING = frozenset({"none", "sm", "md", "lg"})
-_ALLOWED_GAP = frozenset({"none", "sm", "md", "lg"})
 _ALLOWED_ALIGN = frozenset({"left", "center", "right"})
 _ALLOWED_VERTICAL_ALIGN = frozenset({"top", "center", "bottom"})
 _ALLOWED_BACKGROUND = frozenset({"default", "light", "dark", "accent"})
@@ -69,10 +67,6 @@ def _validate_section(section: Any, errors: list[str], *, path: str) -> None:
 
 def _validate_section_settings(settings: dict[str, Any], errors: list[str], *, path: str) -> None:
     for key, allowed in (
-        ("padding_top", _ALLOWED_PADDING),
-        ("padding_bottom", _ALLOWED_PADDING),
-        ("margin_top", _ALLOWED_PADDING),
-        ("margin_bottom", _ALLOWED_PADDING),
         ("background", _ALLOWED_BACKGROUND),
         ("container_width", _ALLOWED_CONTAINER),
     ):
@@ -94,9 +88,6 @@ def _validate_row(row: Any, errors: list[str], *, path: str) -> None:
     if settings is not None and not isinstance(settings, dict):
         errors.append(f"{path}: settings mora biti objekat.")
     elif isinstance(settings, dict):
-        gap = settings.get("column_gap")
-        if gap is not None and gap not in _ALLOWED_GAP:
-            errors.append(f"{path}.settings.column_gap: nevažeća vrednost.")
         valign = settings.get("vertical_align")
         if valign is not None and valign not in _ALLOWED_VERTICAL_ALIGN:
             errors.append(f"{path}.settings.vertical_align: nevažeća vrednost.")
@@ -135,9 +126,6 @@ def _validate_column(column: Any, errors: list[str], *, path: str) -> None:
             width = settings.get(width_key)
             if width is not None and (not isinstance(width, int) or width < 1 or width > 12):
                 errors.append(f"{path}.settings.{width_key}: mora biti 1–12.")
-        padding = settings.get("padding")
-        if padding is not None and padding not in _ALLOWED_PADDING:
-            errors.append(f"{path}.settings.padding: nevažeća vrednost.")
         align = settings.get("horizontal_align")
         if align is not None and align not in _ALLOWED_ALIGN:
             errors.append(f"{path}.settings.horizontal_align: nevažeća vrednost.")

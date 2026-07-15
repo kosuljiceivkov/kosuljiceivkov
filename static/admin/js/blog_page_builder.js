@@ -48,16 +48,11 @@
   ];
 
   const DEFAULT_SECTION_SETTINGS = {
-    padding_top: "md",
-    padding_bottom: "md",
-    margin_top: "none",
-    margin_bottom: "none",
     background: "default",
     container_width: "contained",
   };
 
   const DEFAULT_ROW_SETTINGS = {
-    column_gap: "md",
     vertical_align: "top",
   };
 
@@ -65,7 +60,6 @@
     width_mobile: 12,
     width_tablet: 12,
     width_desktop: 12,
-    padding: "none",
     horizontal_align: "left",
   };
 
@@ -120,12 +114,6 @@
     }
     const key = `${storage}:${normalized}`;
     state.sessionUploads.set(key, { storage, path: normalized });
-  }
-
-  function clearSessionUploads(state) {
-    if (state.sessionUploads) {
-      state.sessionUploads.clear();
-    }
     state.abandonCleanupSent = false;
   }
 
@@ -139,7 +127,6 @@
   function shouldAbandonPendingUploads(state) {
     return Boolean(
       state
-        && state.dirty
         && state.cleanupPendingUrl
         && state.sessionUploads
         && state.sessionUploads.size > 0
@@ -155,7 +142,6 @@
 
     state.abandonCleanupSent = true;
     const paths = getSessionUploadList(state);
-    state.sessionUploads.clear();
 
     const request = fetch(state.cleanupPendingUrl, {
       method: "POST",
@@ -171,12 +157,24 @@
     return request
       .then((response) => response.json().catch(() => ({})).then((data) => ({ response, data })))
       .then(({ response, data }) => {
-        if (!response.ok || !data.ok) {
+        if (!response.ok || !data.ok || Number(data.errors || 0) > 0) {
+          state.abandonCleanupSent = false;
           return { ok: false };
         }
-        return { ok: true };
+        paths.forEach((item) => {
+          state.sessionUploads.delete(`${item.storage}:${item.path}`);
+        });
+        state.abandonCleanupSent = false;
+        return {
+          ok: true,
+          deleted: Number(data.deleted || 0),
+          skippedReferenced: Number(data.skipped_referenced || 0),
+        };
       })
-      .catch(() => ({ ok: false }));
+      .catch(() => {
+        state.abandonCleanupSent = false;
+        return { ok: false };
+      });
   }
 
   function initAbandonUploadCleanup(state, postRoot) {
@@ -264,7 +262,14 @@
         id: uid("blk"),
         type: "video",
         settings: { ...DEFAULT_BLOCK_SETTINGS, aspect: "16:9", width_percent: "100" },
-        attrs: { url: "", path: "", src: "", caption: "" },
+        attrs: {
+          url: "",
+          path: "",
+          src: "",
+          poster: "",
+          poster_path: "",
+          caption: "",
+        },
       };
     }
     if (type === "faq") {
@@ -341,18 +346,17 @@
     const s = settings || {};
     return [
       "iv-page-section",
-      `iv-page-section--pad-top-${s.padding_top || "md"}`,
-      `iv-page-section--pad-bottom-${s.padding_bottom || "md"}`,
-      `iv-page-section--margin-top-${s.margin_top || "none"}`,
-      `iv-page-section--margin-bottom-${s.margin_bottom || "none"}`,
       `iv-page-section--width-${s.container_width || "contained"}`,
       `iv-page-section--bg-${s.background || "default"}`,
-    ].join(" ");
+    ].filter(Boolean).join(" ");
   }
 
   function rowCssClasses(settings) {
     const s = settings || {};
-    return `iv-page-row iv-page-row--gap-${s.column_gap || "md"} iv-page-row--align-${s.vertical_align || "top"}`;
+    return [
+      "iv-page-row",
+      `iv-page-row--align-${s.vertical_align || "top"}`,
+    ].filter(Boolean).join(" ");
   }
 
   function columnCssClasses(settings) {
@@ -360,12 +364,14 @@
     const mobile = s.width_mobile ?? 12;
     const tablet = s.width_tablet ?? 12;
     const desktop = s.width_desktop ?? 12;
-    const padding = s.padding || "none";
     const align = s.horizontal_align || "left";
-    return (
-      `iv-page-col col-mobile-${mobile} col-tablet-${tablet} col-desktop-${desktop} ` +
-      `iv-page-col--pad-${padding} iv-page-col--align-${align}`
-    );
+    return [
+      "iv-page-col",
+      `col-mobile-${mobile}`,
+      `col-tablet-${tablet}`,
+      `col-desktop-${desktop}`,
+      `iv-page-col--align-${align}`,
+    ].filter(Boolean).join(" ");
   }
 
   function blockAlignClass(block, prefix) {
@@ -1630,6 +1636,8 @@
         if (value.trim()) {
           videoBlock.attrs.path = "";
           videoBlock.attrs.src = "";
+          videoBlock.attrs.poster = "";
+          videoBlock.attrs.poster_path = "";
         }
         markDirty(state);
         renderCanvas(state);
@@ -1644,6 +1652,11 @@
         state.videoFileInput.click();
       });
       bodyEl.appendChild(uploadBtn);
+      const videoHint = document.createElement("p");
+      videoHint.className = "blog-page-builder__inspector-hint";
+      videoHint.textContent =
+        "Podržano: MP4 (H.264) i WebM. Učitani fajl koristi svoj prirodni odnos strana.";
+      bodyEl.appendChild(videoHint);
 
       if (isUploading) {
         appendVideoUploadProgress(bodyEl, activeUpload);
@@ -1657,6 +1670,10 @@
         clearBtn.addEventListener("click", () => {
           videoBlock.attrs.path = "";
           videoBlock.attrs.src = "";
+          videoBlock.attrs.poster = "";
+          videoBlock.attrs.poster_path = "";
+          videoBlock.attrs.video_width = "";
+          videoBlock.attrs.video_height = "";
           markDirty(state);
           renderCanvas(state);
           renderEditPanel(state);
@@ -1668,17 +1685,19 @@
         markDirty(state);
         renderCanvas(state);
       }, true);
-      appendSelectField(
-        bodyEl,
-        "Odnos strana",
-        videoBlock.settings.aspect || "16:9",
-        ["16:9", "4:3"],
-        (value) => {
-          videoBlock.settings.aspect = value;
-          markDirty(state);
-          renderCanvas(state);
-        },
-      );
+      if (!videoBlock.attrs.path && !videoBlock.attrs.src) {
+        appendSelectField(
+          bodyEl,
+          "YouTube odnos strana",
+          videoBlock.settings.aspect || "16:9",
+          ["16:9", "4:3"],
+          (value) => {
+            videoBlock.settings.aspect = value;
+            markDirty(state);
+            renderCanvas(state);
+          },
+        );
+      }
       appendMediaWidthField(bodyEl, videoBlock, state);
     }
 
@@ -1921,6 +1940,105 @@
     }
   }
 
+  function createVideoPoster(file) {
+    return new Promise((resolve) => {
+      const objectUrl = URL.createObjectURL(file);
+      const video = document.createElement("video");
+      let settled = false;
+
+      function finish(result) {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        window.clearTimeout(timeout);
+        URL.revokeObjectURL(objectUrl);
+        resolve(result);
+      }
+
+      const timeout = window.setTimeout(() => finish(null), 15000);
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = "metadata";
+      video.addEventListener("error", () => finish(null), { once: true });
+      function captureFrame() {
+        if (!video.videoWidth || !video.videoHeight) {
+          finish(null);
+          return;
+        }
+        const maxWidth = 1280;
+        const scale = Math.min(1, maxWidth / video.videoWidth);
+        const width = Math.max(1, Math.round(video.videoWidth * scale));
+        const height = Math.max(1, Math.round(video.videoHeight * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d");
+        if (!context) {
+          finish(null);
+          return;
+        }
+        context.drawImage(video, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => finish(blob ? {
+            blob,
+            width: video.videoWidth,
+            height: video.videoHeight,
+          } : null),
+          "image/jpeg",
+          0.82,
+        );
+      }
+      video.addEventListener("loadedmetadata", () => {
+        if (!video.videoWidth || !video.videoHeight) {
+          finish(null);
+          return;
+        }
+        const captureAt = Number.isFinite(video.duration) && video.duration > 0
+          ? Math.min(1, Math.max(0, video.duration * 0.1))
+          : 0;
+        if (captureAt > 0.05) {
+          video.addEventListener("seeked", captureFrame, { once: true });
+          video.currentTime = captureAt;
+        } else {
+          video.addEventListener("loadeddata", captureFrame, { once: true });
+        }
+      }, { once: true });
+      video.src = objectUrl;
+    });
+  }
+
+  async function uploadVideoPoster(state, poster, block) {
+    if (!poster?.blob || !state.uploadUrl) {
+      return;
+    }
+    const formData = new FormData();
+    const filename = `video-poster-${Date.now()}.jpg`;
+    formData.append("image", poster.blob, filename);
+    try {
+      const response = await fetch(state.uploadUrl, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "X-CSRFToken": getCsrfToken() },
+        body: formData,
+        signal: AbortSignal.timeout(PAGE_SAVE_TIMEOUT_MS),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        return;
+      }
+      block.attrs.poster = data.url;
+      block.attrs.poster_path = data.path;
+      block.attrs.video_width = poster.width;
+      block.attrs.video_height = poster.height;
+      trackSessionUpload(state, "blog_images", data.path);
+      markDirty(state);
+      renderCanvas(state);
+    } catch (_error) {
+      // Poster je poboljšanje; video ostaje validan i ako izdvajanje slike ne uspe.
+    }
+  }
+
   function uploadVideo(state, file, block, onProgress) {
     if (!state.videoUploadUrl || !file) {
       return Promise.resolve({ ok: false, message: "Otpremanje videa nije dostupno." });
@@ -2089,11 +2207,15 @@
       applyMediaWidthStyles(scale, block);
       if (fileSrc) {
         const wrap = document.createElement("div");
-        wrap.className = "blog-page-builder__video-preview";
+        wrap.className = "blog-page-builder__video-preview blog-page-builder__video-preview--file";
         const video = document.createElement("video");
         video.src = fileSrc;
         video.controls = true;
         video.preload = "metadata";
+        video.playsInline = true;
+        if (block.attrs.poster) {
+          video.poster = block.attrs.poster;
+        }
         wrap.appendChild(video);
         scale.appendChild(wrap);
       } else if (videoId) {
@@ -2233,6 +2355,96 @@
     });
   }
 
+  function bindNestedReorder(state, handle, items, sourceIndex, container, selector, axis) {
+    handle.classList.add("blog-page-builder__drag-handle");
+    handle.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+
+      const draggedItem = items[sourceIndex];
+      if (!draggedItem) {
+        return;
+      }
+
+      let insertIndex = sourceIndex;
+      handle.classList.add("is-dragging");
+      state.root.classList.add("is-reordering");
+
+      function elements() {
+        return Array.from(container.querySelectorAll(`:scope > ${selector}`));
+      }
+
+      function clearMarkers() {
+        elements().forEach((element) => {
+          element.classList.remove("is-drop-before", "is-drop-after");
+        });
+      }
+
+      function markInsertPosition(index) {
+        const nodes = elements();
+        clearMarkers();
+        if (!nodes.length) {
+          return;
+        }
+        if (index >= nodes.length) {
+          nodes[nodes.length - 1].classList.add("is-drop-after");
+        } else {
+          nodes[index].classList.add("is-drop-before");
+        }
+      }
+
+      function onPointerMove(moveEvent) {
+        const coordinate = axis === "x" ? moveEvent.clientX : moveEvent.clientY;
+        const nodes = elements();
+        insertIndex = nodes.length;
+        for (let index = 0; index < nodes.length; index += 1) {
+          const rect = nodes[index].getBoundingClientRect();
+          const midpoint = axis === "x"
+            ? rect.left + rect.width / 2
+            : rect.top + rect.height / 2;
+          if (coordinate < midpoint) {
+            insertIndex = index;
+            break;
+          }
+        }
+        markInsertPosition(insertIndex);
+      }
+
+      function cleanup() {
+        clearMarkers();
+        handle.classList.remove("is-dragging");
+        state.root.classList.remove("is-reordering");
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("pointerup", onPointerUp);
+        window.removeEventListener("pointercancel", onPointerUp);
+      }
+
+      function onPointerUp() {
+        if (insertIndex !== sourceIndex && insertIndex !== sourceIndex + 1) {
+          items.splice(sourceIndex, 1);
+          let targetIndex = insertIndex;
+          if (targetIndex > sourceIndex) {
+            targetIndex -= 1;
+          }
+          items.splice(targetIndex, 0, draggedItem);
+          markDirty(state);
+          cleanup();
+          renderCanvas(state);
+          return;
+        }
+        cleanup();
+      }
+
+      window.addEventListener("pointermove", onPointerMove);
+      window.addEventListener("pointerup", onPointerUp);
+      window.addEventListener("pointercancel", onPointerUp);
+      onPointerMove(event);
+    });
+  }
+
   function renderCanvas(state) {
     clearTextSelectionState(state);
     state.canvas.innerHTML = "";
@@ -2306,6 +2518,8 @@
         const currentPreset = detectRowPreset(row);
         const rowToolbar = document.createElement("div");
         rowToolbar.className = "blog-page-builder__row-chrome";
+        const rowDragHandle = chromeBtn("↕", "drag-row", "vb-chrome-btn--icon", "Prevucite da promenite redosled reda");
+        rowToolbar.appendChild(rowDragHandle);
         rowToolbar.appendChild(chromeBtn("⚙", "select-row", "vb-chrome-btn--icon vb-chrome-btn--accent"));
         const presetSelect = document.createElement("select");
         presetSelect.className = "vb-chrome-select";
@@ -2347,11 +2561,20 @@
           renderCanvas(state);
         });
         rowEl.appendChild(rowToolbar);
+        bindNestedReorder(
+          state,
+          rowDragHandle,
+          section.rows,
+          rowIndex,
+          sectionInner,
+          ".blog-page-builder__row",
+          "y",
+        );
 
         const columnsEl = document.createElement("div");
         columnsEl.className = `blog-page-builder__columns ${rowCssClasses(row.settings)}`;
 
-        row.columns.forEach((column) => {
+        row.columns.forEach((column, columnIndex) => {
           const columnEl = document.createElement("div");
           columnEl.className = `blog-page-builder__column ${columnCssClasses(column.settings)}`;
           if (state.selection && state.selection.id === column.id && state.selection.kind === "column") {
@@ -2360,6 +2583,23 @@
           if (shouldShowColumnTarget(state, column.id)) {
             columnEl.classList.add("is-target");
           }
+
+          const columnDragHandle = document.createElement("button");
+          columnDragHandle.type = "button";
+          columnDragHandle.className = "blog-page-builder__column-drag";
+          columnDragHandle.textContent = "↔";
+          columnDragHandle.title = "Prevucite da promenite redosled kolone";
+          columnDragHandle.setAttribute("aria-label", "Promeni redosled kolone");
+          columnEl.appendChild(columnDragHandle);
+          bindNestedReorder(
+            state,
+            columnDragHandle,
+            row.columns,
+            columnIndex,
+            columnsEl,
+            ".blog-page-builder__column",
+            "x",
+          );
 
           const columnInner = document.createElement("div");
           columnInner.className = "blog-page-builder__column-inner";
@@ -2499,6 +2739,12 @@
 
   async function savePageContent(state, options) {
     const force = options && options.force === true;
+    if (state.activeMediaUploads > 0) {
+      return {
+        ok: false,
+        message: "Sačekajte da se otpremanje medija završi, pa pokušajte ponovo.",
+      };
+    }
     if (!force && !state.dirty) {
       return { ok: true, code: "clean" };
     }
@@ -2537,9 +2783,9 @@
 
       state.pageVersion = data.page_version;
       state.dirty = false;
-      clearSessionUploads(state);
+      const cleanupResult = await abandonPendingUploads(state);
       setSaveStatus(state.postRoot, "saved");
-      return { ok: true };
+      return { ok: true, cleanupPending: !cleanupResult.ok };
     } catch (_error) {
       setSaveStatus(state.postRoot, "error");
       return { ok: false, message: "Mrežna greška pri čuvanju." };
@@ -2562,7 +2808,7 @@
 
     const videoFileInput = document.createElement("input");
     videoFileInput.type = "file";
-    videoFileInput.accept = "video/mp4,video/webm,video/quicktime";
+    videoFileInput.accept = "video/mp4,video/webm";
     videoFileInput.hidden = true;
     root.appendChild(videoFileInput);
 
@@ -2594,6 +2840,7 @@
       targetColumnId: null,
       dirty: false,
       saving: false,
+      activeMediaUploads: 0,
       sessionUploads: new Map(),
       abandonCleanupSent: false,
       selection: null,
@@ -2618,9 +2865,14 @@
       if (!file || !state.pendingImageBlock) {
         return;
       }
-      const result = await uploadImage(state, file, state.pendingImageBlock);
-      if (!result.ok) {
-        showToast(state.root, result.message, true);
+      state.activeMediaUploads += 1;
+      try {
+        const result = await uploadImage(state, file, state.pendingImageBlock);
+        if (!result.ok) {
+          showToast(state.root, result.message, true);
+        }
+      } finally {
+        state.activeMediaUploads = Math.max(0, state.activeMediaUploads - 1);
       }
     });
 
@@ -2632,22 +2884,44 @@
       }
       const block = state.pendingVideoBlock;
       state.pendingVideoBlock = null;
-      updateVideoUploadProgress(state, block, 0);
-      renderEditPanel(state);
-      const result = await uploadVideo(
-        state,
-        file,
-        block,
-        (percent) => updateVideoUploadProgress(state, block, percent),
-      );
-      state.videoUploadProgress = null;
-      if (state.selection?.block?.id === block.id) {
+      state.activeMediaUploads += 1;
+      try {
+        updateVideoUploadProgress(state, block, 0);
         renderEditPanel(state);
-      }
-      if (!result.ok) {
-        showToast(state.root, result.message, true);
-      } else {
-        showToast(state.root, "Video fajl je uspešno otpremljen.");
+        const poster = await createVideoPoster(file);
+        if (!poster) {
+          state.videoUploadProgress = null;
+          if (state.selection?.block?.id === block.id) {
+            renderEditPanel(state);
+          }
+          showToast(
+            state.root,
+            "Video format ili kodek nije podržan u pregledaču. Koristite MP4 (H.264) ili WebM.",
+            true,
+          );
+          return;
+        }
+        const result = await uploadVideo(
+          state,
+          file,
+          block,
+          (percent) => updateVideoUploadProgress(state, block, percent),
+        );
+        state.videoUploadProgress = null;
+        if (state.selection?.block?.id === block.id) {
+          renderEditPanel(state);
+        }
+        if (!result.ok) {
+          showToast(state.root, result.message, true);
+        } else {
+          await uploadVideoPoster(state, poster, block);
+          if (state.selection?.block?.id === block.id) {
+            renderEditPanel(state);
+          }
+          showToast(state.root, "Video fajl je uspešno otpremljen.");
+        }
+      } finally {
+        state.activeMediaUploads = Math.max(0, state.activeMediaUploads - 1);
       }
     });
 

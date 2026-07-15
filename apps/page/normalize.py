@@ -11,6 +11,16 @@ from apps.page.rich_text import sanitize_inline_html
 from apps.page.schema import is_supported_page
 from apps.page.structure import DEFAULT_ROW_SETTINGS, DEFAULT_SECTION_SETTINGS
 
+_SECTION_SPACING_KEYS = frozenset(
+    {"padding_top", "padding_bottom", "margin_top", "margin_bottom", "row_gap"}
+)
+_ROW_SPACING_KEYS = frozenset({"column_gap"})
+_COLUMN_SPACING_KEYS = frozenset({"padding"})
+
+
+def _without_keys(settings: dict[str, Any], keys: frozenset[str]) -> dict[str, Any]:
+    return {key: value for key, value in settings.items() if key not in keys}
+
 
 def normalize_page(page: Any) -> dict[str, Any]:
     if not is_supported_page(page):
@@ -53,7 +63,7 @@ def _normalize_section(section: dict[str, Any]) -> dict[str, Any]:
         result["settings"] = dict(DEFAULT_SECTION_SETTINGS)
     else:
         merged = dict(DEFAULT_SECTION_SETTINGS)
-        merged.update(settings)
+        merged.update(_without_keys(settings, _SECTION_SPACING_KEYS))
         result["settings"] = merged
 
     rows = result.get("rows")
@@ -86,6 +96,10 @@ def _normalize_row(row: dict[str, Any]) -> dict[str, Any]:
     settings = result.get("settings")
     if not isinstance(settings, dict):
         result["settings"] = dict(DEFAULT_ROW_SETTINGS)
+    else:
+        merged = dict(DEFAULT_ROW_SETTINGS)
+        merged.update(_without_keys(settings, _ROW_SPACING_KEYS))
+        result["settings"] = merged
     columns = result.get("columns")
     if not isinstance(columns, list):
         result["columns"] = []
@@ -112,7 +126,7 @@ def _normalize_column(column: dict[str, Any], index: int) -> dict[str, Any]:
         result["settings"] = merged
     else:
         merged = dict(DEFAULT_COLUMN_SETTINGS)
-        merged.update(settings)
+        merged.update(_without_keys(settings, _COLUMN_SPACING_KEYS))
         result["settings"] = merged
     blocks = result.get("blocks")
     if not isinstance(blocks, list):

@@ -7,16 +7,11 @@ from typing import Any
 from apps.page.ids import new_block_id, new_column_id, new_row_id, new_section_id
 
 DEFAULT_SECTION_SETTINGS: dict[str, str] = {
-    "padding_top": "md",
-    "padding_bottom": "md",
-    "margin_top": "none",
-    "margin_bottom": "none",
     "background": "default",
     "container_width": "contained",
 }
 
 DEFAULT_ROW_SETTINGS: dict[str, str] = {
-    "column_gap": "md",
     "vertical_align": "top",
 }
 
@@ -24,7 +19,6 @@ DEFAULT_COLUMN_SETTINGS: dict[str, Any] = {
     "width_mobile": 12,
     "width_tablet": 12,
     "width_desktop": 12,
-    "padding": "none",
     "horizontal_align": "left",
 }
 
@@ -139,7 +133,14 @@ def create_video_block() -> dict[str, Any]:
         "id": new_block_id(),
         "type": "video",
         "settings": {**default_block_settings(), "aspect": "16:9", "width_percent": "100"},
-        "attrs": {"url": "", "path": "", "src": "", "caption": ""},
+        "attrs": {
+            "url": "",
+            "path": "",
+            "src": "",
+            "poster": "",
+            "poster_path": "",
+            "caption": "",
+        },
     }
 
 
