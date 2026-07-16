@@ -37,7 +37,7 @@ from apps.seo.reading_time import reading_time_for_content_object
 from apps.seo.schema.engine import preview_schema_bundle
 from apps.seo.slug_analyzer import analyze_slug_for_object
 from apps.seo.twitter_card import build_twitter_card_tags
-from apps.seo.models import Redirect, SeoMetadata
+from apps.seo.models import SeoMetadata
 from apps.seo.dashboard_actions import apply_bulk_action
 from apps.seo.forms import SeoMetadataAdminForm
 
@@ -965,29 +965,3 @@ class SeoMetadataAdmin(SeoAnalyzerAdminMixin, admin.ModelAdmin):
         ),
     )
 
-
-@admin.register(Redirect)
-class RedirectAdmin(admin.ModelAdmin):
-    list_display = (
-        "old_path",
-        "new_path",
-        "redirect_type",
-        "is_active",
-        "note",
-        "updated_at",
-    )
-    list_filter = ("redirect_type", "is_active")
-    search_fields = ("old_path", "new_path", "note")
-    ordering = ("-updated_at",)
-    fieldsets = (
-        (
-            None,
-            {
-                "fields": ("old_path", "new_path", "redirect_type", "is_active", "note"),
-                "description": (
-                    "Preusmerenja se primenjuju samo kada stranica ne postoji (404). "
-                    "Za 410 ostavite novu putanju praznu."
-                ),
-            },
-        ),
-    )
