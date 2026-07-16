@@ -86,6 +86,7 @@ class ButtonBlockRenderer:
                 "label": label,
                 "href": href or "#",
                 "style": style,
+                "align": _block_align(block),
                 "render_context": context,
             },
             request=context.request,

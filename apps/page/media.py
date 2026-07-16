@@ -135,6 +135,12 @@ class EditorMediaService:
 
     def upload_image(self, upload: UploadedFile, *, request=None) -> EditorImageUploadResult:
         path = self.save_image(upload)
+        alt = ""
+        name = getattr(upload, "name", "") or ""
+        if name:
+            from pathlib import Path
+
+            alt = Path(name).stem.replace("_", " ").replace("-", " ").strip()
         return EditorImageUploadResult(
             path=path,
             url=self.build_public_url_or_rollback(
@@ -142,7 +148,7 @@ class EditorMediaService:
                 request=request,
                 storage_alias="blog_images",
             ),
-            alt="",
+            alt=alt,
         )
 
     def upload_video(self, upload: UploadedFile, *, request=None) -> EditorVideoUploadResult:

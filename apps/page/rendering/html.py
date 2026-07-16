@@ -56,6 +56,7 @@ class HtmlPageRenderer:
             "settings": settings,
             "rows": rows,
             "css_classes": _section_css_classes(settings),
+            "inline_style": _section_inline_style(settings),
         }
 
     def _build_row_context(self, row: dict[str, Any], context: RenderContext) -> dict[str, Any]:
@@ -88,15 +89,30 @@ class HtmlPageRenderer:
 
 
 def _section_css_classes(settings: dict[str, Any]) -> str:
+    from apps.page.rich_text import normalize_hex_color
+
     container_width = settings.get("container_width", "contained")
     background = settings.get("background", "default")
+    custom_color = normalize_hex_color(settings.get("background_color"))
 
     classes = [
         "iv-page-section",
         f"iv-page-section--width-{container_width}",
-        f"iv-page-section--bg-{background}",
     ]
+    if custom_color:
+        classes.append("iv-page-section--bg-custom")
+    else:
+        classes.append(f"iv-page-section--bg-{background}")
     return " ".join(filter(None, classes))
+
+
+def _section_inline_style(settings: dict[str, Any]) -> str:
+    from apps.page.rich_text import normalize_hex_color
+
+    color = normalize_hex_color(settings.get("background_color"))
+    if not color:
+        return ""
+    return f"background-color: {color};"
 
 
 def _row_css_classes(settings: dict[str, Any]) -> str:

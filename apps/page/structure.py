@@ -8,6 +8,7 @@ from apps.page.ids import new_block_id, new_column_id, new_row_id, new_section_i
 
 DEFAULT_SECTION_SETTINGS: dict[str, str] = {
     "background": "default",
+    "background_color": "",
     "container_width": "contained",
 }
 

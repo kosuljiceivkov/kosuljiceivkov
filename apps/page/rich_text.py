@@ -5,11 +5,14 @@ from __future__ import annotations
 import re
 from html import escape, unescape
 from html.parser import HTMLParser
+from urllib.parse import urlparse
 
-ALLOWED_INLINE_TAGS = frozenset({"b", "strong", "i", "em", "u", "br", "span"})
+ALLOWED_INLINE_TAGS = frozenset({"b", "strong", "i", "em", "u", "br", "span", "a"})
 FONT_SIZE_MIN_PX = 8
 FONT_SIZE_MAX_PX = 96
 _FONT_SIZE_RE = re.compile(r"font-size:\s*([0-9]+(?:\.[0-9]+)?)px", re.IGNORECASE)
+_DISALLOWED_LINK_SCHEMES = frozenset({"javascript", "data", "vbscript"})
+_HEX_COLOR_RE = re.compile(r"^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$")
 
 
 def normalize_html_entities(value: str) -> str:
@@ -36,6 +39,33 @@ def normalize_font_size_px(style: str) -> str | None:
     return f"{value}px"
 
 
+def is_safe_href(href: str) -> bool:
+    href = (href or "").strip()
+    if not href or href.startswith("#") or href.startswith("/"):
+        return True
+    if href.startswith(("mailto:", "tel:")):
+        return True
+    parsed = urlparse(href)
+    if not parsed.scheme:
+        return True
+    scheme = parsed.scheme.lower()
+    if scheme in _DISALLOWED_LINK_SCHEMES:
+        return False
+    return scheme in {"http", "https"}
+
+
+def normalize_hex_color(value: str | None) -> str:
+    """Return normalized #RRGGBB/#RGB or empty string if invalid/blank."""
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    if not raw.startswith("#"):
+        raw = f"#{raw}"
+    if not _HEX_COLOR_RE.match(raw):
+        return ""
+    return raw.lower()
+
+
 class _InlineHTMLSanitizer(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
@@ -44,8 +74,17 @@ class _InlineHTMLSanitizer(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs) -> None:
         tag_name = tag.lower()
+        attr_map = dict(attrs)
+        if tag_name == "a":
+            href = str(attr_map.get("href") or "").strip()
+            if href and is_safe_href(href):
+                self._parts.append(
+                    f'<a href="{escape(href, quote=True)}" target="_blank" rel="noopener noreferrer">'
+                )
+                self._open_tags.append("a")
+            return
         if tag_name == "span":
-            font_size = normalize_font_size_px(dict(attrs).get("style", ""))
+            font_size = normalize_font_size_px(attr_map.get("style", ""))
             if font_size:
                 self._parts.append(f'<span style="font-size: {font_size}">')
                 self._open_tags.append("span")

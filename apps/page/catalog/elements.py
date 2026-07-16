@@ -35,16 +35,17 @@ def build_builder_catalog() -> dict:
             for preset_id in ROW_PRESETS
         ],
         "section_settings": [
-            {"id": "background", "label": "Pozadina", "type": "enum", "options": ["default", "light", "dark", "accent"]},
+            {"id": "background", "label": "Pozadina (preset)", "type": "enum", "options": ["default", "light", "dark", "accent"]},
+            {"id": "background_color", "label": "Pozadina (hex)", "type": "text", "placeholder": "#f4f4f5"},
             {"id": "container_width", "label": "Širina", "type": "enum", "options": ["contained", "full"]},
         ],
         "row_settings": [
             {"id": "vertical_align", "label": "Vertikalno", "type": "enum", "options": ["top", "center", "bottom"]},
         ],
         "column_settings": [
-            {"id": "horizontal_align", "label": "Poravnanje teksta kolone", "type": "enum", "options": ["left", "center", "right"]},
+            {"id": "horizontal_align", "label": "Poravnanje", "type": "enum", "options": ["left", "center", "right"]},
         ],
         "block_settings": [
-            {"id": "align", "label": "Poravnanje elementa", "type": "enum", "options": ["left", "center", "right"]},
+            {"id": "align", "label": "Poravnanje", "type": "enum", "options": ["left", "center", "right"]},
         ],
     }

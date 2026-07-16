@@ -29,6 +29,18 @@ class RichTextSanitizerTests(SimpleTestCase):
         self.assertNotIn("script", html)
         self.assertIn("<b>safe</b>", html)
 
+    def test_safe_links_kept_and_unsafe_removed(self):
+        result = sanitize_inline_html(
+            '<a href="javascript:alert(1)">Bad</a>'
+            '<a href="https://example.com">Good</a>'
+        )
+        self.assertNotIn("javascript:", result)
+        self.assertIn(
+            '<a href="https://example.com" target="_blank" rel="noopener noreferrer">Good</a>',
+            result,
+        )
+        self.assertIn("Bad", result)
+
     def test_inline_html_to_plaintext(self):
         self.assertEqual(
             inline_html_to_plaintext("<strong>Bold</strong> text"),

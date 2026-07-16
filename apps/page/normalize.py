@@ -57,6 +57,8 @@ def _sanitize_text_blocks(page: dict[str, Any]) -> dict[str, Any]:
 
 
 def _normalize_section(section: dict[str, Any]) -> dict[str, Any]:
+    from apps.page.rich_text import normalize_hex_color
+
     result = dict(section)
     settings = result.get("settings")
     if not isinstance(settings, dict):
@@ -64,6 +66,8 @@ def _normalize_section(section: dict[str, Any]) -> dict[str, Any]:
     else:
         merged = dict(DEFAULT_SECTION_SETTINGS)
         merged.update(_without_keys(settings, _SECTION_SPACING_KEYS))
+        raw_color = merged.get("background_color", "")
+        merged["background_color"] = normalize_hex_color(raw_color) if raw_color else ""
         result["settings"] = merged
 
     rows = result.get("rows")

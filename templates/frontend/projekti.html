@@ -1,5 +1,9 @@
 {% extends "base.html" %}
-{% load page_tags %}
+{% load static page_tags %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/iv-page.css' %}?v=8">
+{% endblock %}
 
 {% block content %}
 {% include "partials/page_breadcrumb_hero.html" with seo_object=page %}

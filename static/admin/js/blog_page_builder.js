@@ -49,6 +49,7 @@
 
   const DEFAULT_SECTION_SETTINGS = {
     background: "default",
+    background_color: "",
     container_width: "contained",
   };
 
@@ -344,11 +345,51 @@
 
   function sectionCssClasses(settings) {
     const s = settings || {};
+    const custom = normalizeHexColor(s.background_color);
     return [
       "iv-page-section",
       `iv-page-section--width-${s.container_width || "contained"}`,
-      `iv-page-section--bg-${s.background || "default"}`,
+      custom ? "iv-page-section--bg-custom" : `iv-page-section--bg-${s.background || "default"}`,
     ].filter(Boolean).join(" ");
+  }
+
+  function sectionInlineStyle(settings) {
+    const color = normalizeHexColor((settings || {}).background_color);
+    return color ? `background-color: ${color};` : "";
+  }
+
+  function normalizeHexColor(value) {
+    let raw = String(value || "").trim();
+    if (!raw) {
+      return "";
+    }
+    if (!raw.startsWith("#")) {
+      raw = `#${raw}`;
+    }
+    if (!/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(raw)) {
+      return "";
+    }
+    return raw.toLowerCase();
+  }
+
+  function isSafeHref(href) {
+    const value = String(href || "").trim();
+    if (!value || value.startsWith("#") || value.startsWith("/")) {
+      return true;
+    }
+    if (value.startsWith("mailto:") || value.startsWith("tel:")) {
+      return true;
+    }
+    try {
+      const parsed = new URL(value, window.location.origin);
+      const scheme = (parsed.protocol || "").replace(":", "").toLowerCase();
+      if (["javascript", "data", "vbscript"].includes(scheme)) {
+        return false;
+      }
+      return ["http", "https"].includes(scheme) || !scheme;
+    } catch (_error) {
+      return false;
+    }
   }
 
   function rowCssClasses(settings) {
@@ -413,7 +454,7 @@
   function sanitizeEditableHtml(html) {
     const wrapper = document.createElement("div");
     wrapper.innerHTML = html || "";
-    const allowed = new Set(["B", "STRONG", "I", "EM", "U", "BR", "SPAN"]);
+    const allowed = new Set(["B", "STRONG", "I", "EM", "U", "BR", "SPAN", "A"]);
 
     function clean(node) {
       const children = [...node.childNodes];
@@ -428,6 +469,25 @@
         }
         const tag = child.tagName;
         if (tag === "BR") {
+          return;
+        }
+        if (tag === "A") {
+          const href = String(child.getAttribute("href") || "").trim();
+          [...child.attributes].forEach((attr) => {
+            child.removeAttribute(attr.name);
+          });
+          if (href && isSafeHref(href)) {
+            child.setAttribute("href", href);
+            child.setAttribute("target", "_blank");
+            child.setAttribute("rel", "noopener noreferrer");
+            clean(child);
+            return;
+          }
+          while (child.firstChild) {
+            node.insertBefore(child.firstChild, child);
+          }
+          child.remove();
+          clean(node);
           return;
         }
         if (tag === "SPAN") {
@@ -872,7 +932,26 @@
       return;
     }
     selectRangeContents(range);
-    document.execCommand(command, false, null);
+    if (command === "createLink") {
+      const current = document.queryCommandValue("createLink") || "";
+      const href = window.prompt("Unesite URL linka", current || "https://");
+      if (href == null) {
+        return;
+      }
+      const trimmed = String(href).trim();
+      if (!trimmed) {
+        document.execCommand("unlink", false, null);
+      } else if (!isSafeHref(trimmed)) {
+        showToast(state.root, "Link nije dozvoljen (koristite http/https, / ili #).", true);
+        return;
+      } else {
+        document.execCommand("createLink", false, trimmed);
+      }
+    } else if (command === "unlink") {
+      document.execCommand("unlink", false, null);
+    } else {
+      document.execCommand(command, false, null);
+    }
     commitEditableText(state, block, editable);
   }
 
@@ -1358,6 +1437,8 @@
       ["bold", "B", "Podebljano"],
       ["italic", "I", "Kurziv"],
       ["underline", "U", "Podvučeno"],
+      ["createLink", "🔗", "Dodaj link"],
+      ["unlink", "⌀", "Ukloni link"],
     ].forEach(([command, label, title]) => {
       const btn = document.createElement("button");
       btn.type = "button";
@@ -1575,6 +1656,30 @@
     bodyEl.innerHTML = "";
 
     for (const field of state.selection.fields || []) {
+      if (field.type === "text") {
+        appendTextField(
+          bodyEl,
+          field.label,
+          state.selection.settings[field.id] || "",
+          (value) => {
+            if (field.id === "background_color") {
+              const normalized = normalizeHexColor(value);
+              state.selection.settings[field.id] = value.trim() ? (normalized || value.trim()) : "";
+            } else {
+              state.selection.settings[field.id] = value;
+            }
+            markDirty(state);
+            renderCanvas(state);
+          },
+        );
+        if (field.placeholder) {
+          const input = bodyEl.querySelector(".blog-page-builder__inspector-field:last-child input");
+          if (input) {
+            input.placeholder = field.placeholder;
+          }
+        }
+        continue;
+      }
       appendSelectField(
         bodyEl,
         field.label,
@@ -1938,8 +2043,13 @@
 
       block.attrs.src = data.url;
       block.attrs.path = data.path;
-      if (!block.attrs.alt) {
-        block.attrs.alt = "";
+      if (!String(block.attrs.alt || "").trim()) {
+        const fromServer = String(data.alt || "").trim();
+        const fromFile = String(file.name || "")
+          .replace(/\.[^.]+$/, "")
+          .replace(/[_-]+/g, " ")
+          .trim();
+        block.attrs.alt = fromServer || fromFile || "Slika";
       }
       trackSessionUpload(state, "blog_images", data.path);
       markDirty(state);
@@ -2177,7 +2287,8 @@
 
     if (block.type === "button") {
       const wrap = document.createElement("div");
-      wrap.className = "iv-page-button-wrap";
+      const align = (block.settings || {}).align || "center";
+      wrap.className = `iv-page-button-wrap iv-page-button-wrap--align-${align}`;
       const link = document.createElement("span");
       const style = block.attrs.style === "secondary" ? "secondary" : "primary";
       link.className = `btn btn--${style} iv-page-button`;
@@ -2515,6 +2626,12 @@
 
       const sectionPreview = document.createElement("div");
       sectionPreview.className = sectionCssClasses(section.settings);
+      const sectionStyle = sectionInlineStyle(section.settings);
+      if (sectionStyle) {
+        sectionPreview.setAttribute("style", sectionStyle);
+      } else {
+        sectionPreview.removeAttribute("style");
+      }
 
       const sectionInner = document.createElement("div");
       sectionInner.className = "iv-page-section__inner";

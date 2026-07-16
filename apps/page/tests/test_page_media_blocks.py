@@ -204,8 +204,13 @@ class PageMediaBlockTests(TestCase):
         block["attrs"]["src"] = "/media/demo.jpg"
         block["attrs"]["alt"] = ""
 
-        with self.assertRaises(PageValidationError):
+        with self.assertRaises(PageValidationError) as ctx:
             validate_page_or_raise(self._page_with_block(block))
+
+        message = "; ".join(ctx.exception.errors)
+        self.assertIn("slika mora imati alt tekst", message.lower())
+        self.assertNotIn("sections[", message)
+        self.assertNotIn("blocks[", message)
 
     def test_invalid_video_url_fails_validation(self):
         block = create_video_block()
@@ -229,3 +234,23 @@ class PageMediaBlockTests(TestCase):
         self.assertIn("iv-page-button", html)
         self.assertIn("Kontakt", html)
         self.assertIn("/kontakt/", html)
+
+    def test_button_alignment_is_rendered(self):
+        from apps.page.structure import create_button_block
+
+        block = create_button_block()
+        block["attrs"]["label"] = "CTA"
+        block["attrs"]["href"] = "/kontakt/"
+        block["settings"]["align"] = "right"
+        html = self.renderer.render(
+            self._page_with_block(block),
+            context=RenderContext(request=self.request),
+        )
+        self.assertIn("iv-page-button-wrap--align-right", html)
+
+    def test_section_hex_background_renders_inline_style(self):
+        page = self._page_with_block(create_text_block(text="Colored"))
+        page["sections"][0]["settings"]["background_color"] = "#e8f1ff"
+        html = self.renderer.render(page, context=RenderContext(request=self.request))
+        self.assertIn("iv-page-section--bg-custom", html)
+        self.assertIn("background-color: #e8f1ff", html)

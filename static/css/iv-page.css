@@ -4,6 +4,8 @@
 
 .iv-page {
   width: 100%;
+  --iv-page-gutter: 1.25rem;
+  --iv-page-gutter-between: calc(var(--iv-page-gutter) * 2);
 }
 
 .iv-page-section {
@@ -19,14 +21,14 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--iv-page-gutter-between);
 }
 
 .iv-page-section--width-contained .iv-page-section__inner {
   width: min(90%, 72rem);
   max-width: none;
   margin-inline: auto;
-  padding-inline: 0;
+  padding-inline: 1.25rem;
 }
 
 .iv-page-section--width-full .iv-page-section__inner {
@@ -43,6 +45,9 @@
 .iv-page-section--bg-accent {
   background: var(--color-accent-subtle, #e8f1ff);
 }
+.iv-page-section--bg-custom {
+  /* color comes from inline style background-color */
+}
 
 .iv-page-section--align-left { text-align: left; }
 .iv-page-section--align-center { text-align: center; }
@@ -51,8 +56,8 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   width: 100%;
-  column-gap: 0.75rem;
-  row-gap: 1.5rem;
+  column-gap: 0;
+  row-gap: var(--iv-page-gutter-between);
   align-items: start;
 }
 
@@ -79,6 +84,7 @@
 
 .iv-page-col {
   min-width: 0;
+  padding-inline: 0;
 }
 
 .col-mobile-1 { grid-column: span 1; }
@@ -95,6 +101,19 @@
 .col-mobile-12 { grid-column: span 12; }
 
 @media (min-width: 768px) {
+  .iv-page {
+    --iv-page-gutter: 2.5rem;
+  }
+
+  .iv-page-section--width-contained .iv-page-section__inner {
+    padding-inline: 0;
+  }
+
+  /* Elementor-style gutter: padding on columns, not grid track gaps */
+  .iv-page-col {
+    padding-inline: var(--iv-page-gutter);
+  }
+
   .col-tablet-1 { grid-column: span 1; }
   .col-tablet-2 { grid-column: span 2; }
   .col-tablet-3 { grid-column: span 3; }
@@ -150,7 +169,10 @@
   text-wrap: pretty;
 }
 
-.iv-page-heading u {
+.iv-page-text a,
+.iv-page-heading a {
+  color: inherit;
+  text-decoration: underline;
   text-underline-offset: 0.12em;
 }
 
@@ -170,12 +192,38 @@
   word-break: inherit;
 }
 
+/* Must come after the base .iv-page-text rule: its `margin: 0` would
+   otherwise override these auto margins and the capped 65ch box would
+   stay flushed left even with text-align: center/right. */
+.iv-page-text--align-center {
+  margin-inline: auto;
+}
+
+.iv-page-text--align-right {
+  margin-left: auto;
+  margin-right: 0;
+}
+
 .iv-page-section--align-center .iv-page-text {
   margin-inline: auto;
 }
 
 .iv-page-button-wrap {
   margin-top: 1.25rem;
+  display: flex;
+  width: 100%;
+}
+
+.iv-page-button-wrap--align-left {
+  justify-content: flex-start;
+}
+
+.iv-page-button-wrap--align-center {
+  justify-content: center;
+}
+
+.iv-page-button-wrap--align-right {
+  justify-content: flex-end;
 }
 
 .iv-page-media {
