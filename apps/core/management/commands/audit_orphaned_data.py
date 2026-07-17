@@ -1,33 +1,44 @@
 """
-Detektuje osiroćene GenericForeignKey redove, builder hijerarhiju i medije.
+Detektuje osiroćene GenericForeignKey redove i opciono osiročene medije u storage-u.
 """
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
-from apps.core.media_cleanup_service import cleanup_orphaned_media
 from apps.core.orphan_audit import fix_orphaned_data, run_orphan_audit
 
 
 class Command(BaseCommand):
     help = (
-        "Detektuje osiroćene GenericForeignKey reference, builder redove, "
-        "SEO metapodatke i medijske reference. Koristite --fix za bezbedno uklanjanje."
+        "Detektuje osiroćene GenericForeignKey reference (SEO metapodaci). "
+        "Koristite --fix za uklanjanje DB redova; --media-only za storage audit."
     )
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--fix",
             action="store_true",
-            help="Obriši detektovane osiroćene DB redove i osiroćene fajlove u storage-u.",
+            help="Obriši detektovane osiroćene DB redove.",
         )
         parser.add_argument(
             "--skip-media",
             action="store_true",
-            help="Pri --fix preskoči skeniranje/brisanje osiroćenih fajlova u storage-u.",
+            help="Pri --fix preskoči skeniranje/brisanje osiročenih fajlova u storage-u.",
         )
         parser.add_argument(
             "--media-only",
             action="store_true",
-            help="Samo prikaži osiroćene fajlove u storage-u (bez DB audita).",
+            help="Samo prikaži osiročene fajlove u storage-u (bez DB audita).",
+        )
+        parser.add_argument(
+            "--confirm",
+            action="store_true",
+            help="Uz --media-only obriši osiročene fajlove (inače dry-run).",
+        )
+        parser.add_argument(
+            "--minimum-age-hours",
+            type=int,
+            default=24,
+            help="Minimum starosti fajla pre brisanja pri --media-only --confirm.",
         )
 
     def handle(self, *args, **options):
@@ -36,25 +47,38 @@ class Command(BaseCommand):
         media_only = options["media_only"]
 
         if media_only:
-            self._report_storage_orphans(dry_run=not fix)
+            command_args = ["cleanup_orphaned_media"]
+            if options["confirm"]:
+                command_args.extend(
+                    [
+                        "--confirm",
+                        f"--minimum-age-hours={max(0, options['minimum_age_hours'])}",
+                    ]
+                )
+            call_command(*command_args)
             return
 
-        report = run_orphan_audit(include_media=True)
+        report = run_orphan_audit()
         self._print_report(report)
 
         if fix:
             self.stdout.write("")
             self.stdout.write(self.style.WARNING("Primena --fix…"))
-            stats = fix_orphaned_data(include_media_files=not skip_media)
+            stats = fix_orphaned_data()
             self.stdout.write(self.style.SUCCESS("Fix završen."))
             self.stdout.write(f"  Obrisano DB redova (ukupno CASCADE): {stats['db_rows_deleted']}")
             self.stdout.write(f"  Grupe nalaza:                       {stats['finding_groups']}")
-            if not skip_media:
-                self.stdout.write(f"  Obrisano medijskih fajlova:         {stats.get('media_deleted', 0)}")
-                self.stdout.write(f"  Orphaned fajlova u storage:         {stats.get('media_orphaned', 0)}")
-                self.stdout.write(f"  Greške pri brisanju medija:         {stats.get('media_errors', 0)}")
 
-            verify = run_orphan_audit(include_media=False)
+            if not skip_media:
+                self.stdout.write("")
+                self.stdout.write("Čišćenje osiročenih medija u storage-u…")
+                call_command(
+                    "cleanup_orphaned_media",
+                    "--confirm",
+                    f"--minimum-age-hours={max(0, options['minimum_age_hours'])}",
+                )
+
+            verify = run_orphan_audit()
             if verify.total:
                 self.stdout.write(
                     self.style.ERROR(
@@ -88,12 +112,3 @@ class Command(BaseCommand):
                 )
             if len(findings) > 50:
                 self.stdout.write(f"  … i još {len(findings) - 50}")
-
-    def _report_storage_orphans(self, *, dry_run: bool) -> None:
-        if dry_run:
-            self.stdout.write(self.style.WARNING("DRY-RUN — fajlovi neće biti obrisani."))
-        stats = cleanup_orphaned_media(dry_run=dry_run)
-        self.stdout.write(f"Referenci u bazi:     {stats.referenced_in_db}")
-        self.stdout.write(f"Skenirano u storage:  {stats.scanned_storage}")
-        self.stdout.write(f"Orphaned fajlova:     {stats.orphaned}")
-        self.stdout.write(f"Obrisano:             {stats.deleted}")

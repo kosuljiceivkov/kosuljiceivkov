@@ -8,7 +8,7 @@ from pathlib import Path
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
-from django.core.files.storage import FileSystemStorage, storages
+from django.core.files.storage import storages
 from django.core.management import call_command
 from django.test import TestCase
 from PIL import Image
@@ -99,7 +99,7 @@ class DataLifecycleTests(TestCase):
             object_id=999999,
             focus_keyword="orphan",
         )
-        report = run_orphan_audit(include_media=False)
+        report = run_orphan_audit()
         self.assertTrue(any(f.category == "broken_generic_reference" for f in report.findings))
 
     def test_orphan_audit_fix_removes_broken_seo_rows(self):
@@ -112,15 +112,15 @@ class DataLifecycleTests(TestCase):
         self.assertFalse(SeoMetadata.objects.filter(object_id=999999).exists())
 
 
-class R2MediaDeletionTests(TestCase):
-    def test_cleanup_uses_storage_delete_api(self):
-        import tempfile
+class StorageMediaDeletionTests(TestCase):
+    def test_cleanup_pending_paths_deletes_unreferenced_file(self):
+        storage = storages["blog_images"]
+        path = storage.save(
+            "blog/document/2026/07/demo.jpg",
+            ContentFile(b"demo", name="demo.jpg"),
+        )
+        from apps.core.json_media import cleanup_pending_paths
 
-        with tempfile.TemporaryDirectory() as media_dir:
-            storage = FileSystemStorage(location=media_dir)
-            path = storage.save("demo.jpg", ContentFile(b"demo", name="demo.jpg"))
-            from apps.core.media_cleanup_service import cleanup_media_file
-
-            result = cleanup_media_file(path, storage, reason="test")
-            self.assertEqual(result.status, "deleted")
-            self.assertFalse(storage.exists(path))
+        deleted = cleanup_pending_paths([{"storage": "blog_images", "path": path}])
+        self.assertEqual(deleted, 1)
+        self.assertFalse(storage.exists(path))

@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from apps.blog.models import BlogPost
-from apps.core.media_cleanup_service import cleanup_orphaned_media
+from django.core.management import call_command
 from apps.layout.models import CMSPage
 from apps.seo.models import SeoMetadata
 
@@ -86,10 +86,9 @@ class Command(BaseCommand):
             return
 
         self.stdout.write("Ciscenje osirocenih medija...")
-        stats = cleanup_orphaned_media(dry_run=False)
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"Mediji: skenirano={stats.scanned_storage}, orphaned={stats.orphaned}, "
-                f"obrisano={stats.deleted}, greske={stats.errors}"
-            )
+        call_command(
+            "cleanup_orphaned_media",
+            "--confirm",
+            "--minimum-age-hours=0",
         )
+        self.stdout.write(self.style.SUCCESS("Mediji: cleanup_orphaned_media zavrsen."))

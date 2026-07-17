@@ -15,7 +15,6 @@ from django.urls import reverse
 from PIL import Image
 
 from apps.blog.models import BlogPost
-from apps.core.media_cleanup_service import cleanup_orphaned_media
 from apps.page.structure import create_image_block, create_section, create_video_block
 
 
@@ -71,10 +70,8 @@ class OrphanedMediaCleanupIntegrationTests(TestCase):
         )
         self.assertTrue(self.image_storage.exists(orphan_path))
 
-        stats = cleanup_orphaned_media(dry_run=False, storage_aliases=["blog_images"])
+        call_command("cleanup_orphaned_media", "--confirm", "--minimum-age-hours=0")
 
-        self.assertGreaterEqual(stats.orphaned, 1)
-        self.assertGreaterEqual(stats.deleted, 1)
         self.assertFalse(self.image_storage.exists(orphan_path))
 
     def test_orphan_sweep_keeps_files_referenced_in_body_page(self):
@@ -85,10 +82,9 @@ class OrphanedMediaCleanupIntegrationTests(TestCase):
         self.post.apply_body_page(self._page_with_image(path))
         self.post.save()
 
-        stats = cleanup_orphaned_media(dry_run=False, storage_aliases=["blog_images"])
+        call_command("cleanup_orphaned_media", "--confirm", "--minimum-age-hours=0")
 
         self.assertTrue(self.image_storage.exists(path))
-        self.assertEqual(stats.skipped_referenced, 0)
 
     def test_page_save_api_removes_replaced_image(self):
         old_path = self.image_storage.save(
@@ -145,6 +141,7 @@ class OrphanedMediaCleanupIntegrationTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["ok"])
+        self.assertEqual(response.json()["deleted"], 1)
         self.assertFalse(self.image_storage.exists(path))
 
     def test_pending_cleanup_keeps_saved_body_page_image(self):
@@ -165,7 +162,6 @@ class OrphanedMediaCleanupIntegrationTests(TestCase):
         payload = response.json()
         self.assertTrue(payload["ok"])
         self.assertEqual(payload["deleted"], 0)
-        self.assertEqual(payload["skipped_referenced"], 1)
         self.assertTrue(self.image_storage.exists(path))
 
     def test_cleanup_orphaned_media_management_command(self):
@@ -174,7 +170,7 @@ class OrphanedMediaCleanupIntegrationTests(TestCase):
             ContentFile(b"cmd", name="cmd-orphan.jpg"),
         )
 
-        call_command("cleanup_orphaned_media", storages=["blog_images"])
+        call_command("cleanup_orphaned_media", "--confirm", "--minimum-age-hours=0")
 
         self.assertFalse(self.image_storage.exists(orphan_path))
 

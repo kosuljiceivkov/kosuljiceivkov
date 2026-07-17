@@ -7,9 +7,9 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
 from apps.blog.admin_api.responses import parse_json_body, permission_denied
+from apps.core.json_media import cleanup_pending_paths, parse_pending_media_items
 from apps.layout.admin_api.permissions import can_edit_cms_page
 from apps.layout.models import CMSPage
-from apps.page.pending_media import cleanup_pending_editor_media, parse_pending_media_items
 
 
 @require_POST
@@ -23,15 +23,6 @@ def page_cleanup_pending_media_view(request, page_id: int):
     if payload is None:
         return JsonResponse({"ok": False, "error": "invalid_json"}, status=400)
 
-    refs = parse_pending_media_items(payload.get("paths"))
-    stats = cleanup_pending_editor_media(refs)
+    deleted = cleanup_pending_paths(parse_pending_media_items(payload.get("paths")))
 
-    return JsonResponse(
-        {
-            "ok": True,
-            "deleted": stats.deleted,
-            "skipped_referenced": stats.skipped_referenced,
-            "missing": stats.missing,
-            "errors": stats.errors,
-        }
-    )
+    return JsonResponse({"ok": True, "deleted": deleted})

@@ -1,242 +1,219 @@
-"""
-Izvlačenje i čišćenje medijskih putanja iz page JSON sadržaja (iv_page_v1).
-"""
+"""Reference tracking and conservative cleanup for page-builder media."""
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
-from typing import Any, Iterable
-from urllib.parse import urlparse
 
+from django.apps import apps
 from django.core.files.storage import storages
+from django.db import transaction
+from django.db.models import FileField
 
-from apps.core.media_cleanup_service import cleanup_media_file, schedule_media_cleanup
-from apps.core.media_registry import media_identity, normalize_media_name, storage_key
-
-logger = logging.getLogger("apps.core.json_media")
-
-BLOG_IMAGE_PATH_PREFIXES = (
-    "blog/document/",
-    "blog/featured/",
-    "builder/",
-    "seo/",
-    "page/posters/",
-)
-VIDEO_PATH_PREFIXES = (
-    "page/videos/",
-    "builder/videos/",
-)
-_VIDEO_EXTENSIONS = frozenset({".mp4", ".webm", ".mov", ".m4v", ".ogv"})
+MANAGED_PREFIXES: dict[str, tuple[str, ...]] = {
+    "blog_images": (
+        "blog/document/",
+        "blog/featured/",
+        "seo/og/",
+        "seo/twitter/",
+        "builder/",
+    ),
+    "project_videos": (
+        "page/videos/",
+        "builder/videos/",
+    ),
+}
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class JsonMediaRef:
-    storage_alias: str
+    storage: str
     path: str
 
-    @property
-    def identity(self) -> tuple[str, str] | None:
+
+def _is_managed_ref(ref: JsonMediaRef) -> bool:
+    prefixes = MANAGED_PREFIXES.get(ref.storage, ())
+    return any(ref.path.startswith(prefix) for prefix in prefixes)
+
+
+def _storage_alias_for_storage(storage) -> str:
+    for alias in MANAGED_PREFIXES:
         try:
-            storage = storages[self.storage_alias]
+            if storages[alias] is storage:
+                return alias
         except Exception:
-            return None
-        return media_identity(self.path, storage)
-
-
-def _storage_base_url(alias: str) -> str:
-    storage = storages[alias]
-    base_url = getattr(storage, "base_url", "") or ""
-    if base_url and not base_url.endswith("/"):
-        base_url = f"{base_url}/"
-    return base_url
-
-
-def path_from_media_value(value: str, *, storage_alias: str | None = None) -> str:
-    """Normalizuje putanju iz JSON path polja ili javnog src/url."""
-    raw = (value or "").strip()
-    if not raw:
-        return ""
-
-    if raw.startswith(("http://", "https://", "/media/", "/")):
-        for alias in ("blog_images", "project_videos"):
-            base_url = _storage_base_url(alias)
-            if base_url and raw.startswith(base_url):
-                return normalize_media_name(raw[len(base_url) :])
-
-        if raw.startswith("/media/"):
-            trimmed = raw[len("/media/") :]
-            for alias in ("blog_images", "project_videos"):
-                location = getattr(storages[alias], "location", "") or ""
-                location_name = str(location).replace("\\", "/").strip("/")
-                if location_name and trimmed.startswith(f"{location_name}/"):
-                    return normalize_media_name(trimmed[len(location_name) + 1 :])
-            return normalize_media_name(trimmed)
-
-        parsed = urlparse(raw)
-        return normalize_media_name(parsed.path.lstrip("/"))
-
-    return normalize_media_name(raw)
-
-
-def resolve_json_media_ref(
-    value: str,
-    *,
-    storage_alias: str | None = None,
-) -> JsonMediaRef | None:
-    path = path_from_media_value(value, storage_alias=storage_alias)
-    if not path:
-        return None
-
-    alias = storage_alias or _guess_storage_alias(path)
-    return JsonMediaRef(storage_alias=alias, path=path)
-
-
-def _guess_storage_alias(path: str) -> str:
-    lowered = path.lower()
-    if any(lowered.startswith(prefix) for prefix in VIDEO_PATH_PREFIXES):
-        return "project_videos"
-    if any(lowered.endswith(ext) for ext in _VIDEO_EXTENSIONS):
-        return "project_videos"
+            continue
+    location = getattr(storage, "location", None)
+    if location is not None:
+        for alias in MANAGED_PREFIXES:
+            try:
+                if getattr(storages[alias], "location", None) == location:
+                    return alias
+            except Exception:
+                continue
     return "blog_images"
 
 
-def _add_ref(refs: set[JsonMediaRef], value: str, *, storage_alias: str | None = None) -> None:
-    ref = resolve_json_media_ref(value, storage_alias=storage_alias)
-    if ref is not None:
-        refs.add(ref)
-
-
-def extract_media_refs_from_page(page: Any) -> set[JsonMediaRef]:
+def extract_media_refs_from_page(page) -> set[JsonMediaRef]:
     refs: set[JsonMediaRef] = set()
     if not isinstance(page, dict):
         return refs
 
     for section in page.get("sections") or []:
-        if not isinstance(section, dict):
-            continue
         for row in section.get("rows") or []:
-            if not isinstance(row, dict):
-                continue
             for column in row.get("columns") or []:
-                if not isinstance(column, dict):
-                    continue
                 for block in column.get("blocks") or []:
-                    _collect_page_block_media(block, refs)
-    return refs
+                    if not isinstance(block, dict):
+                        continue
+                    block_type = block.get("type")
+                    if block_type not in {"image", "video"}:
+                        continue
+                    attrs = block.get("attrs") or {}
+                    if not isinstance(attrs, dict):
+                        continue
 
+                    path = str(attrs.get("path") or "").strip()
+                    if block_type == "image":
+                        if path:
+                            refs.add(JsonMediaRef("blog_images", path))
+                        continue
 
-def _collect_page_block_media(block: Any, refs: set[JsonMediaRef]) -> None:
-    if not isinstance(block, dict):
-        return
-
-    block_type = block.get("type")
-    attrs = block.get("attrs") or {}
-    if not isinstance(attrs, dict):
-        return
-
-    if block_type == "image":
-        path = str(attrs.get("path") or "").strip()
-        src = str(attrs.get("src") or "").strip()
-        if path:
-            _add_ref(refs, path, storage_alias="blog_images")
-        elif src:
-            _add_ref(refs, src, storage_alias="blog_images")
-        return
-
-    if block_type == "video":
-        path = str(attrs.get("path") or "").strip()
-        src = str(attrs.get("src") or "").strip()
-        poster_path = str(attrs.get("poster_path") or "").strip()
-        poster_src = str(attrs.get("poster_src") or "").strip()
-        if path:
-            _add_ref(refs, path, storage_alias="project_videos")
-        elif src:
-            _add_ref(refs, src, storage_alias="project_videos")
-        if poster_path:
-            _add_ref(refs, poster_path, storage_alias="blog_images")
-        elif poster_src:
-            _add_ref(refs, poster_src, storage_alias="blog_images")
-
-
-def extract_media_refs_from_host(instance) -> set[JsonMediaRef]:
-    refs: set[JsonMediaRef] = set()
-
-    body_page = getattr(instance, "body_page", None)
-    if body_page:
-        refs |= extract_media_refs_from_page(body_page)
+                    if path:
+                        refs.add(JsonMediaRef("project_videos", path))
+                    poster_path = str(attrs.get("poster_path") or "").strip()
+                    poster_src = str(
+                        attrs.get("poster") or attrs.get("poster_src") or ""
+                    ).strip()
+                    if poster_path:
+                        refs.add(JsonMediaRef("blog_images", poster_path))
+                    elif poster_src and not poster_src.startswith(
+                        ("http://", "https://", "/")
+                    ):
+                        refs.add(JsonMediaRef("blog_images", poster_src))
 
     return refs
 
 
-def collect_json_media_identities() -> set[tuple[str, str]]:
+def all_page_media_refs() -> set[JsonMediaRef]:
     from apps.blog.models import BlogPost
     from apps.layout.models import CMSPage
 
-    identities: set[tuple[str, str]] = set()
-
-    for obj in BlogPost.objects.iterator(chunk_size=200):
-        for ref in extract_media_refs_from_host(obj):
-            identity = ref.identity
-            if identity:
-                identities.add(identity)
-
-    for obj in CMSPage.objects.iterator(chunk_size=200):
-        for ref in extract_media_refs_from_host(obj):
-            identity = ref.identity
-            if identity:
-                identities.add(identity)
-
-    return identities
+    refs: set[JsonMediaRef] = set()
+    for model in (BlogPost, CMSPage):
+        for page in model.objects.values_list("body_page", flat=True):
+            refs.update(extract_media_refs_from_page(page))
+    return refs
 
 
-def cleanup_json_media_refs(
-    refs: Iterable[JsonMediaRef],
-    *,
-    reason: str,
-) -> None:
-    for ref in refs:
-        try:
-            storage = storages[ref.storage_alias]
-        except Exception:
-            logger.exception(
-                "Unknown storage alias for JSON media cleanup",
-                extra={"storage_alias": ref.storage_alias, "path": ref.path},
-            )
+def all_file_media_refs() -> set[JsonMediaRef]:
+    refs: set[JsonMediaRef] = set()
+    for model in apps.get_models():
+        file_fields = [
+            field for field in model._meta.fields if isinstance(field, FileField)
+        ]
+        if not file_fields:
             continue
-        cleanup_media_file(ref.path, storage, reason=reason)
+        for values in model._default_manager.values_list(
+            *(field.attname for field in file_fields)
+        ):
+            if not isinstance(values, tuple):
+                values = (values,)
+            for field, value in zip(file_fields, values):
+                path = str(value or "").strip()
+                if not path:
+                    continue
+                refs.add(
+                    JsonMediaRef(
+                        _storage_alias_for_storage(field.storage),
+                        path,
+                    )
+                )
+    return refs
 
 
-def cleanup_removed_json_media(
-    old_refs: set[JsonMediaRef],
-    new_refs: set[JsonMediaRef],
-    *,
-    reason: str = "json_content_replaced",
-) -> None:
-    removed = {ref for ref in old_refs if ref not in new_refs}
+def all_media_refs() -> set[JsonMediaRef]:
+    return all_page_media_refs() | all_file_media_refs()
+
+
+def _delete_ref(ref: JsonMediaRef) -> None:
+    if not _is_managed_ref(ref):
+        return
+    try:
+        storages[ref.storage].delete(ref.path)
+    except Exception:
+        pass
+
+
+def cleanup_removed_json_media(old_refs, new_refs) -> int:
+    """Delete only removed builder files that no saved page still references."""
+    removed = set(old_refs) - set(new_refs)
     if not removed:
-        return
+        return 0
 
-    def _run():
-        cleanup_json_media_refs(removed, reason=reason)
+    deleted = 0
+    for ref in removed:
+        if not _is_managed_ref(ref):
+            continue
 
-    schedule_media_cleanup(_run)
+        def _delete(target_ref=ref):
+            if target_ref in all_media_refs():
+                return
+            try:
+                storages[target_ref.storage].delete(target_ref.path)
+            except Exception:
+                pass
+
+        transaction.on_commit(_delete)
+        deleted += 1
+    return deleted
 
 
-def cleanup_host_json_media(instance, *, reason: str = "host_deleted") -> None:
-    refs = extract_media_refs_from_host(instance)
+def cleanup_deleted_page_media(instance) -> int:
+    """Delete page media from a removed object unless another page still uses it."""
+    refs = extract_media_refs_from_page(getattr(instance, "body_page", None))
     if not refs:
-        return
+        return 0
 
-    def _run():
-        cleanup_json_media_refs(refs, reason=reason)
+    def cleanup():
+        referenced = all_media_refs()
+        for ref in refs - referenced:
+            _delete_ref(ref)
 
-    schedule_media_cleanup(_run)
+    transaction.on_commit(cleanup)
+    return len(refs)
 
 
-def json_media_identity_set(refs: set[JsonMediaRef]) -> set[tuple[str, str]]:
-    identities: set[tuple[str, str]] = set()
-    for ref in refs:
-        identity = ref.identity
-        if identity:
-            identities.add(identity)
-    return identities
+def parse_pending_media_items(raw_items) -> list[dict[str, str]]:
+    if not isinstance(raw_items, list):
+        return []
+
+    items: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for item in raw_items:
+        if not isinstance(item, dict):
+            continue
+        storage = str(item.get("storage") or "blog_images").strip() or "blog_images"
+        path = str(item.get("path") or "").strip()
+        if not path:
+            continue
+        key = (storage, path)
+        if key in seen:
+            continue
+        seen.add(key)
+        items.append({"storage": storage, "path": path})
+    return items
+
+
+def cleanup_pending_paths(items) -> int:
+    referenced = all_media_refs()
+    deleted = 0
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        storage = str(item.get("storage") or "blog_images").strip() or "blog_images"
+        path = str(item.get("path") or "").strip()
+        if not path:
+            continue
+        ref = JsonMediaRef(storage, path)
+        if _is_managed_ref(ref) and ref not in referenced:
+            _delete_ref(ref)
+            deleted += 1
+    return deleted

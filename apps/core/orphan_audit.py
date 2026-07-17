@@ -1,5 +1,5 @@
 """
-Detekcija osiroćenih GenericForeignKey redova i SEO sadržaja.
+Detekcija osiroćenih GenericForeignKey redova (npr. SEO bez vlasnika).
 """
 from __future__ import annotations
 
@@ -30,9 +30,6 @@ class OrphanAuditReport:
         for finding in self.findings:
             grouped.setdefault(finding.category, []).append(finding)
         return grouped
-
-    def merge(self, other: OrphanAuditReport) -> None:
-        self.findings.extend(other.findings)
 
 
 def _target_exists(content_type: ContentType, object_id: int) -> bool:
@@ -99,63 +96,19 @@ def _audit_gfk_model(model: type[models.Model]) -> OrphanAuditReport:
 
 
 def audit_broken_generic_references() -> OrphanAuditReport:
-    """SeoMetadata redovi čiji vlasnik ne postoji."""
     from apps.seo.models import SeoMetadata
 
     return _audit_gfk_model(SeoMetadata)
 
 
-def audit_orphaned_media_references() -> OrphanAuditReport:
-    """Medijski fajlovi na redovima sa pokvarenim GFK referencama."""
-    from apps.core.media_registry import get_media_field_refs, normalize_media_name
-
-    broken_gfk = audit_broken_generic_references()
-    broken_pks: dict[str, set[int]] = {}
-    for finding in broken_gfk.findings:
-        if finding.category in ("broken_generic_reference", "broken_content_type"):
-            broken_pks.setdefault(finding.model_label, set()).add(finding.pk)
-
-    if not broken_pks:
-        return OrphanAuditReport()
-
-    report = OrphanAuditReport()
-    for ref in get_media_field_refs():
-        orphan_ids = broken_pks.get(ref.model_label)
-        if not orphan_ids:
-            continue
-        for obj in ref.model.objects.filter(pk__in=orphan_ids).iterator(chunk_size=200):
-            field_file = getattr(obj, ref.field_name, None)
-            name = normalize_media_name(getattr(field_file, "name", "") or "")
-            if not name:
-                continue
-            report.findings.append(
-                OrphanAuditFinding(
-                    category="orphaned_media_reference",
-                    model_label=ref.model_label,
-                    pk=obj.pk,
-                    detail=f"{ref.field_name}={name} (vlasnik GFK osiroćen)",
-                )
-            )
-    return report
+def run_orphan_audit() -> OrphanAuditReport:
+    return audit_broken_generic_references()
 
 
-def run_orphan_audit(*, include_media: bool = True) -> OrphanAuditReport:
-    report = OrphanAuditReport()
-    report.merge(audit_broken_generic_references())
-    if include_media:
-        report.merge(audit_orphaned_media_references())
-    return report
-
-
-def fix_orphaned_data(*, include_media_files: bool = True) -> dict[str, int]:
-    """
-    Briše detektovane osiroćene DB redove, zatim opciono osiroćene fajlove u storage-u.
-    """
+def fix_orphaned_data() -> dict[str, int]:
     from django.apps import apps as django_apps
 
-    from apps.core.media_cleanup_service import cleanup_orphaned_media
-
-    report = run_orphan_audit(include_media=False)
+    report = run_orphan_audit()
     stats: dict[str, int] = {"db_rows_deleted": 0, "finding_groups": 0}
 
     models_to_purge: dict[str, set[int]] = {}
@@ -167,11 +120,5 @@ def fix_orphaned_data(*, include_media_files: bool = True) -> dict[str, int]:
         deleted_count, _ = model.objects.filter(pk__in=pks).delete()
         stats["db_rows_deleted"] += deleted_count
         stats["finding_groups"] += 1
-
-    if include_media_files:
-        media_stats = cleanup_orphaned_media()
-        stats["media_deleted"] = media_stats.deleted
-        stats["media_orphaned"] = media_stats.orphaned
-        stats["media_errors"] = media_stats.errors
 
     return stats

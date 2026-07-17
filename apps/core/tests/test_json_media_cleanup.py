@@ -6,7 +6,7 @@ from django.test import TestCase
 
 from apps.blog.models import BlogPost
 from apps.core.json_media import (
-    collect_json_media_identities,
+    all_page_media_refs,
     extract_media_refs_from_page,
 )
 from apps.page.structure import create_image_block, create_section
@@ -26,10 +26,10 @@ class JsonMediaCleanupTests(TestCase):
 
         self.assertEqual(len(refs), 1)
         ref = next(iter(refs))
-        self.assertEqual(ref.storage_alias, "blog_images")
+        self.assertEqual(ref.storage, "blog_images")
         self.assertEqual(ref.path, "blog/document/2026/07/demo.jpg")
 
-    def test_collect_json_media_identities_includes_saved_post(self):
+    def test_all_page_media_refs_includes_saved_post(self):
         post = BlogPost.objects.create(
             title="Media",
             slug="media",
@@ -43,12 +43,11 @@ class JsonMediaCleanupTests(TestCase):
         post.apply_body_page(page)
         post.save()
 
-        identities = collect_json_media_identities()
-        storage = storages["blog_images"]
-        from apps.core.media_registry import media_identity
-
-        expected = media_identity("blog/document/2026/07/post.jpg", storage)
-        self.assertIn(expected, identities)
+        refs = all_page_media_refs()
+        self.assertIn(
+            next(iter(extract_media_refs_from_page(page))),
+            refs,
+        )
 
     def test_page_update_removes_replaced_image_file(self):
         storage = storages["blog_images"]

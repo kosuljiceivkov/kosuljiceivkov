@@ -11,7 +11,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from apps.blog.models import BlogPost
-from apps.page.pending_media import cleanup_pending_editor_media, parse_pending_media_items
+from apps.core.json_media import cleanup_pending_paths, parse_pending_media_items
 from apps.page.structure import create_image_block, create_section
 
 
@@ -30,23 +30,23 @@ class PendingMediaCleanupTests(TestCase):
         return reverse("admin:blog_blogpost_page_cleanup_pending_media", args=[self.post.pk])
 
     def test_parse_pending_media_items_accepts_storage_alias(self):
-        refs = parse_pending_media_items(
+        items = parse_pending_media_items(
             [{"storage": "blog_images", "path": "blog/document/2026/07/demo.jpg"}]
         )
-        self.assertEqual(len(refs), 1)
-        self.assertEqual(refs[0].storage_alias, "blog_images")
-        self.assertEqual(refs[0].path, "blog/document/2026/07/demo.jpg")
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]["storage"], "blog_images")
+        self.assertEqual(items[0]["path"], "blog/document/2026/07/demo.jpg")
 
     def test_cleanup_pending_media_deletes_unreferenced_file(self):
         path = self.storage.save(
             "blog/document/2026/07/pending.jpg",
             ContentFile(b"pending", name="pending.jpg"),
         )
-        refs = parse_pending_media_items([{"storage": "blog_images", "path": path}])
+        items = parse_pending_media_items([{"storage": "blog_images", "path": path}])
 
-        stats = cleanup_pending_editor_media(refs)
+        deleted = cleanup_pending_paths(items)
 
-        self.assertEqual(stats.deleted, 1)
+        self.assertEqual(deleted, 1)
         self.assertFalse(self.storage.exists(path))
 
     def test_cleanup_pending_media_skips_referenced_file(self):
@@ -63,11 +63,10 @@ class PendingMediaCleanupTests(TestCase):
         self.post.apply_body_page(page)
         self.post.save()
 
-        refs = parse_pending_media_items([{"storage": "blog_images", "path": path}])
-        stats = cleanup_pending_editor_media(refs)
+        items = parse_pending_media_items([{"storage": "blog_images", "path": path}])
+        deleted = cleanup_pending_paths(items)
 
-        self.assertEqual(stats.deleted, 0)
-        self.assertEqual(stats.skipped_referenced, 1)
+        self.assertEqual(deleted, 0)
         self.assertTrue(self.storage.exists(path))
 
     def test_cleanup_pending_media_api_deletes_upload(self):

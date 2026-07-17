@@ -2,7 +2,7 @@
 
 from django.test import SimpleTestCase
 
-from apps.page.pending_media import parse_pending_media_items
+from apps.core.json_media import parse_pending_media_items
 
 
 class ParsePendingMediaItemsTests(SimpleTestCase):
@@ -11,10 +11,10 @@ class ParsePendingMediaItemsTests(SimpleTestCase):
         self.assertEqual(parse_pending_media_items("bad"), [])
 
     def test_deduplicates_paths(self):
-        refs = parse_pending_media_items(
+        items = parse_pending_media_items(
             [
                 {"storage": "blog_images", "path": "blog/document/2026/07/a.jpg"},
                 {"storage": "blog_images", "path": "blog/document/2026/07/a.jpg"},
             ]
         )
-        self.assertEqual(len(refs), 1)
+        self.assertEqual(len(items), 1)
