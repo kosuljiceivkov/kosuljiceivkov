@@ -50,7 +50,7 @@ class DataLifecycleTests(TestCase):
         path = _save_to_field(
             post,
             "featured_image",
-            "blog/featured/test/featured.jpg",
+            "page/featured/test/featured.jpg",
             _make_image("featured.jpg"),
             storage_alias="blog_images",
         )
@@ -63,7 +63,7 @@ class DataLifecycleTests(TestCase):
 
     def test_blog_post_deletion_removes_json_media(self):
         storage = storages["blog_images"]
-        path = storage.save("blog/document/2026/07/json.jpg", _make_image("json.jpg"))
+        path = storage.save("page/document/2026/07/json.jpg", _make_image("json.jpg"))
         post = BlogPost.objects.create(
             title="JSON media",
             slug="json-media",
@@ -116,7 +116,7 @@ class StorageMediaDeletionTests(TestCase):
     def test_cleanup_pending_paths_deletes_unreferenced_file(self):
         storage = storages["blog_images"]
         path = storage.save(
-            "blog/document/2026/07/demo.jpg",
+            "page/document/2026/07/demo.jpg",
             ContentFile(b"demo", name="demo.jpg"),
         )
         from apps.core.json_media import cleanup_pending_paths

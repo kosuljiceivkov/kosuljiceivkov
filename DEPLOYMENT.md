@@ -75,8 +75,10 @@ Production uses **Cloudflare R2** via `django-storages` + `boto3` (`config/stora
 
 | Storage alias | Path in bucket | Purpose |
 |---------------|----------------|---------|
-| `blog_images` | `blog/images/` | Blog and builder image uploads |
+| `blog_images` | `images/` | Shared image uploads (blog, Projekti, SEO, builder) |
 | `project_videos` | `projects/videos/` | Builder video files |
+
+Object keys under `images/` use prefixes such as `page/document/`, `page/featured/`, `seo/og/`, and `seo/twitter/`.
 
 **R2 environment variables** (preferred):
 
@@ -112,7 +114,7 @@ R2_MEDIA_URL=https://media.yourdomain.com/
 
 Local development uses `MEDIA_ROOT` (`media/` folder) — no R2 credentials required.
 
-There is **automatic media deletion** when database records are removed or media fields are replaced — see `apps/core/media_signals.py`. Orphaned files can be cleaned with `python manage.py cleanup_orphaned_media` or `python manage.py audit_orphaned_data --fix`.
+There is **automatic media deletion** when database records are removed or media fields are replaced — see `apps/core/signals.py`. Orphaned files can be audited with `python manage.py cleanup_orphaned_media` (dry-run) and deleted with `--confirm`.
 
 ---
 

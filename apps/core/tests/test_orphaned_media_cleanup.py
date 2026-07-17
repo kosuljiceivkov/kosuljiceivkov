@@ -65,7 +65,7 @@ class OrphanedMediaCleanupIntegrationTests(TestCase):
 
     def test_orphan_sweep_deletes_unreferenced_files(self):
         orphan_path = self.image_storage.save(
-            "blog/document/2026/07/orphan.jpg",
+            "page/document/2026/07/orphan.jpg",
             ContentFile(b"orphan", name="orphan.jpg"),
         )
         self.assertTrue(self.image_storage.exists(orphan_path))
@@ -76,7 +76,7 @@ class OrphanedMediaCleanupIntegrationTests(TestCase):
 
     def test_orphan_sweep_keeps_files_referenced_in_body_page(self):
         path = self.image_storage.save(
-            "blog/document/2026/07/kept.jpg",
+            "page/document/2026/07/kept.jpg",
             ContentFile(b"kept", name="kept.jpg"),
         )
         self.post.apply_body_page(self._page_with_image(path))
@@ -88,7 +88,7 @@ class OrphanedMediaCleanupIntegrationTests(TestCase):
 
     def test_page_save_api_removes_replaced_image(self):
         old_path = self.image_storage.save(
-            "blog/document/2026/07/old-api.jpg",
+            "page/document/2026/07/old-api.jpg",
             ContentFile(b"old", name="old-api.jpg"),
         )
         old_page = self._page_with_image(old_path)
@@ -130,7 +130,7 @@ class OrphanedMediaCleanupIntegrationTests(TestCase):
 
     def test_pending_cleanup_deletes_abandoned_upload(self):
         path = self.image_storage.save(
-            "blog/document/2026/07/abandoned.jpg",
+            "page/document/2026/07/abandoned.jpg",
             ContentFile(b"abandoned", name="abandoned.jpg"),
         )
         response = self.client.post(
@@ -146,7 +146,7 @@ class OrphanedMediaCleanupIntegrationTests(TestCase):
 
     def test_pending_cleanup_keeps_saved_body_page_image(self):
         path = self.image_storage.save(
-            "blog/document/2026/07/saved.jpg",
+            "page/document/2026/07/saved.jpg",
             ContentFile(b"saved", name="saved.jpg"),
         )
         self.post.apply_body_page(self._page_with_image(path))
@@ -166,7 +166,7 @@ class OrphanedMediaCleanupIntegrationTests(TestCase):
 
     def test_cleanup_orphaned_media_management_command(self):
         orphan_path = self.image_storage.save(
-            "blog/document/2026/07/cmd-orphan.jpg",
+            "page/document/2026/07/cmd-orphan.jpg",
             ContentFile(b"cmd", name="cmd-orphan.jpg"),
         )
 
@@ -177,14 +177,14 @@ class OrphanedMediaCleanupIntegrationTests(TestCase):
     def test_featured_image_replace_removes_old_file(self):
         post = BlogPost.objects.create(title="Featured", slug="featured-replace")
         old_path = self.image_storage.save(
-            "blog/featured/test/old.jpg",
+            "page/featured/test/old.jpg",
             _make_image("old.jpg"),
         )
         post.featured_image = old_path
         post.save(update_fields=["featured_image"])
 
         new_path = self.image_storage.save(
-            "blog/featured/test/new.jpg",
+            "page/featured/test/new.jpg",
             _make_image("new.jpg"),
         )
         with self.captureOnCommitCallbacks(execute=True):

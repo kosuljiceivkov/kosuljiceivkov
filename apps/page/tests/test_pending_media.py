@@ -13,8 +13,8 @@ class ParsePendingMediaItemsTests(SimpleTestCase):
     def test_deduplicates_paths(self):
         items = parse_pending_media_items(
             [
-                {"storage": "blog_images", "path": "blog/document/2026/07/a.jpg"},
-                {"storage": "blog_images", "path": "blog/document/2026/07/a.jpg"},
+                {"storage": "blog_images", "path": "page/document/2026/07/a.jpg"},
+                {"storage": "blog_images", "path": "page/document/2026/07/a.jpg"},
             ]
         )
         self.assertEqual(len(items), 1)

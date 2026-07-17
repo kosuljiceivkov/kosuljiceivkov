@@ -26,7 +26,7 @@ ALLOWED_VIDEO_CONTENT_TYPES = frozenset(
 )
 MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024
 MAX_VIDEO_UPLOAD_BYTES = 200 * 1024 * 1024
-EDITOR_IMAGE_UPLOAD_TO = "blog/document/%Y/%m/"
+EDITOR_IMAGE_UPLOAD_TO = "page/document/%Y/%m/"
 PAGE_VIDEO_UPLOAD_TO = "page/videos/%Y/%m/"
 
 

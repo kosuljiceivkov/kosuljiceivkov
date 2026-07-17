@@ -84,7 +84,7 @@ class PageMediaBlockTests(TestCase):
 
     def test_renders_image_with_alt(self):
         block = create_image_block()
-        block["attrs"]["src"] = "/media/blog/document/demo.jpg"
+        block["attrs"]["src"] = "/media/page/document/demo.jpg"
         block["attrs"]["alt"] = "Demo slika"
 
         html = self.renderer.render(
@@ -96,7 +96,7 @@ class PageMediaBlockTests(TestCase):
 
     def test_renders_image_with_custom_width_percent(self):
         block = create_image_block()
-        block["attrs"]["src"] = "/media/blog/document/demo.jpg"
+        block["attrs"]["src"] = "/media/page/document/demo.jpg"
         block["attrs"]["alt"] = "Demo slika"
         block["settings"]["width_percent"] = "42"
         block["settings"]["align"] = "center"
@@ -124,7 +124,7 @@ class PageMediaBlockTests(TestCase):
     def test_renders_uploaded_video_in_native_ratio_with_poster(self):
         block = create_video_block()
         block["attrs"]["src"] = "/media/page/videos/demo.mp4"
-        block["attrs"]["poster"] = "/media/blog/document/video-poster.jpg"
+        block["attrs"]["poster"] = "/media/page/document/video-poster.jpg"
 
         html = self.renderer.render(
             self._page_with_block(block),
@@ -132,7 +132,7 @@ class PageMediaBlockTests(TestCase):
         )
 
         self.assertIn("iv-page-video--file", html)
-        self.assertIn('poster="http://testserver/media/blog/document/video-poster.jpg"', html)
+        self.assertIn('poster="http://testserver/media/page/document/video-poster.jpg"', html)
         self.assertIn('src="http://testserver/media/page/videos/demo.mp4"', html)
 
     def test_saved_spacing_settings_do_not_affect_rendering(self):

@@ -16,8 +16,8 @@ class JsonMediaCleanupTests(TestCase):
     def test_extract_media_refs_from_page_image_block(self):
         section = create_section()
         block = create_image_block()
-        block["attrs"]["path"] = "blog/document/2026/07/demo.jpg"
-        block["attrs"]["src"] = "/media/blog/images/blog/document/2026/07/demo.jpg"
+        block["attrs"]["path"] = "page/document/2026/07/demo.jpg"
+        block["attrs"]["src"] = "/media/images/page/document/2026/07/demo.jpg"
         block["attrs"]["alt"] = "Demo"
         section["rows"][0]["columns"][0]["blocks"] = [block]
         page = {"format": "iv_page_v1", "type": "page", "sections": [section]}
@@ -27,7 +27,7 @@ class JsonMediaCleanupTests(TestCase):
         self.assertEqual(len(refs), 1)
         ref = next(iter(refs))
         self.assertEqual(ref.storage, "blog_images")
-        self.assertEqual(ref.path, "blog/document/2026/07/demo.jpg")
+        self.assertEqual(ref.path, "page/document/2026/07/demo.jpg")
 
     def test_all_page_media_refs_includes_saved_post(self):
         post = BlogPost.objects.create(
@@ -36,7 +36,7 @@ class JsonMediaCleanupTests(TestCase):
         )
         section = create_section()
         block = create_image_block()
-        block["attrs"]["path"] = "blog/document/2026/07/post.jpg"
+        block["attrs"]["path"] = "page/document/2026/07/post.jpg"
         block["attrs"]["alt"] = "Alt"
         section["rows"][0]["columns"][0]["blocks"] = [block]
         page = {"format": "iv_page_v1", "type": "page", "sections": [section]}
@@ -51,7 +51,7 @@ class JsonMediaCleanupTests(TestCase):
 
     def test_page_update_removes_replaced_image_file(self):
         storage = storages["blog_images"]
-        path = storage.save("blog/document/2026/07/old.jpg", ContentFile(b"old", name="old.jpg"))
+        path = storage.save("page/document/2026/07/old.jpg", ContentFile(b"old", name="old.jpg"))
 
         post = BlogPost.objects.create(
             title="Cleanup",

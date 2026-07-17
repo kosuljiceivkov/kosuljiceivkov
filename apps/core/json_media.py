@@ -10,8 +10,8 @@ from django.db.models import FileField
 
 MANAGED_PREFIXES: dict[str, tuple[str, ...]] = {
     "blog_images": (
-        "blog/document/",
-        "blog/featured/",
+        "page/document/",
+        "page/featured/",
         "seo/og/",
         "seo/twitter/",
         "builder/",

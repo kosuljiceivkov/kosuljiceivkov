@@ -31,15 +31,15 @@ class PendingMediaCleanupTests(TestCase):
 
     def test_parse_pending_media_items_accepts_storage_alias(self):
         items = parse_pending_media_items(
-            [{"storage": "blog_images", "path": "blog/document/2026/07/demo.jpg"}]
+            [{"storage": "blog_images", "path": "page/document/2026/07/demo.jpg"}]
         )
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0]["storage"], "blog_images")
-        self.assertEqual(items[0]["path"], "blog/document/2026/07/demo.jpg")
+        self.assertEqual(items[0]["path"], "page/document/2026/07/demo.jpg")
 
     def test_cleanup_pending_media_deletes_unreferenced_file(self):
         path = self.storage.save(
-            "blog/document/2026/07/pending.jpg",
+            "page/document/2026/07/pending.jpg",
             ContentFile(b"pending", name="pending.jpg"),
         )
         items = parse_pending_media_items([{"storage": "blog_images", "path": path}])
@@ -51,7 +51,7 @@ class PendingMediaCleanupTests(TestCase):
 
     def test_cleanup_pending_media_skips_referenced_file(self):
         path = self.storage.save(
-            "blog/document/2026/07/kept.jpg",
+            "page/document/2026/07/kept.jpg",
             ContentFile(b"kept", name="kept.jpg"),
         )
         section = create_section()
@@ -71,7 +71,7 @@ class PendingMediaCleanupTests(TestCase):
 
     def test_cleanup_pending_media_api_deletes_upload(self):
         path = self.storage.save(
-            "blog/document/2026/07/api.jpg",
+            "page/document/2026/07/api.jpg",
             ContentFile(b"api", name="api.jpg"),
         )
         response = self.client.post(

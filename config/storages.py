@@ -2,7 +2,7 @@
 Media storage backends — local filesystem (dev) and Cloudflare R2 (production).
 
 Aliases (Django STORAGES):
-  - blog_images     → image uploads (blog, builder)
+  - blog_images     → image uploads (blog, Projekti, SEO, builder)
   - project_videos  → video uploads (builder)
 
 Environment variables (R2_* preferred on Render; AWS_* legacy aliases still work):
@@ -36,7 +36,7 @@ class BaseR2Storage(S3Boto3Storage):
 
 
 class BlogImageR2Storage(BaseR2Storage):
-    location = "blog/images"
+    location = "images"
 
 
 class ProjectVideoR2Storage(BaseR2Storage):
@@ -61,7 +61,7 @@ def build_local_media_storages(media_root: Path, media_url: str) -> dict:
 
     return {
         "default": _local_fs(media_root, media_url),
-        "blog_images": _local_fs(media_root / "blog" / "images", f"{media_url}blog/images/"),
+        "blog_images": _local_fs(media_root / "images", f"{media_url}images/"),
         "project_videos": _local_fs(
             media_root / "projects" / "videos",
             f"{media_url}projects/videos/",
