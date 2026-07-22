@@ -100,10 +100,12 @@
                 {{ adminform.form.title }}
               </div>
               <div class="blog-page-builder__canvas" data-builder-canvas></div>
+              <div class="blog-page-builder__add-section">
+                <button type="button" class="blog-page-builder__add-section-fab" data-builder-add-section title="Dodaj sekciju">
+                  +
+                </button>
+              </div>
             </div>
-            <button type="button" class="blog-page-builder__add-section-fab" data-builder-add-section title="Dodaj sekciju">
-              +
-            </button>
           </div>
         </div>
 
@@ -143,7 +145,7 @@
 
         <div class="blog-post-editor__drawer-panel" data-blog-drawer-panel="seo" hidden>
           {% for inline_admin_formset in inline_admin_formsets %}
-            {% include inline_admin_formset.opts.template %}
+            {% include "admin/seo/edit_inline/stacked_no_header.html" %}
           {% endfor %}
         </div>
 
@@ -175,7 +177,7 @@
       </button>
       <button type="button" class="blog-post-editor__rail-btn" data-blog-drawer-trigger="seo" title="SEO">
         <span class="blog-post-editor__rail-icon" aria-hidden="true">◎</span>
-        <span>SEO{% if blog_seo_score is not None %} {{ blog_seo_score }}{% endif %}</span>
+        <span>SEO</span>
       </button>
       <button type="button" class="blog-post-editor__rail-btn" data-blog-drawer-trigger="publish" title="Objava">
         <span class="blog-post-editor__rail-icon" aria-hidden="true">▶</span>

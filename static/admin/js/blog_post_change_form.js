@@ -374,7 +374,64 @@
     });
   }
 
+  function syncVisualBuilderShell() {
+    if (!document.body.classList.contains("visual-builder-admin")) {
+      return;
+    }
+
+    const root = document.documentElement;
+    const header = document.getElementById("header");
+    const content =
+      document.getElementById("content-start") ||
+      document.querySelector("#main > .content");
+
+    const top = header ? Math.round(header.getBoundingClientRect().bottom) : 0;
+    let left = 0;
+    let right = 0;
+
+    if (content) {
+      const rect = content.getBoundingClientRect();
+      left = Math.max(0, Math.round(rect.left));
+      right = Math.max(0, Math.round(window.innerWidth - rect.right));
+    }
+
+    root.style.setProperty("--vb-shell-top", `${top}px`);
+    root.style.setProperty("--vb-shell-left", `${left}px`);
+    root.style.setProperty("--vb-shell-right", `${right}px`);
+  }
+
+  function initVisualBuilderShell() {
+    if (!document.body.classList.contains("visual-builder-admin")) {
+      return;
+    }
+
+    syncVisualBuilderShell();
+    window.requestAnimationFrame(() => {
+      syncVisualBuilderShell();
+      window.requestAnimationFrame(syncVisualBuilderShell);
+    });
+    window.addEventListener("resize", syncVisualBuilderShell);
+
+    const navToggle = document.getElementById("toggle-nav-sidebar");
+    if (navToggle) {
+      navToggle.addEventListener("click", () => {
+        window.requestAnimationFrame(syncVisualBuilderShell);
+        window.setTimeout(syncVisualBuilderShell, 50);
+        window.setTimeout(syncVisualBuilderShell, 200);
+      });
+    }
+
+    const main = document.getElementById("main");
+    if (main && typeof MutationObserver !== "undefined") {
+      const observer = new MutationObserver(() => {
+        syncVisualBuilderShell();
+      });
+      observer.observe(main, { attributes: true, attributeFilter: ["class"] });
+    }
+  }
+
   function init() {
+    initVisualBuilderShell();
     document.querySelectorAll("[data-blog-post-editor]").forEach((postRoot) => {
       initDrawers(postRoot);
       initShortcuts(postRoot);

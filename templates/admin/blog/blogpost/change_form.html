@@ -5,7 +5,7 @@
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'admin/css/blog_post_editor.css' %}">
 <link rel="stylesheet" href="{% static 'css/iv-page.css' %}?v=8">
-<link rel="stylesheet" href="{% static 'admin/css/blog_page_builder.css' %}?v=9">
+<link rel="stylesheet" href="{% static 'admin/css/blog_page_builder.css' %}?v=23">
 {% endblock %}
 
 {% block bodyclass %}{{ block.super }} blog-visual-builder-admin visual-builder-admin{% endblock %}
@@ -16,7 +16,7 @@
 
 {% block extrahead %}
 {{ block.super }}
-<script src="{% static 'admin/js/blog_post_change_form.js' %}"></script>
+<script src="{% static 'admin/js/blog_post_change_form.js' %}?v=2"></script>
 <script src="{% static 'admin/js/blog_page_builder.js' %}?v=9"></script>
 {% endblock %}
 

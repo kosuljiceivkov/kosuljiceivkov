@@ -711,7 +711,8 @@ class SeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
     form = SeoMetadataAdminForm
     extra = 0
     max_num = 1
-    can_delete = True
+    can_delete = False
+    template = "admin/seo/edit_inline/stacked_no_header.html"
     classes = ("seo-metadata-inline",)
     verbose_name = "SEO"
     verbose_name_plural = "SEO"

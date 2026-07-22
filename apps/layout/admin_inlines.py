@@ -39,7 +39,8 @@ class ProjektiSeoMetadataInline(SeoAnalyzerAdminMixin, GenericStackedInline):
     ct_fk_field = "object_id"
     extra = 0
     max_num = 1
-    can_delete = True
+    can_delete = False
+    template = "admin/seo/edit_inline/stacked_no_header.html"
     classes = ("seo-metadata-inline", "blog-post-editor__seo-inline")
     verbose_name = "SEO"
     verbose_name_plural = "SEO"
