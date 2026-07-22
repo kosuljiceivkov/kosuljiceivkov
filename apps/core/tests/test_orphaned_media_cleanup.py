@@ -26,7 +26,7 @@ def _make_image(name: str = "test.jpg") -> ContentFile:
 
 class OrphanedMediaCleanupIntegrationTests(TestCase):
     def setUp(self):
-        for alias in ("blog_images", "project_videos"):
+        for alias in ("blog_images", "blog_videos", "project_images", "project_videos"):
             location = getattr(storages[alias], "location", None)
             if location:
                 Path(location).mkdir(parents=True, exist_ok=True)

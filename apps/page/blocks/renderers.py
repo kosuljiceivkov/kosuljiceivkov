@@ -181,7 +181,12 @@ class VideoBlockRenderer:
         if file_src and not file_src.startswith(("http://", "https://", "/")):
             from django.core.files.storage import storages
 
-            file_src = storages["project_videos"].url(file_src)
+            from apps.core.json_media import VIDEO_STORAGE_ALIASES
+
+            storage_alias = str(attrs.get("storage") or "").strip() or "project_videos"
+            if storage_alias not in VIDEO_STORAGE_ALIASES:
+                storage_alias = "project_videos"
+            file_src = storages[storage_alias].url(file_src)
         elif file_src.startswith("/") and context.request is not None:
             file_src = context.request.build_absolute_uri(file_src)
 

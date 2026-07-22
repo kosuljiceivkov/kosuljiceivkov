@@ -255,7 +255,7 @@
         id: uid("blk"),
         type: "image",
         settings: { ...DEFAULT_BLOCK_SETTINGS, width_percent: "100" },
-        attrs: { src: "", path: "", alt: "", caption: "", media_asset_id: "" },
+        attrs: { src: "", path: "", storage: "", alt: "", caption: "", media_asset_id: "" },
       };
     }
     if (type === "video") {
@@ -266,9 +266,11 @@
         attrs: {
           url: "",
           path: "",
+          storage: "",
           src: "",
           poster: "",
           poster_path: "",
+          poster_storage: "",
           caption: "",
         },
       };
@@ -1751,9 +1753,11 @@
         videoBlock.attrs.url = value;
         if (value.trim()) {
           videoBlock.attrs.path = "";
+          videoBlock.attrs.storage = "";
           videoBlock.attrs.src = "";
           videoBlock.attrs.poster = "";
           videoBlock.attrs.poster_path = "";
+          videoBlock.attrs.poster_storage = "";
         }
         markDirty(state);
         renderCanvas(state);
@@ -1785,9 +1789,11 @@
         clearBtn.className = "blog-page-builder__inspector-btn";
         clearBtn.addEventListener("click", () => {
           videoBlock.attrs.path = "";
+          videoBlock.attrs.storage = "";
           videoBlock.attrs.src = "";
           videoBlock.attrs.poster = "";
           videoBlock.attrs.poster_path = "";
+          videoBlock.attrs.poster_storage = "";
           videoBlock.attrs.video_width = "";
           videoBlock.attrs.video_height = "";
           markDirty(state);
@@ -2043,6 +2049,7 @@
 
       block.attrs.src = data.url;
       block.attrs.path = data.path;
+      block.attrs.storage = data.storage || "blog_images";
       if (!String(block.attrs.alt || "").trim()) {
         const fromServer = String(data.alt || "").trim();
         const fromFile = String(file.name || "")
@@ -2051,7 +2058,7 @@
           .trim();
         block.attrs.alt = fromServer || fromFile || "Slika";
       }
-      trackSessionUpload(state, "blog_images", data.path);
+      trackSessionUpload(state, block.attrs.storage, data.path);
       markDirty(state);
       renderCanvas(state);
       renderEditPanel(state);
@@ -2150,9 +2157,10 @@
       }
       block.attrs.poster = data.url;
       block.attrs.poster_path = data.path;
+      block.attrs.poster_storage = data.storage || "blog_images";
       block.attrs.video_width = poster.width;
       block.attrs.video_height = poster.height;
-      trackSessionUpload(state, "blog_images", data.path);
+      trackSessionUpload(state, block.attrs.poster_storage, data.path);
       markDirty(state);
       renderCanvas(state);
     } catch (_error) {
@@ -2194,8 +2202,9 @@
         }
         block.attrs.src = data.url;
         block.attrs.path = data.path;
+        block.attrs.storage = data.storage || "project_videos";
         block.attrs.url = "";
-        trackSessionUpload(state, "project_videos", data.path);
+        trackSessionUpload(state, block.attrs.storage, data.path);
         markDirty(state);
         renderCanvas(state);
         resolve({ ok: true });

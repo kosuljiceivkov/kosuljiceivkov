@@ -2,8 +2,10 @@
 Media storage backends — local filesystem (dev) and Cloudflare R2 (production).
 
 Aliases (Django STORAGES):
-  - blog_images     → image uploads (blog, Projekti, SEO, builder)
-  - project_videos  → video uploads (builder)
+  - blog_images     → `blog/images/`
+  - blog_videos     → `blog/videos/`
+  - project_images  → `projects/images/`
+  - project_videos  → `projects/videos/`
 
 Environment variables (R2_* preferred on Render; AWS_* legacy aliases still work):
   - R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY
@@ -36,7 +38,15 @@ class BaseR2Storage(S3Boto3Storage):
 
 
 class BlogImageR2Storage(BaseR2Storage):
-    location = "images"
+    location = "blog/images"
+
+
+class BlogVideoR2Storage(BaseR2Storage):
+    location = "blog/videos"
+
+
+class ProjectImageR2Storage(BaseR2Storage):
+    location = "projects/images"
 
 
 class ProjectVideoR2Storage(BaseR2Storage):
@@ -61,7 +71,18 @@ def build_local_media_storages(media_root: Path, media_url: str) -> dict:
 
     return {
         "default": _local_fs(media_root, media_url),
-        "blog_images": _local_fs(media_root / "images", f"{media_url}images/"),
+        "blog_images": _local_fs(
+            media_root / "blog" / "images",
+            f"{media_url}blog/images/",
+        ),
+        "blog_videos": _local_fs(
+            media_root / "blog" / "videos",
+            f"{media_url}blog/videos/",
+        ),
+        "project_images": _local_fs(
+            media_root / "projects" / "images",
+            f"{media_url}projects/images/",
+        ),
         "project_videos": _local_fs(
             media_root / "projects" / "videos",
             f"{media_url}projects/videos/",
@@ -74,6 +95,8 @@ def build_r2_media_storages() -> dict:
     return {
         "default": {"BACKEND": "config.storages.BlogImageR2Storage"},
         "blog_images": {"BACKEND": "config.storages.BlogImageR2Storage"},
+        "blog_videos": {"BACKEND": "config.storages.BlogVideoR2Storage"},
+        "project_images": {"BACKEND": "config.storages.ProjectImageR2Storage"},
         "project_videos": {"BACKEND": "config.storages.ProjectVideoR2Storage"},
     }
 

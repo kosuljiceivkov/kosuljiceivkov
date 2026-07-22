@@ -75,10 +75,12 @@ Production uses **Cloudflare R2** via `django-storages` + `boto3` (`config/stora
 
 | Storage alias | Path in bucket | Purpose |
 |---------------|----------------|---------|
-| `blog_images` | `images/` | Shared image uploads (blog, Projekti, SEO, builder) |
-| `project_videos` | `projects/videos/` | Builder video files |
+| `blog_images` | `blog/images/` | Blog builder images, featured, SEO |
+| `blog_videos` | `blog/videos/` | Blog builder videos |
+| `project_images` | `projects/images/` | Projekti builder images |
+| `project_videos` | `projects/videos/` | Projekti builder videos |
 
-Object keys under `images/` use prefixes such as `page/document/`, `page/featured/`, `seo/og/`, and `seo/twitter/`.
+Builder uploads use date folders (`YYYY/MM/…`) inside each location. Featured images use `blog/images/featured/YYYY/MM/…`. SEO images use `blog/images/seo/og/…` and `blog/images/seo/twitter/…`. Cleanup manages each dedicated storage location.
 
 **R2 environment variables** (preferred):
 

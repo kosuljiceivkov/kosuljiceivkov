@@ -122,6 +122,7 @@ def create_image_block() -> dict[str, Any]:
         "attrs": {
             "src": "",
             "path": "",
+            "storage": "",
             "alt": "",
             "caption": "",
             "media_asset_id": "",
@@ -137,9 +138,11 @@ def create_video_block() -> dict[str, Any]:
         "attrs": {
             "url": "",
             "path": "",
+            "storage": "",
             "src": "",
             "poster": "",
             "poster_path": "",
+            "poster_storage": "",
             "caption": "",
         },
     }

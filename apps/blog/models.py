@@ -123,7 +123,7 @@ class BlogPost(SeoContentMixin, TimestampMixin):
     )
     featured_image = models.ImageField(
         "Istaknuta slika",
-        upload_to="page/featured/%Y/%m/",
+        upload_to="featured/%Y/%m/",
         storage=blog_images_storage,
         blank=True,
         help_text="Prikazuje se na kartici u listi bloga i u zaglavlju članka.",

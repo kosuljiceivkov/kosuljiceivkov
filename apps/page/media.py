@@ -26,8 +26,23 @@ ALLOWED_VIDEO_CONTENT_TYPES = frozenset(
 )
 MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024
 MAX_VIDEO_UPLOAD_BYTES = 200 * 1024 * 1024
-EDITOR_IMAGE_UPLOAD_TO = "page/document/%Y/%m/"
-PAGE_VIDEO_UPLOAD_TO = "page/videos/%Y/%m/"
+
+# media_scope → storage location already encodes blog/ vs projects/.
+# Public examples:
+#   blog/images/2026/07/photo.jpg
+#   blog/videos/2026/07/clip.mp4
+#   projects/images/2026/07/photo.jpg
+#   projects/videos/2026/07/clip.mp4
+MEDIA_SCOPES = frozenset({"blog", "projects"})
+IMAGE_STORAGE_BY_SCOPE = {
+    "blog": "blog_images",
+    "projects": "project_images",
+}
+VIDEO_STORAGE_BY_SCOPE = {
+    "blog": "blog_videos",
+    "projects": "project_videos",
+}
+DATE_UPLOAD_TO = "%Y/%m/"
 
 
 class EditorMediaError(Exception):
@@ -43,6 +58,7 @@ class EditorMediaError(Exception):
 class EditorImageUploadResult:
     path: str
     url: str
+    storage: str = "blog_images"
     alt: str = ""
 
 
@@ -50,6 +66,7 @@ class EditorImageUploadResult:
 class EditorVideoUploadResult:
     path: str
     url: str
+    storage: str = "project_videos"
 
 
 class EditorMediaService:
@@ -59,8 +76,21 @@ class EditorMediaService:
     allowed_video_content_types = ALLOWED_VIDEO_CONTENT_TYPES
     max_image_upload_bytes = MAX_IMAGE_UPLOAD_BYTES
     max_video_upload_bytes = MAX_VIDEO_UPLOAD_BYTES
-    image_upload_to_template = EDITOR_IMAGE_UPLOAD_TO
-    video_upload_to_template = PAGE_VIDEO_UPLOAD_TO
+    image_upload_to_template = DATE_UPLOAD_TO
+    video_upload_to_template = DATE_UPLOAD_TO
+
+    def __init__(self, media_scope: str = "blog"):
+        if media_scope not in MEDIA_SCOPES:
+            raise ValueError(f"Unsupported media_scope: {media_scope}")
+        self.media_scope = media_scope
+
+    @property
+    def image_storage_alias(self) -> str:
+        return IMAGE_STORAGE_BY_SCOPE[self.media_scope]
+
+    @property
+    def video_storage_alias(self) -> str:
+        return VIDEO_STORAGE_BY_SCOPE[self.media_scope]
 
     def validate_image(self, upload: UploadedFile) -> None:
         if upload is None:
@@ -95,13 +125,13 @@ class EditorMediaService:
 
     def save_image(self, upload: UploadedFile) -> str:
         self.validate_image(upload)
-        storage = storages["blog_images"]
+        storage = storages[self.image_storage_alias]
         upload_prefix = timezone.now().strftime(self.image_upload_to_template)
         return storage.save(f"{upload_prefix}{upload.name}", upload)
 
     def save_video(self, upload: UploadedFile) -> str:
         self.validate_video(upload)
-        storage = storages["project_videos"]
+        storage = storages[self.video_storage_alias]
         upload_prefix = timezone.now().strftime(self.video_upload_to_template)
         return storage.save(f"{upload_prefix}{upload.name}", upload)
 
@@ -146,8 +176,9 @@ class EditorMediaService:
             url=self.build_public_url_or_rollback(
                 path,
                 request=request,
-                storage_alias="blog_images",
+                storage_alias=self.image_storage_alias,
             ),
+            storage=self.image_storage_alias,
             alt=alt,
         )
 
@@ -158,6 +189,7 @@ class EditorMediaService:
             url=self.build_public_url_or_rollback(
                 path,
                 request=request,
-                storage_alias="project_videos",
+                storage_alias=self.video_storage_alias,
             ),
+            storage=self.video_storage_alias,
         )

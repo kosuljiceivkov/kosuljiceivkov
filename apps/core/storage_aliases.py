@@ -1,7 +1,8 @@
 """
 Rešava Django 5.2 FileField storage alias stringove u STORAGES backend instance.
 
-Koristite blog_images_storage / project_videos_storage u modelima — serializabilno
+Koristite blog_images_storage / project_images_storage /
+blog_videos_storage / project_videos_storage u modelima — serializabilno
 za migracije (za razliku od storage="blog_images" stringa ili lambda).
 """
 from __future__ import annotations
@@ -21,12 +22,22 @@ def blog_images_storage():
     return storages["blog_images"]
 
 
+def project_images_storage():
+    return storages["project_images"]
+
+
+def blog_videos_storage():
+    return storages["blog_videos"]
+
+
 def project_videos_storage():
     return storages["project_videos"]
 
 
 STORAGE_ALIAS_CALLABLES: dict[str, callable] = {
     "blog_images": blog_images_storage,
+    "project_images": project_images_storage,
+    "blog_videos": blog_videos_storage,
     "project_videos": project_videos_storage,
     "default": blog_images_storage,
 }

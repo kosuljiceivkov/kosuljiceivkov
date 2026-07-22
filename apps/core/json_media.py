@@ -8,18 +8,19 @@ from django.core.files.storage import storages
 from django.db import transaction
 from django.db.models import FileField
 
+# Dedicated storages: empty prefix means the whole location is managed.
 MANAGED_PREFIXES: dict[str, tuple[str, ...]] = {
-    "blog_images": (
-        "page/document/",
-        "page/featured/",
-        "seo/og/",
-        "seo/twitter/",
-        "builder/",
-    ),
-    "project_videos": (
-        "page/videos/",
-        "builder/videos/",
-    ),
+    "blog_images": ("",),
+    "blog_videos": ("",),
+    "project_images": ("",),
+    "project_videos": ("",),
+}
+
+IMAGE_STORAGE_ALIASES = frozenset({"blog_images", "project_images"})
+VIDEO_STORAGE_ALIASES = frozenset({"blog_videos", "project_videos"})
+POSTER_STORAGE_BY_VIDEO = {
+    "blog_videos": "blog_images",
+    "project_videos": "project_images",
 }
 
 
@@ -30,7 +31,11 @@ class JsonMediaRef:
 
 
 def _is_managed_ref(ref: JsonMediaRef) -> bool:
-    prefixes = MANAGED_PREFIXES.get(ref.storage, ())
+    if ref.storage not in MANAGED_PREFIXES:
+        return False
+    prefixes = MANAGED_PREFIXES[ref.storage]
+    if "" in prefixes:
+        return bool(str(ref.path or "").strip())
     return any(ref.path.startswith(prefix) for prefix in prefixes)
 
 
@@ -73,21 +78,38 @@ def extract_media_refs_from_page(page) -> set[JsonMediaRef]:
                     path = str(attrs.get("path") or "").strip()
                     if block_type == "image":
                         if path:
-                            refs.add(JsonMediaRef("blog_images", path))
+                            image_storage = (
+                                str(attrs.get("storage") or "").strip() or "blog_images"
+                            )
+                            if image_storage not in IMAGE_STORAGE_ALIASES:
+                                image_storage = "blog_images"
+                            refs.add(JsonMediaRef(image_storage, path))
                         continue
 
+                    video_storage = (
+                        str(attrs.get("storage") or "").strip() or "project_videos"
+                    )
+                    if video_storage not in VIDEO_STORAGE_ALIASES:
+                        video_storage = "project_videos"
                     if path:
-                        refs.add(JsonMediaRef("project_videos", path))
+                        refs.add(JsonMediaRef(video_storage, path))
+
                     poster_path = str(attrs.get("poster_path") or "").strip()
                     poster_src = str(
                         attrs.get("poster") or attrs.get("poster_src") or ""
                     ).strip()
+                    poster_storage = (
+                        str(attrs.get("poster_storage") or "").strip()
+                        or POSTER_STORAGE_BY_VIDEO.get(video_storage, "blog_images")
+                    )
+                    if poster_storage not in IMAGE_STORAGE_ALIASES:
+                        poster_storage = "blog_images"
                     if poster_path:
-                        refs.add(JsonMediaRef("blog_images", poster_path))
+                        refs.add(JsonMediaRef(poster_storage, poster_path))
                     elif poster_src and not poster_src.startswith(
                         ("http://", "https://", "/")
                     ):
-                        refs.add(JsonMediaRef("blog_images", poster_src))
+                        refs.add(JsonMediaRef(poster_storage, poster_src))
 
     return refs
 

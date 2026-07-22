@@ -35,7 +35,7 @@ def page_upload_image_view(request, post_id: int):
         log_upload_failure(post_id=post.pk, user_id=_user_id(request), code="missing_image")
         return JsonResponse({"ok": False, "error": "missing_image"}, status=400)
 
-    service = EditorMediaService()
+    service = EditorMediaService(media_scope="blog")
     try:
         result = service.upload_image(upload, request=request)
     except EditorMediaError as exc:
@@ -57,6 +57,7 @@ def page_upload_image_view(request, post_id: int):
             "ok": True,
             "url": result.url,
             "path": result.path,
+            "storage": result.storage,
             "alt": result.alt,
         }
     )
@@ -74,7 +75,7 @@ def page_upload_video_view(request, post_id: int):
         log_upload_failure(post_id=post.pk, user_id=_user_id(request), code="missing_video")
         return JsonResponse({"ok": False, "error": "missing_video"}, status=400)
 
-    service = EditorMediaService()
+    service = EditorMediaService(media_scope="blog")
     try:
         result = service.upload_video(upload, request=request)
     except EditorMediaError as exc:
@@ -96,5 +97,6 @@ def page_upload_video_view(request, post_id: int):
             "ok": True,
             "url": result.url,
             "path": result.path,
+            "storage": result.storage,
         }
     )

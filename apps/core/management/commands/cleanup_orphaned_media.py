@@ -106,7 +106,9 @@ class Command(BaseCommand):
         stored: set[tuple[str, str]] = set()
         for storage_alias, prefixes in MANAGED_PREFIXES.items():
             for prefix in prefixes:
-                for path in iter_storage_files(storage_alias, prefix.rstrip("/")):
+                # Empty prefix = list the entire dedicated storage root.
+                list_prefix = prefix.rstrip("/") if prefix else ""
+                for path in iter_storage_files(storage_alias, list_prefix):
                     stored.add((storage_alias, path))
 
         orphaned = sorted(stored - referenced)

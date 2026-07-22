@@ -36,7 +36,7 @@ def _save_to_field(instance, field_name: str, filename: str, content: ContentFil
 
 class DataLifecycleTests(TestCase):
     def setUp(self):
-        for alias in ("blog_images", "project_videos", "default"):
+        for alias in ("blog_images", "blog_videos", "project_images", "project_videos", "default"):
             location = getattr(storages[alias], "location", None)
             if location:
                 Path(location).mkdir(parents=True, exist_ok=True)
