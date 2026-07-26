@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load static contact_tags %}
+
+{% block body_class %}page-landing{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/screed-edu.css' %}?v=2">
+{% endblock %}
+
+{% block perf_css %}
+{% include "partials/perf/async_stylesheet.html" with href="css/animations.css" cache_bust=3 %}
+{% endblock %}
+
+{% block content %}
+{% include "partials/page_breadcrumb_hero.html" with title=landing.h1 lead=landing.lead %}
+
+{% for section in landing.sections %}
+<section class="section{% if forloop.counter|divisibleby:2 %} section--muted{% endif %} screed-about u-content-auto">
+    <div class="container container--narrow" data-animate="fade-up">
+        <h2 class="section__title">{{ section.title }}</h2>
+        <div class="screed-about__body">
+            {% for paragraph in section.paragraphs %}
+            <p class="screed-about__text">{{ paragraph }}</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endfor %}
+
+{% if landing.cards %}
+<section class="section{% if landing.sections|length|divisibleby:2 %}{% else %} section--muted{% endif %} screed-types u-content-auto">
+    <div class="container">
+        <div data-animate="fade-up">
+            {% include "partials/section_head.html" with title=landing.cards_title subtitle=landing.cards_subtitle %}
+        </div>
+        <ul class="screed-types__grid" role="list" data-animate-stagger data-stagger="fade-up">
+            {% for item in landing.cards %}
+            <li class="screed-types__card">
+                <h3 class="screed-types__title">{{ item.title }}</h3>
+                <p class="screed-types__text">{{ item.text }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+{% endif %}
+
+{% if landing.factors %}
+<section class="section screed-price u-content-auto">
+    <div class="container container--narrow" data-animate="fade-up">
+        <h2 class="screed-price__factors-title">{{ landing.factors_title }}</h2>
+        <ul class="screed-price__factors" role="list">
+            {% for factor in landing.factors %}
+            <li class="screed-price__factor">{{ factor }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+{% endif %}
+
+{% if landing.faq %}
+<section class="section section--muted home-faq u-content-auto" aria-labelledby="landing-faq-title">
+    <div class="container">
+        <div data-animate="fade-up">
+            {% include "partials/section_head.html" with eyebrow="FAQ" title="Česta pitanja o ceni" title_id="landing-faq-title" %}
+        </div>
+        <div class="home-faq__list" data-animate-stagger data-stagger="fade-up">
+            {% for item in landing.faq %}
+            <details class="home-faq__item">
+                <summary class="home-faq__question">{{ item.question }}</summary>
+                <div class="home-faq__answer">
+                    <p>{{ item.answer }}</p>
+                </div>
+            </details>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% if landing.related %}
+<section class="section landing-related u-content-auto" aria-labelledby="landing-related-title">
+    <div class="container">
+        <div data-animate="fade-up">
+            {% include "partials/section_head.html" with title="Povezane stranice" title_id="landing-related-title" subtitle="Dodatne informacije o cementnim košuljicama, estrihu i ponudi." %}
+        </div>
+        <ul class="landing-related__grid" role="list" data-animate-stagger data-stagger="fade-up">
+            {% for item in landing.related %}
+            <li class="landing-related__card">
+                <h3 class="landing-related__title">
+                    <a href="{% url item.url_name %}">{{ item.title }}</a>
+                </h3>
+                <p class="landing-related__text">{{ item.text }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+{% endif %}
+
+<section class="cta-banner cta-banner--inline" aria-labelledby="landing-cta-title">
+    <div class="container cta-banner__inner" data-animate="fade-in">
+        <h2 id="landing-cta-title" class="cta-banner__title">Zatražite ponudu</h2>
+        <p class="cta-banner__text">
+            Javite nam lokaciju, kvadraturu i tip objekta — pripremamo procenu u najkraćem roku.
+        </p>
+        <div class="contact-actions contact-actions--cta contact-actions--centered">
+            {% include "partials/contact/phone_number_buttons.html" with primary_class="contact-actions__btn" %}
+            <a href="{% url 'frontend:kontakt' %}" class="btn btn--light btn--lg contact-actions__btn">
+                Kontakt
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
