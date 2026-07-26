@@ -3,6 +3,7 @@
 
 {% block extra_css %}
 {% include "partials/perf/async_stylesheet.html" with href="css/pages/usluge-gallery.css" cache_bust=2 %}
+<link rel="stylesheet" href="{% static 'css/pages/screed-edu.css' %}?v=2">
 {% endblock %}
 
 {% block perf_css %}
@@ -10,7 +11,7 @@
 {% endblock %}
 
 {% block content %}
-{% include "partials/page_breadcrumb_hero.html" with title="Naše usluge" lead="Pružamo kompletna rešenja za izradu cementnih košuljica i pripremu podova za završne obloge. Svaki projekat realizujemo uz pažljivo planiranje, kvalitetne materijale i preciznu izvedbu." %}
+{% include "partials/page_breadcrumb_hero.html" with title="Cementne košuljice — naše usluge" lead="Pružamo kompletna rešenja za cementne košuljice (estrih) i pripremu podova za završne obloge. Svaki projekat realizujemo uz pažljivo planiranje, kvalitetne materijale i preciznu izvedbu." %}
 
 <section class="section">
     <div class="container container--narrow services-detail">
@@ -28,6 +29,9 @@
         {% endfor %}
     </div>
 </section>
+
+{% include "partials/home/about_screed.html" %}
+{% include "partials/home/screed_types.html" %}
 
 <section class="section section--muted" aria-labelledby="usluge-audience-title">
     <div class="container">
@@ -53,6 +57,7 @@
     </div>
 </section>
 
+{% include "partials/home/price.html" %}
 {% include "partials/usluge/gallery.html" %}
 
 <section class="cta-banner cta-banner--inline" aria-labelledby="usluge-cta-title">

@@ -199,6 +199,24 @@ def resolve_breadcrumb_trail(
             return build_trail_for_static_page(request, title="Usluge", url_name="frontend:usluge")
         if url_name == "kontakt":
             return build_trail_for_static_page(request, title="Kontakt", url_name="frontend:kontakt")
+        if url_name == "cementne_kosuljice":
+            return build_trail_for_static_page(
+                request,
+                title="Cementne košuljice",
+                url_name="frontend:cementne_kosuljice",
+            )
+        if url_name == "cena_cementne_kosuljice":
+            return build_trail_for_static_page(
+                request,
+                title="Cena",
+                url_name="frontend:cena_cementne_kosuljice",
+            )
+        if url_name == "estrih":
+            return build_trail_for_static_page(
+                request,
+                title="Estrih",
+                url_name="frontend:estrih",
+            )
 
     return BreadcrumbTrail()
 

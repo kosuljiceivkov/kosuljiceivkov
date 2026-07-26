@@ -1,0 +1,17 @@
+<section class="section screed-about u-content-auto" id="sta-su-cementne-kosuljice" aria-labelledby="screed-about-title">
+    <div class="container container--narrow">
+        <div data-animate="fade-up">
+            {% include "partials/section_head.html" with eyebrow=about_screed.eyebrow title=about_screed.title title_id="screed-about-title" subtitle=about_screed.subtitle %}
+            <div class="screed-about__body">
+                {% for paragraph in about_screed.paragraphs %}
+                <p class="screed-about__text">{{ paragraph }}</p>
+                {% endfor %}
+                <p class="screed-more">
+                    <a href="{% url 'frontend:cementne_kosuljice' %}">Više o cementnim košuljicama</a>
+                    ·
+                    <a href="{% url 'frontend:estrih' %}">Šta je estrih?</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>

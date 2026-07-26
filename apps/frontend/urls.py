@@ -8,6 +8,17 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("usluge/", views.usluge, name="usluge"),
     path("kontakt/", views.kontakt, name="kontakt"),
+    path(
+        "cementne-kosuljice/",
+        views.cementne_kosuljice,
+        name="cementne_kosuljice",
+    ),
+    path(
+        "cena-cementne-kosuljice/",
+        views.cena_cementne_kosuljice,
+        name="cena_cementne_kosuljice",
+    ),
+    path("estrih/", views.estrih, name="estrih"),
     path("projekti/", cms_views.projekti, name="projekti"),
     path("blog/", cms_views.blog_list, name="blog"),
     path(

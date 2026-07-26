@@ -1,0 +1,19 @@
+<section class="section section--muted screed-types u-content-auto" id="vrste-kosuljica" aria-labelledby="screed-types-title">
+    <div class="container">
+        <div data-animate="fade-up">
+            {% include "partials/section_head.html" with eyebrow="Vrste" title="Vrste cementnih košuljica" title_id="screed-types-title" subtitle="Biramo izvedbu prema objektu, opterećenju i zahtevima projekta — od klasičnog estriha do industrijske podloge." %}
+        </div>
+
+        <ul class="screed-types__grid" role="list" data-animate-stagger data-stagger="fade-up">
+            {% for item in screed_types %}
+            <li class="screed-types__card">
+                <h3 class="screed-types__title">{{ item.title }}</h3>
+                <p class="screed-types__text">{{ item.text }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+        <p class="section__footer-link screed-more">
+            <a href="{% url 'frontend:cementne_kosuljice' %}">Kompletan vodič o cementnim košuljicama</a>
+        </p>
+    </div>
+</section>

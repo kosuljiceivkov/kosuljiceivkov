@@ -17,6 +17,14 @@
             </ul>
         </div>
         <div>
+            <p class="site-footer__heading">Saznajte više</p>
+            <ul class="site-footer__links">
+                <li><a href="{% url 'frontend:cementne_kosuljice' %}">Cementne košuljice</a></li>
+                <li><a href="{% url 'frontend:cena_cementne_kosuljice' %}">Cena</a></li>
+                <li><a href="{% url 'frontend:estrih' %}">Estrih</a></li>
+            </ul>
+        </div>
+        <div>
             <p class="site-footer__heading">Kontakt</p>
             <ul class="site-footer__links">
                 {% if contact_phone %}<li><a href="tel:{{ contact_phone|phone_uri }}" class="tel-link">{{ contact_phone_display }}</a></li>{% endif %}

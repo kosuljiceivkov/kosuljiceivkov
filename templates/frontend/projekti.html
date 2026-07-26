@@ -6,6 +6,6 @@
 {% endblock %}
 
 {% block content %}
-{% include "partials/page_breadcrumb_hero.html" with seo_object=page %}
+{% include "partials/page_breadcrumb_hero.html" with seo_object=page lead=projekti_list_lead %}
 {% render_cms_page page %}
 {% endblock %}

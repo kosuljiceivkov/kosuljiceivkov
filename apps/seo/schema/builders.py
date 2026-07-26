@@ -522,3 +522,53 @@ def build_homepage_schema_graph(request) -> list[dict[str, Any]]:
         schemas.append(faq_schema)
 
     return [schema for schema in schemas if schema]
+
+
+def build_blog_index_schema_graph(request) -> list[dict[str, Any]]:
+    """CollectionPage + ItemList za javni blog listing."""
+    from apps.blog.selectors import get_published_posts_queryset
+    from apps.frontend.blog_index_data import BLOG_INDEX_H1, BLOG_INDEX_SEO
+
+    page_url = absolute_url(request, reverse("frontend:blog"))
+    schemas: list[dict[str, Any]] = []
+
+    organization = build_organization_schema(request)
+    if organization:
+        schemas.append(organization)
+
+    posts = list(get_published_posts_queryset()[:50])
+    list_elements: list[dict[str, Any]] = []
+    for index, post in enumerate(posts, start=1):
+        post_url = absolute_url(request, post.get_absolute_url())
+        list_elements.append(
+            {
+                "@type": "ListItem",
+                "position": index,
+                "url": post_url,
+                "name": post.title,
+            }
+        )
+
+    collection: dict[str, Any] = {
+        "@context": JSON_LD_CONTEXT,
+        "@type": "CollectionPage",
+        "@id": f"{page_url}#webpage",
+        "url": page_url,
+        "name": BLOG_INDEX_H1,
+        "headline": BLOG_INDEX_SEO["title"],
+        "description": BLOG_INDEX_SEO["description"],
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": getattr(settings, "SEO_SITE_NAME", "Cementne košuljice Ivkov"),
+            "url": organization_site_url(request),
+        },
+    }
+    if list_elements:
+        collection["mainEntity"] = {
+            "@type": "ItemList",
+            "numberOfItems": len(list_elements),
+            "itemListElement": list_elements,
+        }
+
+    schemas.append(clean_schema(collection))
+    return [schema for schema in schemas if schema]

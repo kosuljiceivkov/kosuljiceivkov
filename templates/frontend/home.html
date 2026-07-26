@@ -16,7 +16,8 @@
 {% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pages/home.css' %}?v=5">
+<link rel="stylesheet" href="{% static 'css/pages/home.css' %}?v=6">
+<link rel="stylesheet" href="{% static 'css/pages/screed-edu.css' %}?v=2">
 {% endblock %}
 
 {% block perf_css %}
@@ -27,8 +28,11 @@
 {% block content %}
 {% include "partials/home/hero.html" %}
 {% include "partials/home/why_us.html" %}
+{% include "partials/home/about_screed.html" %}
 {% include "partials/home/services_preview.html" %}
+{% include "partials/home/screed_types.html" %}
 {% include "partials/home/process.html" %}
+{% include "partials/home/price.html" %}
 {% include "partials/home/work_carousel.html" %}
 {% include "partials/home/projects_preview.html" %}
 {% include "partials/home/blog_preview.html" %}

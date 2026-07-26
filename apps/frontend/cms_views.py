@@ -6,16 +6,15 @@ from apps.blog.selectors import (
     get_published_post,
     get_published_posts_queryset,
 )
+from apps.frontend.blog_index_data import (
+    BLOG_EMPTY_MESSAGE,
+    BLOG_INDEX_H1,
+    BLOG_INDEX_LEAD,
+    BLOG_INDEX_SEO,
+    PROJEKTI_LIST_LEAD,
+)
 from apps.layout.selectors import get_projekti_page
 from apps.seo.page_seo import build_static_page_seo
-
-BLOG_INDEX_SEO = {
-    "title": "Blog",
-    "description": (
-        "Stručni saveti i vesti o pripremi podloge, ugradnji "
-        "i održavanju cementnih košuljica."
-    ),
-}
 
 
 def projekti(request):
@@ -29,6 +28,7 @@ def projekti(request):
         {
             "page": page,
             "seo_object": page,
+            "projekti_list_lead": PROJEKTI_LIST_LEAD,
         },
     )
 
@@ -40,6 +40,9 @@ def blog_list(request):
         "frontend/blog_list.html",
         {
             "posts": posts,
+            "blog_index_h1": BLOG_INDEX_H1,
+            "blog_index_lead": BLOG_INDEX_LEAD,
+            "blog_empty_message": BLOG_EMPTY_MESSAGE,
             "seo_overrides": build_static_page_seo(
                 request,
                 url_name="frontend:blog",
@@ -53,7 +56,8 @@ def blog_category(request, category_path):
     category = get_active_category_by_path(category_path)
     posts = get_published_posts_queryset(category=category)
     description = category.description.strip() or (
-        f"Blog objave u kategoriji {category.get_breadcrumb_title()}."
+        f"Blog objave o cementnim košuljicama u kategoriji "
+        f"{category.get_breadcrumb_title()}."
     )
     return render(
         request,

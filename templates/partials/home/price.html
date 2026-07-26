@@ -1,0 +1,30 @@
+{% load contact_tags %}
+<section class="section screed-price u-content-auto" id="cena-cementnih-kosuljica" aria-labelledby="screed-price-title">
+    <div class="container container--narrow">
+        <div data-animate="fade-up">
+            {% include "partials/section_head.html" with eyebrow=price_section.eyebrow title=price_section.title title_id="screed-price-title" subtitle=price_section.subtitle %}
+
+            <p class="screed-price__intro">{{ price_section.intro }}</p>
+
+            <h3 class="screed-price__factors-title">{{ price_section.factors_title }}</h3>
+            <ul class="screed-price__factors" role="list">
+                {% for factor in price_section.factors %}
+                <li class="screed-price__factor">{{ factor }}</li>
+                {% endfor %}
+            </ul>
+
+            <p class="screed-price__closing">{{ price_section.closing }}</p>
+
+            <p class="screed-more">
+                <a href="{% url 'frontend:cena_cementne_kosuljice' %}">Detaljnije o ceni cementnih košuljica</a>
+            </p>
+
+            <div class="screed-price__actions u-actions">
+                {% include "partials/contact/phone_number_buttons.html" with primary_class="screed-price__cta" %}
+                <a href="{% url 'frontend:kontakt' %}" class="btn btn--outline-dark btn--lg">
+                    Kontakt
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

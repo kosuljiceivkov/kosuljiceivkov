@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% include "partials/page_breadcrumb_hero.html" with title="Blog" lead="Stručni saveti i vesti o pripremi podloge, ugradnji i održavanju cementnih košuljica." %}
+{% include "partials/page_breadcrumb_hero.html" with title=blog_index_h1 lead=blog_index_lead %}
 
 <section class="section">
     <div class="container">
@@ -14,8 +14,27 @@
             {% endfor %}
         </div>
         {% else %}
-        <p class="empty-state">Blog objave će uskoro biti dostupne.</p>
+        <p class="empty-state">{{ blog_empty_message }}</p>
+        <ul class="blog-index-links" role="list">
+            <li><a href="{% url 'frontend:cementne_kosuljice' %}">Cementne košuljice — vodič</a></li>
+            <li><a href="{% url 'frontend:estrih' %}">Šta je estrih?</a></li>
+            <li><a href="{% url 'frontend:cena_cementne_kosuljice' %}">Cena cementnih košuljica</a></li>
+        </ul>
         {% endif %}
     </div>
 </section>
+
+{% if posts %}
+<section class="section section--muted">
+    <div class="container container--narrow">
+        <p class="blog-index-related">
+            Više o temi:
+            <a href="{% url 'frontend:cementne_kosuljice' %}">cementne košuljice</a>,
+            <a href="{% url 'frontend:estrih' %}">estrih</a>
+            i
+            <a href="{% url 'frontend:cena_cementne_kosuljice' %}">cena</a>.
+        </p>
+    </div>
+</section>
+{% endif %}
 {% endblock %}

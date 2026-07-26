@@ -177,15 +177,21 @@ CONTACT_ADDRESS = env(
 SEO_SITE_NAME = "Cementne košuljice Ivkov"
 SEO_DEFAULT_TITLE = env(
     "SEO_DEFAULT_TITLE",
-    default="Cementne košuljice Ivkov — Izrada i ugradnja košuljica",
+    default="Cementne košuljice Ivkov — izrada i ugradnja estriha",
 )
 SEO_DEFAULT_DESCRIPTION = env(
     "SEO_DEFAULT_DESCRIPTION",
-    default="Izrada i ugradnja cementnih i betonskih košuljica. Profesionalna usluga širom Srbije.",
+    default=(
+        "Cementne košuljice (estrih, ravnajući sloj) — mašinska izrada i "
+        "ugradnja širom Srbije. Pozovite za ponudu."
+    ),
 )
 SEO_DEFAULT_KEYWORDS = env(
     "SEO_DEFAULT_KEYWORDS",
-    default="cementne košuljice, betonske košuljice, terase, stepeništa",
+    default=(
+        "cementne košuljice, cementna košuljica, estrih, ravnajući sloj, "
+        "mašinska izrada košuljica"
+    ),
 )
 SEO_DEFAULT_OG_IMAGE_URL = env(
     "SEO_DEFAULT_OG_IMAGE_URL",

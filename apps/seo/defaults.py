@@ -9,12 +9,12 @@ def get_site_seo_defaults(request=None):
     title = getattr(
         settings,
         "SEO_DEFAULT_TITLE",
-        f"{site_name} — Cementne i betonske košuljice",
+        f"{site_name} — izrada i ugradnja cementnih košuljica",
     )
     description = getattr(
         settings,
         "SEO_DEFAULT_DESCRIPTION",
-        "Izrada i ugradnja cementnih i betonskih košuljica.",
+        "Cementne košuljice (estrih) — mašinska izrada i ugradnja širom Srbije.",
     )
     canonical = resolve_request_canonical(request) if request else None
 
