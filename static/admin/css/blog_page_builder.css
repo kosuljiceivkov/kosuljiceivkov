@@ -911,7 +911,7 @@
 
 .blog-page-builder__section-chrome {
   position: absolute;
-  top: 0.5rem;
+  top: 0.35rem;
   right: 0.5rem;
   z-index: 40;
   display: flex;
@@ -946,12 +946,24 @@
 }
 
 /* ——— Row ——— */
+/*
+  Chrome zones (must not overlap):
+  - Section chrome: top-right of section
+  - Row chrome: fully above the row (top-left)
+  - Column drag: inside column, mid-left edge
+  - Block chrome: above block, top-right
+*/
 
 .blog-page-builder__row {
   position: relative;
-  padding: 1.1rem 0 0.25rem;
+  padding: 0.35rem 0 0.75rem;
+  margin-top: 2rem;
   max-width: 100%;
   box-sizing: border-box;
+}
+
+.blog-page-builder__row:first-child {
+  margin-top: 1.5rem;
 }
 
 .blog-page-builder__row.is-drop-before::before,
@@ -975,8 +987,8 @@
   position: absolute;
   top: 0;
   left: 0;
-  transform: translateY(-50%);
-  z-index: 22;
+  transform: translateY(calc(-100% - 0.35rem));
+  z-index: 34;
   display: flex;
   align-items: center;
   gap: 0.15rem;
@@ -1052,14 +1064,14 @@
 
 .blog-page-builder__column-drag {
   position: absolute;
-  top: auto;
-  bottom: 0;
-  left: 50%;
-  z-index: 38;
-  transform: translate(-50%, 50%);
-  min-width: 2rem;
+  top: 50%;
+  bottom: auto;
+  left: 0.2rem;
+  z-index: 28;
+  transform: translateY(-50%);
+  min-width: 1.75rem;
   height: 1.45rem;
-  padding: 0 0.45rem;
+  padding: 0 0.35rem;
   border: 0;
   border-radius: 3px;
   background: var(--vb-chrome);
@@ -1080,6 +1092,7 @@
 .blog-page-builder__column-drag.is-dragging {
   cursor: grabbing;
   opacity: 1;
+  z-index: 42;
 }
 
 .blog-page-builder__column.is-target .blog-page-builder__column-inner {
@@ -1095,7 +1108,7 @@
   height: 100%;
   border: 1px dashed transparent;
   border-radius: 2px;
-  padding: 0.35rem;
+  padding: 0.35rem 0.35rem 0.35rem 2.1rem;
   transition: border-color 0.12s ease, background 0.12s ease, outline 0.12s ease;
   cursor: pointer;
   box-sizing: border-box;
@@ -1178,8 +1191,9 @@
   position: absolute;
   top: -0.1rem;
   right: 0.25rem;
+  left: auto;
   transform: translateY(-100%);
-  z-index: 36;
+  z-index: 32;
   display: flex;
   gap: 0.05rem;
   padding: 0.1rem;
@@ -1194,7 +1208,7 @@
 .blog-page-builder__block.is-selected .blog-page-builder__block-chrome {
   opacity: 1;
   pointer-events: auto;
-  z-index: 36;
+  z-index: 32;
 }
 
 .blog-page-builder__block-chrome .vb-chrome-btn {
