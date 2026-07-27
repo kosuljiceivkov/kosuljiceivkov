@@ -464,7 +464,18 @@ a:hover {
 
 /* Blog članak */
 .blog-article__header {
-    padding: var(--space-8) 0 var(--space-6);
+    padding: 1.25rem 0 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 0;
+}
+
+.blog-article__header .breadcrumbs {
+    margin: 0 0 0.85rem;
+}
+
+.blog-article__header .breadcrumbs__list {
+    justify-content: flex-start;
 }
 
 .blog-article__preview-badge {
@@ -492,19 +503,24 @@ a:hover {
 
 .blog-article__back {
     display: inline-block;
-    margin-bottom: var(--space-4);
+    margin: 1.5rem 0 var(--space-6);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
     text-decoration: none;
+    text-align: left;
 }
 
 .blog-article__title {
-    margin: 0 0 var(--space-5);
+    margin: 0 0 0.75rem;
     font-family: var(--font-heading);
-    font-size: var(--type-h1);
-    line-height: var(--line-height-tight);
+    font-size: clamp(1.65rem, 3.5vw, 2.25rem);
+    font-weight: var(--font-weight-bold);
+    line-height: 1.2;
     color: var(--color-heading);
+    text-align: left;
     overflow-wrap: break-word;
+    text-wrap: balance;
+    max-width: 48rem;
 }
 
 .blog-article__meta {
@@ -513,6 +529,8 @@ a:hover {
     gap: var(--space-2) var(--space-5);
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
+    text-align: left;
+    justify-content: flex-start;
 }
 
 .blog-article__tags {

@@ -913,7 +913,7 @@
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  z-index: 18;
+  z-index: 40;
   display: flex;
   gap: 0.1rem;
   padding: 0.15rem;
@@ -929,16 +929,6 @@
 .blog-page-builder__section.is-selected .blog-page-builder__section-chrome {
   opacity: 1;
   pointer-events: auto;
-}
-
-/* Section controls yield when editing rows or widgets inside */
-.blog-page-builder__section:hover:has(.blog-page-builder__row:hover) .blog-page-builder__section-chrome,
-.blog-page-builder__section:hover:has(.blog-page-builder__block:hover) .blog-page-builder__section-chrome,
-.blog-page-builder__section:hover:has(.blog-page-builder__block.is-selected) .blog-page-builder__section-chrome,
-.blog-page-builder__section.is-selected:has(.blog-page-builder__row.is-selected) .blog-page-builder__section-chrome,
-.blog-page-builder__section.is-selected:has(.blog-page-builder__block.is-selected) .blog-page-builder__section-chrome {
-  opacity: 0;
-  pointer-events: none;
 }
 
 .blog-page-builder__section-chrome .vb-chrome-btn {
@@ -1025,6 +1015,8 @@
   /* Do not set gap here — inherits column-gap from .iv-page-row */
   max-width: 100%;
   box-sizing: border-box;
+  /* Equal-height columns so drop guides span the full row */
+  align-items: stretch !important;
 }
 
 /* ——— Column ——— */
@@ -1032,6 +1024,11 @@
 .blog-page-builder__column {
   position: relative;
   min-width: 0;
+  min-height: 100%;
+  height: auto;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
   padding-block: 0.2rem;
   box-sizing: border-box;
 }
@@ -1042,12 +1039,12 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 3px;
+  width: 4px;
   border-radius: 999px;
   background: var(--vb-accent);
-  box-shadow: 0 0 0 2px var(--vb-outline-soft);
+  box-shadow: 0 0 0 3px var(--vb-outline-soft);
   pointer-events: none;
-  z-index: 30;
+  z-index: 45;
 }
 
 .blog-page-builder__column.is-drop-before::before { left: 0; }
@@ -1055,13 +1052,14 @@
 
 .blog-page-builder__column-drag {
   position: absolute;
-  top: 0.2rem;
+  top: auto;
+  bottom: 0;
   left: 50%;
-  z-index: 24;
-  transform: translate(-50%, -50%);
-  min-width: 1.8rem;
+  z-index: 38;
+  transform: translate(-50%, 50%);
+  min-width: 2rem;
   height: 1.45rem;
-  padding: 0 0.35rem;
+  padding: 0 0.45rem;
   border: 0;
   border-radius: 3px;
   background: var(--vb-chrome);
@@ -1070,6 +1068,7 @@
   opacity: 0;
   pointer-events: none;
   touch-action: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
 .blog-page-builder__column:hover .blog-page-builder__column-drag,
@@ -1091,12 +1090,15 @@
 }
 
 .blog-page-builder__column-inner {
+  flex: 1 1 auto;
   min-height: 3.5rem;
+  height: 100%;
   border: 1px dashed transparent;
   border-radius: 2px;
   padding: 0.35rem;
   transition: border-color 0.12s ease, background 0.12s ease, outline 0.12s ease;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 .blog-page-builder__column:hover .blog-page-builder__column-inner {
@@ -1117,13 +1119,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  flex: 1 1 auto;
   gap: 0.35rem;
   min-height: 6rem;
+  height: 100%;
   padding: 1.25rem;
   color: #a4afb7;
   font-size: 0.78rem;
   text-align: center;
   pointer-events: none;
+  box-sizing: border-box;
 }
 
 .blog-page-builder__column-empty-icon {
@@ -1174,7 +1179,7 @@
   top: -0.1rem;
   right: 0.25rem;
   transform: translateY(-100%);
-  z-index: 32;
+  z-index: 36;
   display: flex;
   gap: 0.05rem;
   padding: 0.1rem;

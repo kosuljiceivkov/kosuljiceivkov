@@ -1,4 +1,4 @@
-{% load static seo_tags %}
+﻿{% load static seo_tags %}
 <!DOCTYPE html>
 <html lang="sr-Latn" class="no-js">
 <head>
@@ -10,7 +10,7 @@
     {% block lcp_preload %}{% endblock %}
     {% include "partials/perf/fonts.html" %}
     {% include "partials/perf/critical_css.html" %}
-    <link rel="stylesheet" href="{% static 'css/bundles/site-core.css' %}?v=15">
+    <link rel="stylesheet" href="{% static 'css/bundles/site-core.css' %}?v=17">
     {% include "partials/perf/async_stylesheet.html" with href="css/bundles/site-defer.css" cache_bust=2 %}
     {% block extra_css %}{% endblock %}
     {% block perf_css %}{% endblock %}

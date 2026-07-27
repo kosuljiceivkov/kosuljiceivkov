@@ -1,33 +1,35 @@
 {% extends "base.html" %}
-{% load static page_tags %}
+{% load static page_tags seo_tags %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/iv-page.css' %}?v=9">
+<link rel="stylesheet" href="{% static 'css/iv-page.css' %}?v=10">
 {% endblock %}
 
 {% block content %}
 <article class="blog-article">
-    {% include "partials/page_breadcrumb_hero.html" with seo_object=post %}
-
-    <div class="container container--narrow">
-        <div class="blog-article__meta">
-            <time datetime="{{ post.publish_date|date:'Y-m-d' }}">
-                Objavljeno: {{ post.publish_date|date:"d.m.Y." }}
-            </time>
-            {% if post.was_updated_after_publish %}
-            <time datetime="{{ post.updated_at|date:'c' }}">
-                Ažurirano: {{ post.updated_at|date:"d.m.Y." }}
-            </time>
-            {% endif %}
-            <span>{{ post.get_reading_time_minutes }} min čitanja</span>
+    <header class="blog-article__header">
+        <div class="container">
+            {% render_breadcrumbs post %}
+            <h1 class="blog-article__title">{{ post.title }}</h1>
+            <div class="blog-article__meta">
+                <time datetime="{{ post.publish_date|date:'Y-m-d' }}">
+                    Objavljeno: {{ post.publish_date|date:"d.m.Y." }}
+                </time>
+                {% if post.was_updated_after_publish %}
+                <time datetime="{{ post.updated_at|date:'c' }}">
+                    Ažurirano: {{ post.updated_at|date:"d.m.Y." }}
+                </time>
+                {% endif %}
+                <span>{{ post.get_reading_time_minutes }} min čitanja</span>
+            </div>
         </div>
-    </div>
+    </header>
 
     {% if post.should_render_page %}
         {% render_blog_page post %}
     {% endif %}
 
-    <div class="container container--narrow">
+    <div class="container">
         <p class="blog-article__back">
             <a href="{% url 'frontend:blog' %}">&larr; Nazad na blog</a>
         </p>
